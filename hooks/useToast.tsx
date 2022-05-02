@@ -1,14 +1,14 @@
 // react
-import { useState, useContext, createContext } from 'react';
+import { useState, useContext, createContext } from 'react'
 
 // types
-import { FC } from '../types';
+import { FC } from '../types'
 
 // mui
 import {
   Snackbar,
   Alert,
-} from '@mui/material';
+} from '@mui/material'
 
 export type ToastType = "error" | "warning" | "info" | "success"
 
@@ -18,14 +18,14 @@ export interface ToastProviderProps {
 
 export const ToastProvider: FC<ToastProviderProps> = (props) => {
 
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [toastType, setToastType] = useState<ToastType>("info");
+  const [open, setOpen] = useState(false)
+  const [message, setMessage] = useState("")
+  const [toastType, setToastType] = useState<ToastType>("info")
 
   const generateToast = (message: string, type?: ToastType) => {
-    setOpen(true);
-    setMessage(message);
-    setToastType(type ?? "info");
+    setOpen(true)
+    setMessage(message)
+    setToastType(type ?? "info")
   }
 
   return (
@@ -35,14 +35,14 @@ export const ToastProvider: FC<ToastProviderProps> = (props) => {
         open={open}
         autoHideDuration={6000}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        onClose={() => { setOpen(false); }}
+        onClose={() => { setOpen(false) }}
       >
         <Alert severity={toastType} variant="filled">
           {message}
         </Alert>
       </Snackbar>
     </ToastContext.Provider>
-  );
+  )
 }
 
 export interface useToastHook {
@@ -50,11 +50,11 @@ export interface useToastHook {
   generateToast: (message: string, type?: ToastType) => void
 }
 
-const ToastContext = createContext({} as useToastHook);
+const ToastContext = createContext({} as useToastHook)
 
 /**
  * use generateToast function to render toast message
  */
 export function useToast(): useToastHook {
-  return useContext(ToastContext);
+  return useContext(ToastContext)
 }

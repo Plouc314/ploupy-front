@@ -1,5 +1,5 @@
 // next
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/router'
 
 // react
 import { useState } from 'react'
@@ -29,10 +29,10 @@ import {
   setPersistence,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-} from 'firebase/auth';
+} from 'firebase/auth'
 
 // utils
-import { auth, SessionPersistence, LocalPersistence } from '../utils/Firebase';
+import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../utils/Firebase'
 
 // hooks
 import { useToast } from '../hooks/useToast'
@@ -44,53 +44,44 @@ export interface PageLoginProps { }
 
 const PageLogin: FC<PageLoginProps> = (props) => {
 
-  const router = useRouter();
-  const { generateToast } = useToast();
+  const router = useRouter()
+  const { generateToast } = useToast()
 
   const [state, setState] = useState<'signin' | 'signup'>('signin')
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const reset = () => {
     setEmail("")
     setUsername("")
     setPassword("")
     setRemember(false)
+    setErrorMessage('')
   }
 
   const submit = async () => {
-
-    // select the persitence type (session | local)
-    const persistence = remember ? LocalPersistence : SessionPersistence;
-
-    const authFunc = state === "signin" ?
-      signInWithEmailAndPassword : createUserWithEmailAndPassword
-
-    // Set correct persistence
-    setPersistence(auth, persistence)
-      .then(() => {
-        // sign in
-        authFunc(auth, email, password)
-          .then(() => {
-            // sign in succesful -> redirect to home page
-            reset();
-            // setErrorMessage("");
-
-            router.push("/");
-          })
-          .catch((error) => {
-            // sign in failed -> display error message
-            // setErrorMessage(error.message);
-            console.log(error.message)
-          });
-      })
-      .catch((error) => {
-        // persitence failed -> display error message
-        // setErrorMessage(error.message);
-        console.log(error.message)
-      })
+    if (state === "signin") {
+      signInWithEmailAndPassword(auth, email, password)
+        .then((response) => {
+          reset()
+          router.push("/")
+        })
+        .catch((error: any) => {
+          setErrorMessage(getErrorMessage(error))
+        })
+    } else {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((response) => {
+          reset()
+          router.push("/")
+        })
+        .catch((error: any) => {
+          setErrorMessage(getErrorMessage(error))
+        })
+    }
   }
 
   return (
@@ -151,11 +142,29 @@ const PageLogin: FC<PageLoginProps> = (props) => {
               onChange={(e) => { setPassword(e.target.value) }}
             />
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" id="checkRemember" />}
+              control={<Checkbox
+                value="remember"
+                color="primary"
+                id="checkRemember"
+                onChange={(e) => {
+                  // select the persitence type (session | local)
+                  setPersistence(auth, remember ? SessionPersistence : LocalPersistence)
+                  setRemember(!remember)
+                }}
+              />}
               label="Remember me"
+              value={remember}
             />
+            <Typography
+              variant="body2"
+              sx={{
+                "color": "error.main"
+              }}
+              align="center"
+            >
+              {errorMessage}
+            </Typography>
             <Button
-              type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
@@ -168,7 +177,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
                 <Link
                   href="#"
                   variant="body2"
-                  onClick={() => { generateToast("Too bad for you !", "warning") }}
+                  onClick={() => { generateToast("Too bad for you !", "info") }}
                 >
                   Forgot password?
                 </Link>
@@ -178,6 +187,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
                   href="#"
                   variant="body2"
                   onClick={() => {
+                    console.log(remember)
                     setState(state === "signup" ? "signin" : "signup")
                   }}
                 >

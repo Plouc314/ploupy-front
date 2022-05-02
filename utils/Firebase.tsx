@@ -110,3 +110,16 @@ export const AuthProvider: FC<AuthProviderProps> = (props) => {
 
 
 export const useAuth = () => useContext(userContext)
+
+
+/**
+ * Extract and format the error message from the error object
+ */
+export function getErrorMessage(error: any) {
+  let msg = error.message
+  // extract message
+  msg = msg.split("/")[1].split(")")[0].replaceAll("-", " ")
+  // capitalize
+  msg = msg.charAt(0).toUpperCase() + msg.slice(1)
+  return msg
+}
