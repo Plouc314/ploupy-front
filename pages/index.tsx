@@ -54,8 +54,7 @@ const PageHome: FC<PageHomeProps> = (props) => {
       </AppBar>
       <Paper sx={{ margin: 2, padding: 2 }}>
         <Typography>
-          This site is in so early development I don't what it's going to look like.
-          Come back someday, maybe.
+          {"This site is in so early development I don't what it's going to look like. \n Come back someday, maybe."}
         </Typography>
       </Paper>
     </Page>
