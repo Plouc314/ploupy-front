@@ -8,6 +8,7 @@ import { FC } from '../types'
 import {
   AppBar,
   Button,
+  Paper,
   Toolbar,
   Typography,
 } from '@mui/material'
@@ -51,6 +52,12 @@ const PageHome: FC<PageHomeProps> = (props) => {
           </Button>
         </Toolbar>
       </AppBar>
+      <Paper sx={{ margin: 2, padding: 2 }}>
+        <Typography>
+          This site is in so early development I don't what it's going to look like.
+          Come back someday, maybe.
+        </Typography>
+      </Paper>
     </Page>
   )
 }
