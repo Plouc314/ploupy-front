@@ -1,3 +1,6 @@
+// next
+import { useRouter } from 'next/router';
+
 // react
 import { useState } from 'react'
 
@@ -21,6 +24,16 @@ import {
 } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 
+// firebase
+import {
+  setPersistence,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from 'firebase/auth';
+
+// utils
+import { auth, SessionPersistence, LocalPersistence } from '../utils/Firebase';
+
 // hooks
 import { useToast } from '../hooks/useToast'
 
@@ -31,16 +44,53 @@ export interface PageLoginProps { }
 
 const PageLogin: FC<PageLoginProps> = (props) => {
 
+  const router = useRouter();
   const { generateToast } = useToast();
+
   const [state, setState] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false)
 
-  const handleSubmit = () => {
-    console.log(email)
-    console.log(username)
-    console.log(password)
+  const reset = () => {
+    setEmail("")
+    setUsername("")
+    setPassword("")
+    setRemember(false)
+  }
+
+  const submit = async () => {
+
+    // select the persitence type (session | local)
+    const persistence = remember ? LocalPersistence : SessionPersistence;
+
+    const authFunc = state === "signin" ?
+      signInWithEmailAndPassword : createUserWithEmailAndPassword
+
+    // Set correct persistence
+    setPersistence(auth, persistence)
+      .then(() => {
+        // sign in
+        authFunc(auth, email, password)
+          .then(() => {
+            // sign in succesful -> redirect to home page
+            reset();
+            // setErrorMessage("");
+
+            router.push("/");
+          })
+          .catch((error) => {
+            // sign in failed -> display error message
+            // setErrorMessage(error.message);
+            console.log(error.message)
+          });
+      })
+      .catch((error) => {
+        // persitence failed -> display error message
+        // setErrorMessage(error.message);
+        console.log(error.message)
+      })
   }
 
   return (
@@ -109,7 +159,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
-              onClick={handleSubmit}
+              onClick={submit}
             >
               {state === "signin" ? "Sign In" : "Sign Up"}
             </Button>
