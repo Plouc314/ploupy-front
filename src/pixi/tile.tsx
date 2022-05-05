@@ -6,23 +6,41 @@ import { Graphics, Container } from 'pixi.js';
 
 // pixi
 import Color from './color';
+import Player from './player';
 
 class Tile implements Game.Sprite {
 
-  public static readonly SIZE = 100
+  public static readonly SIZE = 50
   public static readonly DEFAULT_COLOR: Game.RGB = { r: 200, g: 200, b: 200 }
   public readonly coord: Game.Coordinate
+
   private sprite: Graphics
-  private color: Color
+
+  public color: Color
+  public owner: Player | null
 
   constructor(x: number, y: number) {
     this.coord = { x, y }
     this.color = Color.fromRgb(Tile.DEFAULT_COLOR)
+    this.owner = null
     this.sprite = new Graphics()
     this.buildSprite()
   }
 
-  public setColor(color: Color) {
+  public setOwner(owner: Player | null) {
+    if (this.owner === owner) return
+    let color: Color
+    if (owner === null) {
+      color = Color.fromRgb(Tile.DEFAULT_COLOR)
+    } else {
+      color = owner.tileColor()
+    }
+    this.setColor(color)
+    this.owner = owner
+  }
+
+  private setColor(color: Color) {
+    if (this.color.hex() == color.hex()) return
     this.color = color
     this.buildSprite()
   }

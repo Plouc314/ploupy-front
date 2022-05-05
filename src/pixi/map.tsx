@@ -6,17 +6,18 @@ import { Container } from 'pixi.js'
 
 // pixi
 import Tile from './tile'
+import Player from './player'
 
 class Map implements Game.Sprite {
 
   public dimension: Game.Dimension
   private tiles: Tile[][]
-  private sprite: Container
+  private container: Container
 
   constructor(dim: Game.Dimension) {
     this.dimension = { ...dim }
     this.tiles = []
-    this.sprite = this.buildMap()
+    this.container = this.buildMap()
   }
 
   private buildMap(): Container {
@@ -54,8 +55,23 @@ class Map implements Game.Sprite {
     return this.tiles[coord.x][coord.y]
   }
 
+  public claimTile(player: Player, coord: Game.Coordinate): boolean {
+
+    const tile = this.tile(coord)
+
+    if (!tile) return false
+    if (tile.owner === player) return false
+
+    if (tile.owner) {
+      tile.owner.score--
+    }
+    tile.setOwner(player)
+    player.score++
+    return true
+  }
+
   public child(): Container {
-    return this.sprite
+    return this.container
   }
 
 }

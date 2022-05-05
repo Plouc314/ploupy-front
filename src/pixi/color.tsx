@@ -15,6 +15,22 @@ class Color {
         return new Color(Color.toHex(r as Game.RGB))
     }
 
+    public withDiff(r: Game.RGB | number, g?: number, b?: number): Color {
+        if (typeof r === "number" && typeof g === "number" && typeof b === "number") {
+            r = { r, g, b }
+        }
+        const diff = r as Game.RGB
+        const rgb = this.rgb()
+        const clamp = (v: number, min: number, max: number) => {
+            return Math.max(Math.min(v, max), min)
+        }
+        return Color.fromRgb(
+            clamp(rgb.r + diff.r, 0, 255),
+            clamp(rgb.g + diff.g, 0, 255),
+            clamp(rgb.b + diff.b, 0, 255),
+        )
+    }
+
     private static toRgb(raw: number): Game.RGB {
         return {
             r: (raw >> 16) & 255,

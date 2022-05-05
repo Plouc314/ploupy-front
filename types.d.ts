@@ -21,20 +21,15 @@ export namespace Game {
     b: number
   }
 
-  export type Dimension = {
+  export interface Point2D {
     x: number
     y: number
   }
 
-  export type Coordinate = {
-    x: number
-    y: number
-  }
-
-  export type Position = {
-    x: number
-    y: number
-  }
+  export type Dimension = Point2D
+  export type Coordinate = Point2D
+  export type Position = Point2D
+  export type Direction = Point2D
 
   export interface Sprite {
     child: () => Container
