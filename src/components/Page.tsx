@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
 // types
-import { FC } from '../types'
+import { FC } from '../../types'
 
 // mui
 import {

@@ -32,10 +32,10 @@ import {
 } from 'firebase/auth'
 
 // utils
-import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../utils/Firebase'
+import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../src/utils/Firebase'
 
 // hooks
-import { useToast } from '../hooks/useToast'
+import { useToast } from '../src/hooks/useToast'
 
 
 const theme = createTheme()

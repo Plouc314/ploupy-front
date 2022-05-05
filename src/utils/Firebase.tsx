@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 
 // types
-import { FC } from '../types'
+import { FC } from '../../types'
 
 // firebase
 import { initializeApp, getApps } from "firebase/app"
@@ -14,7 +14,7 @@ import {
 } from '@firebase/auth'
 
 // utils
-import { Firebase } from '../types'
+import { Firebase } from '../../types'
 
 /*
 Firebase config keys and Ids

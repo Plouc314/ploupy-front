@@ -2,7 +2,7 @@
 import { useState, useContext, createContext } from 'react'
 
 // types
-import { FC } from '../types'
+import { FC } from '../../types'
 
 // mui
 import {

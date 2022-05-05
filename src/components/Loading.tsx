@@ -1,5 +1,5 @@
 // types
-import { FC } from "../types"
+import { FC } from "../../types"
 
 // mui
 import {

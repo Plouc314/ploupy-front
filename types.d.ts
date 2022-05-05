@@ -13,3 +13,30 @@ export namespace Firebase {
     loading: boolean
   }
 }
+
+export namespace Game {
+  export type RGB = {
+    r: number
+    g: number
+    b: number
+  }
+
+  export type Dimension = {
+    x: number
+    y: number
+  }
+
+  export type Coordinate = {
+    x: number
+    y: number
+  }
+
+  export type Position = {
+    x: number
+    y: number
+  }
+
+  export interface Sprite {
+    child: () => Container
+  }
+}

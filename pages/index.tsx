@@ -17,10 +17,11 @@ import {
 import { signOut } from "firebase/auth";
 
 // components
-import Page from '../components/Page'
+import Page from '../src/components/Page'
 
 // utils
-import { auth } from '../utils/Firebase'
+import { auth } from '../src/utils/Firebase'
+import Scene from '../src/pixi/scene';
 
 
 export interface PageHomeProps { }
@@ -54,9 +55,10 @@ const PageHome: FC<PageHomeProps> = (props) => {
       </AppBar>
       <Paper sx={{ margin: 2, padding: 2 }}>
         <Typography>
-          {"This site is in so early development I don't what it's going to look like. \n Come back someday, maybe."}
+          {"This site is in so early development I don't know what it's going to look like. \n Come back someday, maybe."}
         </Typography>
       </Paper>
+      <Scene></Scene>
     </Page>
   )
 }
