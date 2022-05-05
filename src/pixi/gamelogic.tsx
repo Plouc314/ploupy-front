@@ -12,13 +12,17 @@ class GameLogic {
 
   public static setup() {
     this.players = [
-      new Player(),
-      new Player(),
+      new Player(Color.fromRgb(220, 100, 100)),
+      new Player(Color.fromRgb(100, 220, 100)),
     ]
     this.map = new Map({ x: 10, y: 10 })
 
     Pixi.app.stage.addChild(this.map.child())
     this.players.forEach(p => Pixi.app.stage.addChild(p.child()))
+
+    this.players[0].child().position.x = 500
+    this.players[0].child().position.y = 500
+    console.log(this.players[0].pos())
 
     Keyboard.setup()
     Keyboard.listen(["a", "d", "w", "s"])

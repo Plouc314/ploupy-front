@@ -8,17 +8,17 @@ import { Graphics, Container, Sprite } from 'pixi.js';
 import Keyboard from './keyboard';
 import Frame from './frame';
 import Color from './color';
-import Tile from './tile';
+import Pixi from './app';
 
 class Player implements Game.Sprite {
 
+  public static readonly SIZE = 100
   public static readonly SPEED = 10
-  public static readonly DEFAULT_COLOR: Game.RGB = { r: 220, g: 100, b: 100 }
   private sprite: Container
   private color: Color
 
-  constructor() {
-    this.color = Color.fromRgb(Player.DEFAULT_COLOR)
+  constructor(color: Color) {
+    this.color = color
     this.sprite = this.buildSprite()
   }
 
@@ -46,9 +46,13 @@ class Player implements Game.Sprite {
 
   public pos(): Game.Position {
     return {
-      x: this.sprite.position.x + 50,
-      y: this.sprite.position.y + 50,
+      x: this.sprite.position.x + Player.SIZE / 2,
+      y: this.sprite.position.y + Player.SIZE / 2,
     }
+  }
+
+  public tileColor(): Color {
+
   }
 
   public child(): Container {
