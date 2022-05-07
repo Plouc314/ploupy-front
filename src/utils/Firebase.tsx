@@ -13,6 +13,10 @@ import {
   browserSessionPersistence,
 } from '@firebase/auth'
 
+// comm
+import API from '../comm/api'
+import User from '../comm/user'
+
 // utils
 import { Firebase } from '../../types'
 
@@ -89,6 +93,24 @@ function useFirebaseAuth() {
       }
     })
   }, [] /* the effect is only executed once */)
+
+  useEffect(() => {
+    if (user) {
+      API.getUserData(user.id)
+        .then((data) => {
+          if (!data) {
+            throw new Error(`No user found for uid: ${user.id}`)
+          }
+          User.connected = true
+          User.uid = data.uid
+          User.username = data.username
+          User.email = data.email
+        })
+
+    } else {
+      User.connected = false
+    }
+  }, [user])
 
   return { user: user, loading: loading } as Firebase.Auth
 }

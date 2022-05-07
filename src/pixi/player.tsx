@@ -9,6 +9,7 @@ import Keyboard from './keyboard';
 import Frame from './frame';
 import Color from './color';
 import GameLogic from './gamelogic';
+import Tile from './tile';
 
 class Player implements Game.Sprite {
 
@@ -20,17 +21,21 @@ class Player implements Game.Sprite {
   private container: Container
   private delayBar: Graphics
 
+  public username: string
   public color: Color
-  private attackDelay: number
+  public attackDelay: number
   public dir: Game.Direction
   public score: number
+  public tiles: Tile[]
 
-  constructor(color: Color) {
+  constructor(username: string, color: Color) {
+    this.username = username
     this.color = color
     this.delayBar = new Graphics()
     this.container = this.buildContainer()
     this.attackDelay = 0
     this.score = 0
+    this.tiles = []
     this.dir = { x: 0, y: 0 }
   }
 
@@ -73,9 +78,6 @@ class Player implements Game.Sprite {
       this.container.position.x += this.dir.x * Player.SPEED * Frame.dt
       this.container.position.y += this.dir.y * Player.SPEED * Frame.dt
     }
-    // check current tile
-    const map = GameLogic.map
-    map.claimTile(this, map.coord(this.pos()))
 
     // update attack
     this.attackDelay = Math.max(this.attackDelay - Frame.dt, 0)
@@ -95,10 +97,10 @@ class Player implements Game.Sprite {
     const map = GameLogic.map
     const coord = map.coord(this.pos())
     for (let i = 1; i < Player.ATTACK_SCOPE; i++) {
-      map.claimTile(this, {
-        x: coord.x + this.dir.x * i,
-        y: coord.y + this.dir.y * i
-      })
+      // map.claimTile(this, {
+      //   x: coord.x + this.dir.x * i,
+      //   y: coord.y + this.dir.y * i
+      // })
     }
   }
 
@@ -107,6 +109,11 @@ class Player implements Game.Sprite {
       x: this.container.position.x + Player.SIZE / 2,
       y: this.container.position.y + Player.SIZE / 2,
     }
+  }
+
+  public setPos(pos: Game.Position) {
+    this.container.position.x = pos.x - Player.SIZE / 2
+    this.container.position.y = pos.y - Player.SIZE / 2
   }
 
   public tileColor(): Color {

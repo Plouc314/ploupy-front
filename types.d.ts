@@ -34,4 +34,33 @@ export namespace Game {
   export interface Sprite {
     child: () => Container
   }
+
+  export namespace Comm {
+    export type PlayerState = {
+      username: string
+      position: Position
+    }
+
+    export type ServerState = {
+      username: string
+      position: Position
+      score: number
+      tiles: Game.Coordinate[]
+    }
+  }
+
+}
+
+export namespace Comm {
+  export type Response<T> = {
+    success: boolean
+    msg: string
+    data: T
+  }
+
+  export type UserData = {
+    uid: string
+    username: string
+    email: string
+  }
 }

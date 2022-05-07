@@ -64,9 +64,12 @@ class Map implements Game.Sprite {
 
     if (tile.owner) {
       tile.owner.score--
+      const idx = tile.owner.tiles.indexOf(tile)
+      tile.owner.tiles.splice(idx, 1)
     }
     tile.setOwner(player)
     player.score++
+    player.tiles.push(tile)
     return true
   }
 

@@ -23,6 +23,7 @@ import Page from '../src/components/Page'
 import { auth } from '../src/utils/Firebase'
 import Scene from '../src/pixi/scene';
 import Sio from '../src/comm/sio';
+import User from '../src/comm/user';
 
 
 export interface PageHomeProps { }
@@ -59,12 +60,30 @@ const PageHome: FC<PageHomeProps> = (props) => {
           {"This site is in so early development I don't know what it's going to look like. \n Come back someday, maybe."}
         </Typography>
         <Button
-          onClick={() => { Sio.connect() }}
+          onClick={() => {
+            Sio.connect()
+            console.dir(User)
+          }}
         >
           test
         </Button>
+        <Button
+          onClick={() => {
+            Scene.start(0)
+          }}
+        >
+          play 0
+        </Button>
+        <Button
+          onClick={() => {
+            Scene.start(1)
+          }}
+        >
+          play 1
+        </Button>
+
       </Paper>
-      <Scene></Scene>
+      <canvas id="PixiCanvas" />
     </Page>
   )
 }

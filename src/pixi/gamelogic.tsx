@@ -12,6 +12,9 @@ import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
 import BonusSystem from "./bonus"
+import CommSystem from "./comm"
+import Tile from "./tile"
+
 
 class GameLogic {
   public static dimension: Game.Dimension = { x: 20, y: 20 }
@@ -19,15 +22,17 @@ class GameLogic {
   public static map: Map
   public static ui: UI
   public static layout: Container
-  private static idx = 0
+  private static idx: number
 
-  public static setup() {
+  public static setup(idx: number) {
     this.players = [
-      new Player(Color.fromRgb(220, 100, 100)),
-      new Player(Color.fromRgb(100, 220, 100)),
+      new Player("Player 0", Color.fromRgb(220, 100, 100)),
+      new Player("Player 1", Color.fromRgb(100, 220, 100)),
     ]
-
+    this.idx = idx
     BonusSystem.setup()
+    CommSystem.setup()
+    CommSystem.onServerState = this.onServerState
 
     this.ui = new UI(Pixi.app.view.width)
     this.layout = new Container()
@@ -47,19 +52,35 @@ class GameLogic {
 
     Keyboard.setup()
     Keyboard.listen(["a", "d", "w", "s", "p"])
-    Keyboard.addOnPress("Tab", () => {
-      this.idx++
-    })
   }
 
   public static run() {
     if (this.players.length == 0) return
-    const player = this.players[this.idx % this.players.length]
+    // const player = this.players[this.idx % this.players.length]
+    const player = this.players[this.idx]
+
     player.update()
 
     BonusSystem.update(player)
+    CommSystem.sendPlayerState(player)
 
     this.ui.update()
+  }
+
+  private static onServerState(state: Game.Comm.ServerState) {
+    const player = this.players.find(p => p.username === state.username)
+    if (!player) return
+
+    player.setPos(state.position)
+    player.score = state.score
+
+    for (const coord of state.tiles) {
+      const tile = this.map.tile(coord) as Tile
+      tile.setOwner(player)
+      if (player.tiles.indexOf(tile) == -1) {
+        player.tiles.push(tile)
+      }
+    }
   }
 
 }

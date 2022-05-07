@@ -1,6 +1,9 @@
 // socket io
 import { io, Socket } from "socket.io-client"
 
+// comm
+import User from "./user"
+
 class Sio {
 
   public static sio: Socket
@@ -12,7 +15,15 @@ class Sio {
     if (this.sio) {
       return
     }
-    this.sio = io("http://127.0.0.1:8000")
+    this.sio = io("http://127.0.0.1:8000", {
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            'uid': User.uid
+          }
+        }
+      }
+    })
 
     this.sio.on("connect", () => {
       console.log("connected")
