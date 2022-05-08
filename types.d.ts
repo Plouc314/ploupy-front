@@ -35,24 +35,30 @@ export namespace Game {
     child: () => Container
   }
 
-  export namespace Comm {
+  export namespace Client {
     export type PlayerState = {
-      username: string
       position: Position
     }
+  }
 
-    export type ServerState = {
+  export namespace Server {
+    export type PlayerState = {
       username: string
       position: Position
       score: number
       tiles: Game.Coordinate[]
+    }
+
+    export type GameState = {
+      dim: Dimension
+      players: PlayerState[]
     }
   }
 
 }
 
 export namespace Comm {
-  export type Response<T> = {
+  export type Response<T = {}> = {
     success: boolean
     msg: string
     data: T

@@ -96,7 +96,8 @@ function useFirebaseAuth() {
 
   useEffect(() => {
     if (user) {
-      API.getUserData(user.id)
+      if (User.connected && user.id === User.uid) return
+      API.getUserData({ uid: user.id })
         .then((data) => {
           if (!data) {
             throw new Error(`No user found for uid: ${user.id}`)

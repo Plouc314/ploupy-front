@@ -14,25 +14,60 @@ import UI from "./ui"
 import BonusSystem from "./bonus"
 import CommSystem from "./comm"
 import Tile from "./tile"
+import User from "../comm/user"
 
 
 class GameLogic {
   public static dimension: Game.Dimension = { x: 20, y: 20 }
   public static players: Player[] = []
+  public static ownPlayer: Player
   public static map: Map
   public static ui: UI
   public static layout: Container
-  private static idx: number
+  public static isGame: boolean = false
 
-  public static setup(idx: number) {
-    this.players = [
-      new Player("Player 0", Color.fromRgb(220, 100, 100)),
-      new Player("Player 1", Color.fromRgb(100, 220, 100)),
-    ]
-    this.idx = idx
+  public static setup() {
     BonusSystem.setup()
     CommSystem.setup()
-    CommSystem.onServerState = this.onServerState
+    CommSystem.onPlayerState = this.onPlayerState
+    CommSystem.onStartGame = this.onStartGame
+    this.isGame = false
+  }
+
+  public static runstr() {
+    console.group("run")
+    console.log(this.isGame)
+    console.log(this.ownPlayer)
+    console.groupEnd()
+    if (!this.isGame) return
+    if (!this.ownPlayer) return
+    this.ownPlayer.update()
+
+    BonusSystem.update(this.ownPlayer)
+    CommSystem.sendPlayerState(this.ownPlayer)
+
+    this.ui.update()
+  }
+
+  private static onStartGame(state: Game.Server.GameState) {
+    console.group("start game")
+    console.dir(state)
+    console.groupEnd()
+    const colors = [
+      Color.fromRgb(220, 100, 100),
+      Color.fromRgb(100, 220, 100),
+    ]
+
+    this.isGame = true
+
+    this.players = state.players.map((p, i) => {
+      const player: Player = new Player(p.username, colors[i])
+      player.score = p.score
+      player.setPos(p.position)
+      return player
+    })
+
+    this.ownPlayer = this.players.find((p) => p.username === User.username) as Player
 
     this.ui = new UI(Pixi.app.view.width)
     this.layout = new Container()
@@ -42,32 +77,21 @@ class GameLogic {
 
     this.layout.addChild(this.map.child())
     this.players.forEach(p => this.layout.addChild(p.child()))
-    this.layout.addChild(BonusSystem.child())
+    // this.layout.addChild(BonusSystem.child())
 
     Pixi.app.stage.addChild(this.layout)
     Pixi.app.stage.addChild(this.ui.child())
 
-    this.players[0].child().position.x = 500
-    this.players[0].child().position.y = 500
-
     Keyboard.setup()
     Keyboard.listen(["a", "d", "w", "s", "p"])
+
+    console.log(GameLogic.runstr)
+    console.dir(GameLogic)
+
+    Pixi.app.ticker.add(GameLogic.runstr)
   }
 
-  public static run() {
-    if (this.players.length == 0) return
-    // const player = this.players[this.idx % this.players.length]
-    const player = this.players[this.idx]
-
-    player.update()
-
-    BonusSystem.update(player)
-    CommSystem.sendPlayerState(player)
-
-    this.ui.update()
-  }
-
-  private static onServerState(state: Game.Comm.ServerState) {
+  private static onPlayerState(state: Game.Server.PlayerState) {
     const player = this.players.find(p => p.username === state.username)
     if (!player) return
 

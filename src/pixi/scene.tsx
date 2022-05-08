@@ -5,13 +5,9 @@ import Sio from '../comm/sio';
 
 class Scene {
 
-  public static start(idx: number) {
+  public static start() {
     const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement;
-    Pixi.onLoadingComplete = () => GameLogic.setup(idx)
-    Pixi.run = () => {
-      if (!Sio.connected) return
-      GameLogic.run()
-    }
+    Pixi.onLoadingComplete = () => GameLogic.setup()
     Pixi.setup(canvas)
   }
 }

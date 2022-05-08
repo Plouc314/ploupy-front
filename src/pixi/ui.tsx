@@ -9,7 +9,7 @@ import Color from './color'
 import GameLogic from './gamelogic'
 
 class UI implements Game.Sprite {
-    public static readonly SCORE_WIDTH = 60
+    public static readonly SCORE_WIDTH = 100
     private container: Container
     private bg: Graphics
     private scores: Text[]
@@ -35,7 +35,7 @@ class UI implements Game.Sprite {
             const player = GameLogic.players[i]
             const text = this.scores[i]
             text.style.fill = player.textColor().hex()
-            text.text = GameLogic.players[i].score.toString()
+            text.text = `${player.username}: ${player.score}`
         }
     }
 

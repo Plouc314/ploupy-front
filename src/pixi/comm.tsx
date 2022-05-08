@@ -9,23 +9,29 @@ import Player from "./player"
 
 class CommSystem {
 
-    public static onServerState: (state: Game.Comm.ServerState) => void
+
+    public static onStartGame: (state: Game.Server.GameState) => void
+    public static onPlayerState: (state: Game.Server.PlayerState) => void
 
     public static setup() {
         Sio.sio.on("player_state", (state) => {
-            if (this.onServerState) {
-                this.onServerState(state)
+            if (this.onPlayerState) {
+                this.onPlayerState(state)
+            }
+        })
+        Sio.sio.on("start_game", (state) => {
+            if (this.onStartGame) {
+                this.onStartGame(state)
             }
         })
     }
 
-    public static sendJoinGame(player: Player) {
-        Sio.sio.emit("join_game", player.username)
+    public static sendJoinGame() {
+        Sio.sio.emit("join_queue")
     }
 
     public static sendPlayerState(player: Player) {
-        const state: Game.Comm.PlayerState = {
-            username: player.username,
+        const state: Game.Client.PlayerState = {
             position: player.pos(),
         }
         Sio.sio.emit("player_state", state)

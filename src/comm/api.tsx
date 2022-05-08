@@ -6,9 +6,9 @@ import { Comm } from "../../types"
  */
 class API {
 
-  public static readonly API_URL: string = "http://127.0.0.1:5000/api"
+  public static readonly API_URL: string = "http://127.0.0.1:5000/api/"
 
-  private static async get<R extends {}>(
+  public static async get<R extends {}>(
     endpoint: string, args?: Record<string, any>
   ): Promise<Comm.Response<R>> {
 
@@ -31,7 +31,7 @@ class API {
     return await response.json()
   }
 
-  private static async post<T extends {}, R extends {} = {}>(
+  public static async post<T extends {}, R extends {} = {}>(
     endpoint: string, body: T
   ): Promise<Comm.Response<R>> {
     const response = await fetch(
@@ -49,11 +49,19 @@ class API {
     return await response.json()
   }
 
-  public static async getUserData(uid: string): Promise<Comm.UserData | null> {
-    const response = await this.get<Comm.UserData>("/user-data", { uid })
+  public static async getUserData(
+    args: { uid?: string, username?: string }
+  ): Promise<Comm.UserData | null> {
+    const response = await this.get<Comm.UserData>("user-data", args)
 
     if (!response.success) return null
     return response.data
+  }
+
+  public static async createUser(
+    user: Comm.UserData
+  ): Promise<Comm.Response> {
+    return await this.post("create-user", user)
   }
 
 }

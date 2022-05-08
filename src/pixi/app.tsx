@@ -9,8 +9,6 @@ class Pixi {
   static app: Application
   static ready = false
   static onLoadingComplete?: () => void
-  /** Executed each frame */
-  static run?: () => void
 
   static setup(canvas: HTMLCanvasElement) {
     if (this.ready) {
@@ -33,9 +31,6 @@ class Pixi {
 
     this.app.ticker.add((dt) => {
       Frame.dt = dt
-      if (this.run) {
-        this.run()
-      }
     })
   }
 }

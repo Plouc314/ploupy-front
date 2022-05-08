@@ -37,6 +37,10 @@ import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../
 // hooks
 import { useToast } from '../src/hooks/useToast'
 
+// comm
+import API from '../src/comm/api'
+import User from '../src/comm/user'
+
 
 const theme = createTheme()
 
@@ -73,8 +77,24 @@ const PageLogin: FC<PageLoginProps> = (props) => {
           setErrorMessage(getErrorMessage(error))
         })
     } else {
+      // first assert for username unicity
+      const data = await API.getUserData({ username: username })
+      if (data) {
+        setErrorMessage(`Username ${username} is already taken.`)
+        return
+      }
       createUserWithEmailAndPassword(auth, email, password)
-        .then((response) => {
+        .then(async (response) => {
+          const user = {
+            uid: response.user.uid,
+            username: username,
+            email: email,
+          }
+          await API.createUser(user)
+
+          // set User data here -> otherwise: race between fetch/create user
+          User.set(user)
+
           reset()
           router.push("/")
         })

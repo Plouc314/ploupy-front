@@ -24,6 +24,7 @@ import { auth } from '../src/utils/Firebase'
 import Scene from '../src/pixi/scene';
 import Sio from '../src/comm/sio';
 import User from '../src/comm/user';
+import CommSystem from '../src/pixi/comm';
 
 
 export interface PageHomeProps { }
@@ -69,17 +70,13 @@ const PageHome: FC<PageHomeProps> = (props) => {
         </Button>
         <Button
           onClick={() => {
-            Scene.start(0)
+            Scene.start()
+            setTimeout(() => {
+              CommSystem.sendJoinGame()
+            }, 100)
           }}
         >
-          play 0
-        </Button>
-        <Button
-          onClick={() => {
-            Scene.start(1)
-          }}
-        >
-          play 1
+          play
         </Button>
 
       </Paper>
