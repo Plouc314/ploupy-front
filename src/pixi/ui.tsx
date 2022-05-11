@@ -2,19 +2,24 @@
 import { Container, Text, Graphics } from 'pixi.js'
 
 // types
-import { Game } from '../../types'
+import { IGame } from '../../types'
 
 // pixi
 import Color from './color'
-import GameLogic from './game'
+import Game from './game'
 
-class UI implements Game.Sprite {
+class UI implements IGame.Sprite {
     public static readonly SCORE_WIDTH = 100
+
+    public game: Game
+
     private container: Container
     private bg: Graphics
     private scores: Text[]
 
-    constructor(width: number) {
+    constructor(game: Game, width: number) {
+        this.game = game
+
         this.container = new Container()
         this.bg = new Graphics()
         this.bg.beginFill(Color.fromRgb(255, 255, 255).hex())
@@ -22,7 +27,7 @@ class UI implements Game.Sprite {
         this.container.addChild(this.bg)
 
         this.scores = []
-        for (let i = 0; i < GameLogic.players.length; i++) {
+        for (let i = 0; i < this.game.players.length; i++) {
             const text = new Text("")
             text.position.x = i * UI.SCORE_WIDTH
             this.container.addChild(text)
@@ -31,8 +36,8 @@ class UI implements Game.Sprite {
     }
 
     public update() {
-        for (let i = 0; i < GameLogic.players.length; i++) {
-            const player = GameLogic.players[i]
+        for (let i = 0; i < this.game.players.length; i++) {
+            const player = this.game.players[i]
             const text = this.scores[i]
             text.style.fill = player.textColor().hex()
             text.text = `${player.username}: ${player.score}`

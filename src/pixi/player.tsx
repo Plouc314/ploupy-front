@@ -1,17 +1,16 @@
 // types
-import { Game } from '../../types'
+import { IGame } from '../../types'
 
 // pixi.js
 import { Graphics, Container, Sprite } from 'pixi.js';
 
 // pixi
 import Keyboard from './keyboard';
-import Frame from './frame';
 import Color from './color';
-import GameLogic from './game';
 import Tile from './tile';
+import Map from './map';
 
-class Player implements Game.Sprite {
+class Player implements IGame.Sprite {
 
   public static readonly SIZE = 50
   public static readonly SPEED = 10
@@ -21,16 +20,23 @@ class Player implements Game.Sprite {
   private container: Container
   private delayBar: Graphics
 
+  public keyboard: Keyboard
+  public map: Map
+
   public username: string
   public color: Color
   public attackDelay: number
-  public dir: Game.Direction
+  public dir: IGame.Direction
   public score: number
   public tiles: Tile[]
 
-  constructor(username: string, color: Color) {
+  constructor(username: string, color: Color, keyboard: Keyboard, map: Map) {
     this.username = username
     this.color = color
+
+    this.keyboard = keyboard
+    this.map = map
+
     this.delayBar = new Graphics()
     this.container = this.buildContainer()
     this.attackDelay = 0
@@ -55,34 +61,34 @@ class Player implements Game.Sprite {
     this.delayBar.drawRect(40, 5, 5, 40 * this.attackDelay / Player.ATTACK_DELAY)
   }
 
-  public update() {
+  public update(dt: number) {
     // movement
     let isMov = false
-    if (Keyboard.get("a").down) {
+    if (this.keyboard.get("a").down) {
       this.dir = { x: -1, y: 0 }
       isMov = true
     }
-    if (Keyboard.get("d").down) {
+    if (this.keyboard.get("d").down) {
       this.dir = { x: 1, y: 0 }
       isMov = true
     }
-    if (Keyboard.get("w").down) {
+    if (this.keyboard.get("w").down) {
       this.dir = { x: 0, y: -1 }
       isMov = true
     }
-    if (Keyboard.get("s").down) {
+    if (this.keyboard.get("s").down) {
       this.dir = { x: 0, y: 1 }
       isMov = true
     }
     if (isMov) {
-      this.container.position.x += this.dir.x * Player.SPEED * Frame.dt
-      this.container.position.y += this.dir.y * Player.SPEED * Frame.dt
+      this.container.position.x += this.dir.x * Player.SPEED * dt
+      this.container.position.y += this.dir.y * Player.SPEED * dt
     }
 
     // update attack
-    this.attackDelay = Math.max(this.attackDelay - Frame.dt, 0)
+    this.attackDelay = Math.max(this.attackDelay - dt, 0)
 
-    if (Keyboard.get("p").down) {
+    if (this.keyboard.get("p").down) {
       if (this.attackDelay == 0) {
         this.attack()
         this.attackDelay = Player.ATTACK_DELAY
@@ -94,8 +100,7 @@ class Player implements Game.Sprite {
   }
 
   private attack() {
-    const map = GameLogic.map
-    const coord = map.coord(this.pos())
+    const coord = this.map.coord(this.pos())
     for (let i = 1; i < Player.ATTACK_SCOPE; i++) {
       // map.claimTile(this, {
       //   x: coord.x + this.dir.x * i,
@@ -104,14 +109,14 @@ class Player implements Game.Sprite {
     }
   }
 
-  public pos(): Game.Position {
+  public pos(): IGame.Position {
     return {
       x: this.container.position.x + Player.SIZE / 2,
       y: this.container.position.y + Player.SIZE / 2,
     }
   }
 
-  public setPos(pos: Game.Position) {
+  public setPos(pos: IGame.Position) {
     this.container.position.x = pos.x - Player.SIZE / 2
     this.container.position.y = pos.y - Player.SIZE / 2
   }

@@ -11,7 +11,7 @@ import {
   onAuthStateChanged,
   browserLocalPersistence,
   browserSessionPersistence,
-} from '@firebase/auth'
+} from 'firebase/auth'
 
 // comm
 import API from '../comm/api'
@@ -113,7 +113,15 @@ function useFirebaseAuth() {
 Context, provider at root of application (_app.js)
 Same data as UseFirebaseAuth (work together)
 */
-const userContext = createContext<Firebase.Auth>({ user: null, loading: true })
+const userContext = createContext<Firebase.Auth>({
+  user: {
+    connected: false,
+    uid: "",
+    username: "",
+    email: "",
+  },
+  loading: true
+})
 
 export interface AuthProviderProps {
 

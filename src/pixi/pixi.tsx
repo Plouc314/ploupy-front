@@ -8,7 +8,6 @@ import Textures from './textures'
 class Pixi {
   public app: Application
   public textures: Textures
-  public ready = false
 
   constructor(canvas: HTMLCanvasElement) {
 

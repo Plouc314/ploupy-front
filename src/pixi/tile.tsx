@@ -1,5 +1,5 @@
 // types
-import { Game } from '../../types'
+import { IGame } from '../../types'
 
 // pixi.js
 import { Graphics, Container } from 'pixi.js';
@@ -8,11 +8,11 @@ import { Graphics, Container } from 'pixi.js';
 import Color from './color';
 import Player from './player';
 
-class Tile implements Game.Sprite {
+class Tile implements IGame.Sprite {
 
   public static readonly SIZE = 50
-  public static readonly DEFAULT_COLOR: Game.RGB = { r: 200, g: 200, b: 200 }
-  public readonly coord: Game.Coordinate
+  public static readonly DEFAULT_COLOR: IGame.RGB = { r: 200, g: 200, b: 200 }
+  public readonly coord: IGame.Coordinate
 
   private sprite: Graphics
 

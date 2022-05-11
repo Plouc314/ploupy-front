@@ -11,10 +11,7 @@ import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
-import BonusSystem from "./bonus"
-import CommSystem from "./comm"
 import Tile from "./tile"
-import User from "../comm/user"
 import Comm from "./comm"
 
 
@@ -28,82 +25,66 @@ class Game {
   public map: Map
   public ui: UI
   public layout: Container
-  public isGame: boolean
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, gameState: IGame.Server.GameState) {
     this.pixi = pixi
     this.comm = comm
     this.user = user
     this.keyboard = new Keyboard()
-    this.isGame = false
 
-    this.comm.setOnPlayerState(this.onPlayerState)
+    this.comm.setOnPlayerState((state) => this.onPlayerState(state))
 
     this.keyboard.listen(["a", "d", "w", "s", "p"])
-  }
 
-  public runstr() {
-    console.group("run")
-    console.log(this.isGame)
-    console.log(this.ownPlayer)
-    console.groupEnd()
-    if (!this.isGame) return
-    if (!this.ownPlayer) return
-    this.ownPlayer.update()
+    this.map = new Map(gameState.dim)
 
-    BonusSystem.update(this.ownPlayer)
-    CommSystem.sendPlayerState(this.ownPlayer)
-
-    this.ui.update()
-  }
-
-  private onStartGame(state: IGame.Server.GameState) {
-    console.group("start game")
-    console.dir(state)
-    console.groupEnd()
+    // setup game
     const colors = [
       Color.fromRgb(220, 100, 100),
       Color.fromRgb(100, 220, 100),
     ]
 
-    this.isGame = true
-
-    this.players = state.players.map((p, i) => {
-      const player: Player = new Player(p.username, colors[i])
+    this.players = gameState.players.map((p, i) => {
+      const player: Player = new Player(p.username, colors[i], this.keyboard, this.map)
       player.score = p.score
       player.setPos(p.position)
       return player
     })
 
-    this.ownPlayer = this.players.find((p) => p.username === User.username) as Player
+    this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
 
-    this.ui = new UI(Pixi.app.view.width)
+    this.ui = new UI(this, this.pixi.app.view.width)
     this.layout = new Container()
     this.layout.position.y = 50
 
-    this.map = new Map(this.dimension)
-
     this.layout.addChild(this.map.child())
     this.players.forEach(p => this.layout.addChild(p.child()))
-    // this.layout.addChild(BonusSystem.child())
 
-    Pixi.app.stage.addChild(this.layout)
-    Pixi.app.stage.addChild(this.ui.child())
+    this.pixi.app.stage.addChild(this.layout)
+    this.pixi.app.stage.addChild(this.ui.child())
 
-    Keyboard.setup()
-    Keyboard.listen(["a", "d", "w", "s", "p"])
-
-    console.log(GameLogic.runstr)
-    console.dir(GameLogic)
-
-    Pixi.app.ticker.add(GameLogic.runstr)
+    this.pixi.app.ticker.add((dt) => this.run(dt))
   }
+
+  private run(dt: number) {
+    if (!this.ownPlayer) return
+    this.ownPlayer.update(dt)
+
+    const state: IGame.Client.PlayerState = {
+      position: this.map.coord(this.ownPlayer.pos(), true),
+    }
+
+    this.comm.sendPlayerState(state)
+
+    this.ui.update()
+  }
+
 
   private onPlayerState(state: IGame.Server.PlayerState) {
     const player = this.players.find(p => p.username === state.username)
     if (!player) return
 
-    player.setPos(state.position)
+    player.setPos(this.map.pos(state.position))
     player.score = state.score
 
     for (const coord of state.tiles) {

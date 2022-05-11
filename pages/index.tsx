@@ -1,6 +1,9 @@
 // next
 import { useRouter } from 'next/router'
 
+// react
+import { useState, useEffect } from 'react'
+
 // types
 import { FC } from '../types'
 
@@ -14,24 +17,46 @@ import {
 } from '@mui/material'
 
 // firebase
-import { signOut } from "firebase/auth";
+import { signOut } from "firebase/auth"
 
 // components
 import Page from '../src/components/Page'
 
+// hooks
+import { useToast } from '../src/hooks/useToast'
+
 // utils
-import { auth } from '../src/utils/Firebase'
-import Scene from '../src/pixi/scene';
-import Sio from '../src/comm/sio';
-import User from '../src/comm/user';
-import CommSystem from '../src/pixi/comm';
+import { auth, useAuth } from '../src/utils/Firebase'
+
+// pixi
+import useSio from '../src/comm/sio'
+import Pixi from '../src/pixi/pixi'
+import Comm from '../src/pixi/comm'
+import Game from '../src/pixi/game'
 
 
 export interface PageHomeProps { }
 
 const PageHome: FC<PageHomeProps> = (props) => {
 
-  const router = useRouter();
+  const router = useRouter()
+  const { generateToast } = useToast()
+  const { user } = useAuth()
+  const { connected, sio } = useSio()
+  const [comm, setComm] = useState<Comm | null>(null)
+  const [game, setGame] = useState<Game | null>(null)
+
+  useEffect(() => {
+    if (connected && sio) {
+      const _comm = new Comm(sio)
+      _comm.setOnStartGame((gameState) => {
+        const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
+        const pixi = new Pixi(canvas)
+        setGame(new Game(pixi, _comm, user, gameState))
+      })
+      setComm(_comm)
+    }
+  }, [connected])
 
   return (
     <Page
@@ -62,18 +87,11 @@ const PageHome: FC<PageHomeProps> = (props) => {
         </Typography>
         <Button
           onClick={() => {
-            Sio.connect()
-            console.dir(User)
-          }}
-        >
-          test
-        </Button>
-        <Button
-          onClick={() => {
-            Scene.start()
-            setTimeout(() => {
-              CommSystem.sendJoinGame()
-            }, 100)
+            if (!comm) {
+              generateToast("Not connected", "error")
+              return
+            }
+            comm.sendJoinGame()
           }}
         >
           play

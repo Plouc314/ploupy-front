@@ -19,10 +19,7 @@ class Comm {
         this.sio.emit("join_queue")
     }
 
-    public sendPlayerState(player: Player) {
-        const state: IGame.Client.PlayerState = {
-            position: player.pos(),
-        }
+    public sendPlayerState(state: IGame.Client.PlayerState) {
         this.sio.emit("player_state", state)
     }
 

@@ -1,5 +1,5 @@
 // types
-import { Game } from '../../types'
+import { IGame } from '../../types'
 
 // pixi.js
 import { Container } from 'pixi.js'
@@ -8,13 +8,13 @@ import { Container } from 'pixi.js'
 import Tile from './tile'
 import Player from './player'
 
-class Map implements Game.Sprite {
+class Map implements IGame.Sprite {
 
-  public dimension: Game.Dimension
+  public dimension: IGame.Dimension
   private tiles: Tile[][]
   private container: Container
 
-  constructor(dim: Game.Dimension) {
+  constructor(dim: IGame.Dimension) {
     this.dimension = { ...dim }
     this.tiles = []
     this.container = this.buildMap()
@@ -36,14 +36,29 @@ class Map implements Game.Sprite {
     return container
   }
 
-  public coord(pos: Game.Position): Game.Coordinate {
+  /**
+   * Convert the given position to coordinate
+   * if keepPrecision is specified, don't floor coordinate
+   */
+  public coord(pos: IGame.Position, keepPrecision?: boolean): IGame.Coordinate {
+    const floor = keepPrecision ? (x: number) => x : Math.floor
     return {
-      x: Math.floor(pos.x / Tile.SIZE),
-      y: Math.floor(pos.y / Tile.SIZE),
+      x: floor(pos.x / Tile.SIZE),
+      y: floor(pos.y / Tile.SIZE),
     }
   }
 
-  public tile(coord: Game.Coordinate): Tile | null {
+  /**
+   * Convert the given coordinate to position
+   */
+  public pos(coord: IGame.Coordinate): IGame.Position {
+    return {
+      x: coord.x * Tile.SIZE,
+      y: coord.y * Tile.SIZE,
+    }
+  }
+
+  public tile(coord: IGame.Coordinate): Tile | null {
     if (
       coord.x < 0 ||
       coord.x >= this.dimension.x ||
@@ -55,7 +70,7 @@ class Map implements Game.Sprite {
     return this.tiles[coord.x][coord.y]
   }
 
-  public claimTile(player: Player, coord: Game.Coordinate): boolean {
+  public claimTile(player: Player, coord: IGame.Coordinate): boolean {
 
     const tile = this.tile(coord)
 

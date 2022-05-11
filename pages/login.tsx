@@ -39,7 +39,6 @@ import { useToast } from '../src/hooks/useToast'
 
 // comm
 import API from '../src/comm/api'
-import User from '../src/comm/user'
 
 
 const theme = createTheme()
@@ -91,9 +90,6 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             email: email,
           }
           await API.createUser(user)
-
-          // set User data here -> otherwise: race between fetch/create user
-          User.set(user)
 
           reset()
           router.push("/")

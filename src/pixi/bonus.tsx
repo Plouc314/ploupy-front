@@ -2,7 +2,7 @@
 import { Container, Text, Graphics } from 'pixi.js'
 
 // types
-import { Game } from "../../types";
+import { IGame } from "../../types";
 
 // pixi
 import Player from './player';
@@ -12,15 +12,15 @@ import Frame from './frame';
 import GameLogic from './game';
 
 
-export class Bonus implements Game.Sprite {
+export class Bonus implements IGame.Sprite {
 
   public static readonly SIZE = 50
   public static readonly EFFECT_SCOPE = 6
 
   private container: Graphics
-  public coord: Game.Coordinate
+  public coord: IGame.Coordinate
 
-  constructor(coord: Game.Coordinate) {
+  constructor(coord: IGame.Coordinate) {
     this.coord = coord
     this.container = new Graphics()
     this.container.beginFill(Color.fromRgb(100, 100, 200).hex())
@@ -30,16 +30,16 @@ export class Bonus implements Game.Sprite {
   }
 
   public effect(player: Player) {
-    const map = GameLogic.map
-    const coord = map.coord(player.pos())
-    for (let x = 1; x < Bonus.EFFECT_SCOPE; x++) {
-      for (let y = 1; y < Bonus.EFFECT_SCOPE; y++) {
-        map.claimTile(player, {
-          x: coord.x + x - Bonus.EFFECT_SCOPE / 2,
-          y: coord.y + y - Bonus.EFFECT_SCOPE / 2
-        })
-      }
-    }
+    // const map = GameLogic.map
+    // const coord = map.coord(player.pos())
+    // for (let x = 1; x < Bonus.EFFECT_SCOPE; x++) {
+    //   for (let y = 1; y < Bonus.EFFECT_SCOPE; y++) {
+    //     map.claimTile(player, {
+    //       x: coord.x + x - Bonus.EFFECT_SCOPE / 2,
+    //       y: coord.y + y - Bonus.EFFECT_SCOPE / 2
+    //     })
+    //   }
+    // }
   }
 
   public child(): Container {
@@ -62,40 +62,40 @@ class BonusSystem {
   }
 
   private static generateBonus() {
-    const x = Math.round(Math.random() * GameLogic.dimension.x)
-    const y = Math.round(Math.random() * GameLogic.dimension.y)
-    for (const bonus of this.bonuses) {
-      if (bonus.coord.x == x && bonus.coord.y == y) {
-        this.generateBonus()
-        return
-      }
-    }
-    const bonus = new Bonus({ x, y })
-    this.bonuses.push(bonus)
-    this.container.addChild(bonus.child())
+    // const x = Math.round(Math.random() * GameLogic.dimension.x)
+    // const y = Math.round(Math.random() * GameLogic.dimension.y)
+    // for (const bonus of this.bonuses) {
+    //   if (bonus.coord.x == x && bonus.coord.y == y) {
+    //     this.generateBonus()
+    //     return
+    //   }
+    // }
+    // const bonus = new Bonus({ x, y })
+    // this.bonuses.push(bonus)
+    // this.container.addChild(bonus.child())
   }
 
   public static update(player: Player) {
-    this.timer = Math.max(this.timer - Frame.dt, 0)
-    if (this.timer == 0) {
-      this.timer = this.GENERATION_DELAY
-      this.generateBonus()
-    }
+    // this.timer = Math.max(this.timer - Frame.dt, 0)
+    // if (this.timer == 0) {
+    //   this.timer = this.GENERATION_DELAY
+    //   this.generateBonus()
+    // }
 
-    const { x, y } = GameLogic.map.coord(player.pos())
+    // const { x, y } = GameLogic.map.coord(player.pos())
 
-    const toRemove: Bonus[] = []
-    for (const bonus of this.bonuses) {
-      if (bonus.coord.x == x && bonus.coord.y == y) {
-        bonus.effect(player)
-        toRemove.push(bonus)
-        this.container.removeChild(bonus.child())
-      }
-    }
-    for (const bonus of toRemove) {
-      const idx = this.bonuses.indexOf(bonus)
-      this.bonuses.splice(idx, 1)
-    }
+    // const toRemove: Bonus[] = []
+    // for (const bonus of this.bonuses) {
+    //   if (bonus.coord.x == x && bonus.coord.y == y) {
+    //     bonus.effect(player)
+    //     toRemove.push(bonus)
+    //     this.container.removeChild(bonus.child())
+    //   }
+    // }
+    // for (const bonus of toRemove) {
+    //   const idx = this.bonuses.indexOf(bonus)
+    //   this.bonuses.splice(idx, 1)
+    // }
   }
 
   public static child(): Container {

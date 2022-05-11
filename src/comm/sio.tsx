@@ -18,6 +18,8 @@ function useSio() {
   // if auth is ok and no sio -> connect
   if (!loading && user && !sio) {
     const _sio = io("http://127.0.0.1:8000", {
+      path: "/ws/socket.io/",
+      //transports: ['websocket'],
       transportOptions: {
         polling: {
           extraHeaders: {
@@ -28,7 +30,10 @@ function useSio() {
     })
     _sio.on("connect", () => {
       console.log("connected")
-      setConnected(true)
+      _sio.emit("auth", user.uid, (response: boolean) => {
+        console.log("response " + response)
+        setConnected(true)
+      })
     })
 
     _sio.on("disconnect", () => {
