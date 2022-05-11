@@ -1,18 +1,18 @@
 // types
-import { Comm } from "../../types"
+import { IComm } from "../../types"
 
 /**
  * Interface to the server api
  */
-class API {
+namespace API {
 
-  public static readonly API_URL: string = "http://127.0.0.1:5000/api/"
+  const API_URL: string = "http://127.0.0.1:5000/api/"
 
-  public static async get<R extends {}>(
+  export async function get<R extends {}>(
     endpoint: string, args?: Record<string, any>
-  ): Promise<Comm.Response<R>> {
+  ): Promise<IComm.Response<R>> {
 
-    let url = this.API_URL + endpoint
+    let url = API_URL + endpoint
 
     if (args) {
       url += "?" + Object.entries(args).map(v => v[0] + "=" + v[1]).join("&")
@@ -31,11 +31,11 @@ class API {
     return await response.json()
   }
 
-  public static async post<T extends {}, R extends {} = {}>(
+  export async function post<T extends {}, R extends {} = {}>(
     endpoint: string, body: T
-  ): Promise<Comm.Response<R>> {
+  ): Promise<IComm.Response<R>> {
     const response = await fetch(
-      this.API_URL + endpoint,
+      API_URL + endpoint,
       {
         method: 'POST',
         headers: {
@@ -49,19 +49,19 @@ class API {
     return await response.json()
   }
 
-  public static async getUserData(
+  export async function getUserData(
     args: { uid?: string, username?: string }
-  ): Promise<Comm.UserData | null> {
-    const response = await this.get<Comm.UserData>("user-data", args)
+  ): Promise<IComm.UserData | null> {
+    const response = await get<IComm.UserData>("user-data", args)
 
     if (!response.success) return null
     return response.data
   }
 
-  public static async createUser(
-    user: Comm.UserData
-  ): Promise<Comm.Response> {
-    return await this.post("create-user", user)
+  export async function createUser(
+    user: IComm.UserData
+  ): Promise<IComm.Response> {
+    return await post("create-user", user)
   }
 
 }

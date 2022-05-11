@@ -15,7 +15,6 @@ import {
 
 // comm
 import API from '../comm/api'
-import User from '../comm/user'
 
 // utils
 import { Firebase } from '../../types'
@@ -66,52 +65,46 @@ Setup an observer to change the user/loading states once the auth state change.
 Return the user & the loading state
 */
 function useFirebaseAuth() {
-  const [user, setUser] = useState<Firebase.User | null>(null)
+  const [user, setUser] = useState<Firebase.User>({
+    connected: false,
+    uid: "",
+    username: "",
+    email: "",
+  })
   const [loading, setLoading] = useState(true)
 
   // listen for Firebase state change
   // use an useEffect hook to prevent setting up the observer at each rerender
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) { // signed in
+    onAuthStateChanged(auth, async (_user) => {
+      if (_user) { // signed in
 
         // start loading state
         setLoading(true)
 
-        // something surely takes time here
+        // get user data from server
+        const data = await API.getUserData({ uid: _user.uid })
+
+        if (!data) {
+          throw new Error(`No user found for uid: ${_user.uid}`)
+        }
+
         setUser({
-          email: user.email as string,
-          id: user.uid
+          connected: true,
+          uid: data.uid,
+          email: data.email,
+          username: data.username,
         })
 
         // stop loading state
         setLoading(false)
 
       } else { // not signed in
-        setUser(null)
+        setUser({ ...user, connected: false })
         setLoading(false)
       }
     })
   }, [] /* the effect is only executed once */)
-
-  useEffect(() => {
-    if (user) {
-      if (User.connected && user.id === User.uid) return
-      API.getUserData({ uid: user.id })
-        .then((data) => {
-          if (!data) {
-            throw new Error(`No user found for uid: ${user.id}`)
-          }
-          User.connected = true
-          User.uid = data.uid
-          User.username = data.username
-          User.email = data.email
-        })
-
-    } else {
-      User.connected = false
-    }
-  }, [user])
 
   return { user: user, loading: loading } as Firebase.Auth
 }
@@ -137,6 +130,7 @@ export const useAuth = () => useContext(userContext)
 
 /**
  * Extract and format the error message from the error object
+ * Use with response from firebase auth
  */
 export function getErrorMessage(error: any) {
   let msg = error.message

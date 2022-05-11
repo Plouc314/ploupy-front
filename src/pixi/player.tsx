@@ -8,7 +8,7 @@ import { Graphics, Container, Sprite } from 'pixi.js';
 import Keyboard from './keyboard';
 import Frame from './frame';
 import Color from './color';
-import GameLogic from './gamelogic';
+import GameLogic from './game';
 import Tile from './tile';
 
 class Player implements Game.Sprite {

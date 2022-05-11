@@ -1,40 +1,40 @@
+// pixijs
 import { Loader, Texture } from 'pixi.js'
 
 class Textures {
-  static ready = false;
-  static loader = new Loader();
+  public ready = false
+  private loader = new Loader()
 
-  static avatars = [
+  private readonly avatars = [
     "bear",
     "dog",
   ]
 
-  static load(onClomplete?: () => void) {
+  public load(onClomplete?: () => void) {
     if (this.ready) {
-      return;
+      return
     }
 
     this.loader.onComplete.add(() => {
-      this.ready = true;
+      this.ready = true
       if (onClomplete) {
-        onClomplete();
+        onClomplete()
       }
-    });
+    })
 
     this.loader.reset()
-    for (const file of this.avatars) {
-      this.loader.add(`/assets/textures/${file}.png`)
+    for (const avatar of this.avatars) {
+      this.loader.add(avatar, `/assets/textures/${avatar}.png`)
     }
     // start loading
-    this.loader.load();
+    this.loader.load()
   }
 
-  static get(name: string) {
-    let path = `/assets/textures/${name}.png`;
-    const texture = this.loader.resources[path].texture as Texture;
-    return texture;
+  public get(name: string): Texture {
+    const texture = this.loader.resources[name].texture as Texture
+    return texture
   }
 }
 
 
-export default Textures;
+export default Textures

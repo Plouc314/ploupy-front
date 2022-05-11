@@ -4,17 +4,19 @@ export type FC<T> = React.FC<React.PropsWithChildren<T>>
 
 export namespace Firebase {
   export type User = {
-    id: string
+    connected: boolean
+    uid: string
+    username: string
     email: string
   }
 
   export type Auth = {
-    user: User | null
+    user: User
     loading: boolean
   }
 }
 
-export namespace Game {
+export namespace IGame {
   export type RGB = {
     r: number
     g: number
@@ -57,7 +59,7 @@ export namespace Game {
 
 }
 
-export namespace Comm {
+export namespace IComm {
   export type Response<T = {}> = {
     success: boolean
     msg: string

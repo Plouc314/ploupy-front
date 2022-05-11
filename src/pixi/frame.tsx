@@ -4,7 +4,11 @@
  */
 class Frame {
     /** Frame duration */
-    public static dt = 0
+    public dt: number
+
+    constructor(dt: number) {
+        this.dt = dt
+    }
 }
 
 export default Frame

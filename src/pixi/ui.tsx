@@ -6,7 +6,7 @@ import { Game } from '../../types'
 
 // pixi
 import Color from './color'
-import GameLogic from './gamelogic'
+import GameLogic from './game'
 
 class UI implements Game.Sprite {
     public static readonly SCORE_WIDTH = 100

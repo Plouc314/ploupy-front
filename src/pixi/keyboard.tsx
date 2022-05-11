@@ -12,19 +12,19 @@ export interface KeyHandler {
 
 class Keyboard {
   private static readonly ESCAPE = "Escape"
-  private static handlers: Record<string, KeyHandler>
-  private static states: Record<string, KeyState>
-  public static active: boolean = false
+  private handlers: Record<string, KeyHandler>
+  private states: Record<string, KeyState>
+  public active: boolean = false
 
-  public static setup() {
-    window.addEventListener("keydown", (e) => { this.onKeyDown(e) }, false)
-    window.addEventListener("keyup", (e) => { this.onKeyUp(e) }, false)
+  constructor() {
     this.handlers = {}
     this.states = {}
     this.active = true
+    window.addEventListener("keydown", (e) => { this.onKeyDown(e) }, false)
+    window.addEventListener("keyup", (e) => { this.onKeyUp(e) }, false)
   }
 
-  public static reset() {
+  public reset() {
     window.removeEventListener("keydown", (e) => { this.onKeyDown(e) })
     window.removeEventListener("keyup", (e) => { this.onKeyUp(e) })
     this.handlers = {}
@@ -32,14 +32,14 @@ class Keyboard {
     this.active = false
   }
 
-  public static get(key: string): KeyState {
+  public get(key: string): KeyState {
     return this.states[key]
   }
 
-  private static onKeyDown(e: KeyboardEvent) {
+  private onKeyDown(e: KeyboardEvent) {
     if (!this.active) return
 
-    if (e.key === this.ESCAPE) {
+    if (e.key === Keyboard.ESCAPE) {
       this.active = false
     }
 
@@ -59,7 +59,7 @@ class Keyboard {
     e.preventDefault()
   }
 
-  private static onKeyUp(e: KeyboardEvent) {
+  private onKeyUp(e: KeyboardEvent) {
     if (!this.active) return
 
     if (!(e.key in this.states)) return
@@ -79,7 +79,7 @@ class Keyboard {
     e.preventDefault()
   }
 
-  public static listen(key: string | string[]) {
+  public listen(key: string | string[]) {
     if (typeof key === "string") {
       key = [key]
     }
@@ -91,7 +91,7 @@ class Keyboard {
     }
   }
 
-  public static addOnDown(key: string, cb: () => void) {
+  public addOnDown(key: string, cb: () => void) {
     this.listen(key)
     if (!(key in this.handlers)) {
       this.handlers[key] = {
@@ -103,7 +103,7 @@ class Keyboard {
     this.handlers[key].onDown.push(cb)
   }
 
-  public static addOnUp(key: string, cb: () => void) {
+  public addOnUp(key: string, cb: () => void) {
     this.listen(key)
     if (!(key in this.handlers)) {
       this.handlers[key] = {
@@ -115,7 +115,7 @@ class Keyboard {
     this.handlers[key].onUp.push(cb)
   }
 
-  public static addOnPress(key: string, cb: () => void) {
+  public addOnPress(key: string, cb: () => void) {
     this.listen(key)
     if (!(key in this.handlers)) {
       this.handlers[key] = {

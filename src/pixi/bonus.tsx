@@ -9,7 +9,7 @@ import Player from './player';
 import Tile from './tile';
 import Color from './color';
 import Frame from './frame';
-import GameLogic from './gamelogic';
+import GameLogic from './game';
 
 
 export class Bonus implements Game.Sprite {

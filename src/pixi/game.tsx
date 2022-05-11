@@ -1,11 +1,11 @@
 // types
-import { Game } from "../../types"
+import { Firebase, IGame } from "../../types"
 
 // pixi.js
 import { Container } from "pixi.js"
 
 // pixi
-import Pixi from "./app"
+import Pixi from "./pixi"
 import Color from "./color"
 import Keyboard from "./keyboard"
 import Map from "./map"
@@ -15,26 +15,34 @@ import BonusSystem from "./bonus"
 import CommSystem from "./comm"
 import Tile from "./tile"
 import User from "../comm/user"
+import Comm from "./comm"
 
 
-class GameLogic {
-  public static dimension: Game.Dimension = { x: 20, y: 20 }
-  public static players: Player[] = []
-  public static ownPlayer: Player
-  public static map: Map
-  public static ui: UI
-  public static layout: Container
-  public static isGame: boolean = false
+class Game {
+  public pixi: Pixi
+  public comm: Comm
+  public user: Firebase.User
+  public keyboard: Keyboard
+  public players: Player[] = []
+  public ownPlayer: Player
+  public map: Map
+  public ui: UI
+  public layout: Container
+  public isGame: boolean
 
-  public static setup() {
-    BonusSystem.setup()
-    CommSystem.setup()
-    CommSystem.onPlayerState = this.onPlayerState
-    CommSystem.onStartGame = this.onStartGame
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User) {
+    this.pixi = pixi
+    this.comm = comm
+    this.user = user
+    this.keyboard = new Keyboard()
     this.isGame = false
+
+    this.comm.setOnPlayerState(this.onPlayerState)
+
+    this.keyboard.listen(["a", "d", "w", "s", "p"])
   }
 
-  public static runstr() {
+  public runstr() {
     console.group("run")
     console.log(this.isGame)
     console.log(this.ownPlayer)
@@ -49,7 +57,7 @@ class GameLogic {
     this.ui.update()
   }
 
-  private static onStartGame(state: Game.Server.GameState) {
+  private onStartGame(state: IGame.Server.GameState) {
     console.group("start game")
     console.dir(state)
     console.groupEnd()
@@ -91,7 +99,7 @@ class GameLogic {
     Pixi.app.ticker.add(GameLogic.runstr)
   }
 
-  private static onPlayerState(state: Game.Server.PlayerState) {
+  private onPlayerState(state: IGame.Server.PlayerState) {
     const player = this.players.find(p => p.username === state.username)
     if (!player) return
 
@@ -109,4 +117,4 @@ class GameLogic {
 
 }
 
-export default GameLogic
+export default Game

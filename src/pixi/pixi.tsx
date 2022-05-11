@@ -3,17 +3,14 @@ import { Application } from 'pixi.js'
 
 // pixi
 import Textures from './textures'
-import Frame from './frame'
+
 
 class Pixi {
-  static app: Application
-  static ready = false
-  static onLoadingComplete?: () => void
+  public app: Application
+  public textures: Textures
+  public ready = false
 
-  static setup(canvas: HTMLCanvasElement) {
-    if (this.ready) {
-      return // only setup once
-    }
+  constructor(canvas: HTMLCanvasElement) {
 
     const size = Math.min(window.innerHeight, window.innerWidth) * 0.8
 
@@ -26,12 +23,7 @@ class Pixi {
     })
     this.app.ticker.maxFPS = 30
 
-    // load texture
-    Textures.load(this.onLoadingComplete)
-
-    this.app.ticker.add((dt) => {
-      Frame.dt = dt
-    })
+    this.textures = new Textures()
   }
 }
 

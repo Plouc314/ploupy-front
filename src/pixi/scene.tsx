@@ -1,6 +1,6 @@
 // pixi
-import Pixi from './app'
-import GameLogic from './gamelogic';
+import Pixi from './pixi'
+import GameLogic from './game';
 import Sio from '../comm/sio';
 
 class Scene {
