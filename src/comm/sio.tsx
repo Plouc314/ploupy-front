@@ -5,6 +5,8 @@ import { useState } from "react"
 import { io, Socket } from "socket.io-client"
 import { useAuth } from "../utils/Firebase"
 
+// comm
+import { URL_SIO } from './config'
 
 /**
  * Socket io hook
@@ -17,9 +19,7 @@ function useSio() {
 
   // if auth is ok and no sio -> connect
   if (!loading && user && !sio) {
-    const _sio = io("http://127.0.0.1:8000", {
-      path: "/ws/socket.io/",
-      //transports: ['websocket'],
+    const _sio = io(URL_SIO, {
       transportOptions: {
         polling: {
           extraHeaders: {
@@ -30,10 +30,7 @@ function useSio() {
     })
     _sio.on("connect", () => {
       console.log("connected")
-      _sio.emit("auth", user.uid, (response: boolean) => {
-        console.log("response " + response)
-        setConnected(true)
-      })
+      setConnected(true)
     })
 
     _sio.on("disconnect", () => {

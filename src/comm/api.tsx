@@ -1,18 +1,19 @@
 // types
 import { IComm } from "../../types"
 
+// comm
+import { URL_API } from './config'
+
 /**
  * Interface to the server api
  */
 class API {
 
-  private static readonly API_URL: string = "http://127.0.0.1:8000/api/"
-
   public static async get<R extends {}>(
     endpoint: string, args?: Record<string, any>
   ): Promise<IComm.Response<R>> {
 
-    let url = this.API_URL + endpoint
+    let url = URL_API + endpoint
 
     if (args) {
       url += "?" + Object.entries(args).map(v => v[0] + "=" + v[1]).join("&")
@@ -35,7 +36,7 @@ class API {
     endpoint: string, body: T
   ): Promise<IComm.Response<R>> {
     const response = await fetch(
-      this.API_URL + endpoint,
+      URL_API + endpoint,
       {
         method: 'POST',
         headers: {
