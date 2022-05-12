@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 
 // types
-import { FC } from '../types'
+import { FC } from '../../types'
 
 // firebase
 import { initializeApp, getApps } from "firebase/app"
@@ -11,10 +11,13 @@ import {
   onAuthStateChanged,
   browserLocalPersistence,
   browserSessionPersistence,
-} from '@firebase/auth'
+} from 'firebase/auth'
+
+// comm
+import API from '../comm/api'
 
 // utils
-import { Firebase } from '../types'
+import { Firebase } from '../../types'
 
 /*
 Firebase config keys and Ids
@@ -62,29 +65,42 @@ Setup an observer to change the user/loading states once the auth state change.
 Return the user & the loading state
 */
 function useFirebaseAuth() {
-  const [user, setUser] = useState<Firebase.User | null>(null)
+  const [user, setUser] = useState<Firebase.User>({
+    connected: false,
+    uid: "",
+    username: "",
+    email: "",
+  })
   const [loading, setLoading] = useState(true)
 
   // listen for Firebase state change
   // use an useEffect hook to prevent setting up the observer at each rerender
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) { // signed in
+    onAuthStateChanged(auth, async (_user) => {
+      if (_user) { // signed in
 
         // start loading state
         setLoading(true)
 
-        // something surely takes time here
+        // get user data from server
+        const data = await API.getUserData({ uid: _user.uid })
+
+        if (!data) {
+          throw new Error(`No user found for uid: ${_user.uid}`)
+        }
+
         setUser({
-          email: user.email as string,
-          id: user.uid
+          connected: true,
+          uid: data.uid,
+          email: data.email,
+          username: data.username,
         })
 
         // stop loading state
         setLoading(false)
 
       } else { // not signed in
-        setUser(null)
+        setUser({ ...user, connected: false })
         setLoading(false)
       }
     })
@@ -97,7 +113,15 @@ function useFirebaseAuth() {
 Context, provider at root of application (_app.js)
 Same data as UseFirebaseAuth (work together)
 */
-const userContext = createContext<Firebase.Auth>({ user: null, loading: true })
+const userContext = createContext<Firebase.Auth>({
+  user: {
+    connected: false,
+    uid: "",
+    username: "",
+    email: "",
+  },
+  loading: true
+})
 
 export interface AuthProviderProps {
 
@@ -114,6 +138,7 @@ export const useAuth = () => useContext(userContext)
 
 /**
  * Extract and format the error message from the error object
+ * Use with response from firebase auth
  */
 export function getErrorMessage(error: any) {
   let msg = error.message

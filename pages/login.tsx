@@ -32,10 +32,13 @@ import {
 } from 'firebase/auth'
 
 // utils
-import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../utils/Firebase'
+import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../src/utils/Firebase'
 
 // hooks
-import { useToast } from '../hooks/useToast'
+import { useToast } from '../src/hooks/useToast'
+
+// comm
+import API from '../src/comm/api'
 
 
 const theme = createTheme()
@@ -73,8 +76,21 @@ const PageLogin: FC<PageLoginProps> = (props) => {
           setErrorMessage(getErrorMessage(error))
         })
     } else {
+      // first assert for username unicity
+      const data = await API.getUserData({ username: username })
+      if (data) {
+        setErrorMessage(`Username ${username} is already taken.`)
+        return
+      }
       createUserWithEmailAndPassword(auth, email, password)
-        .then((response) => {
+        .then(async (response) => {
+          const user = {
+            uid: response.user.uid,
+            username: username,
+            email: email,
+          }
+          await API.createUser(user)
+
           reset()
           router.push("/")
         })
