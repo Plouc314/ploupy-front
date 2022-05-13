@@ -4,9 +4,6 @@ import { IGame } from "../../types"
 // socket io
 import { Socket } from "socket.io-client"
 
-// pixi
-import Player from "./player"
-
 class Comm {
 
     public sio: Socket

@@ -5,8 +5,8 @@ import { IGame } from '../../types'
 import { Container } from 'pixi.js'
 
 // pixi
-import Tile from './tile'
-import Player from './player'
+import Tile from './entity/tile'
+
 
 class Map implements IGame.Sprite {
 
@@ -28,7 +28,7 @@ class Map implements IGame.Sprite {
       this.tiles.push(col)
 
       for (let y = 0; y < this.dimension.y; y++) {
-        const tile = new Tile(x, y)
+        const tile = new Tile(this, { x, y })
         col.push(tile)
         container.addChild(tile.child())
       }
@@ -70,28 +70,11 @@ class Map implements IGame.Sprite {
     return this.tiles[coord.x][coord.y]
   }
 
-  public claimTile(player: Player, coord: IGame.Coordinate): boolean {
-
-    const tile = this.tile(coord)
-
-    if (!tile) return false
-    if (tile.owner === player) return false
-
-    if (tile.owner) {
-      tile.owner.score--
-      const idx = tile.owner.tiles.indexOf(tile)
-      tile.owner.tiles.splice(idx, 1)
-    }
-    tile.setOwner(player)
-    player.score++
-    player.tiles.push(tile)
-    return true
-  }
+  public update(dt: number) { }
 
   public child(): Container {
     return this.container
   }
-
 }
 
 export default Map

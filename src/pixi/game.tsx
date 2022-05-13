@@ -6,12 +6,12 @@ import { Container } from "pixi.js"
 
 // pixi
 import Pixi from "./pixi"
-import Color from "./color"
+import Color from "../utils/color"
 import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
-import Tile from "./tile"
+import Tile from "./entity/tile"
 import Comm from "./comm"
 
 
@@ -32,8 +32,6 @@ class Game {
     this.user = user
     this.keyboard = new Keyboard()
 
-    this.comm.setOnPlayerState((state) => this.onPlayerState(state))
-
     this.keyboard.listen(["a", "d", "w", "s", "p"])
 
     this.map = new Map(gameState.dim)
@@ -44,12 +42,9 @@ class Game {
       Color.fromRgb(100, 220, 100),
     ]
 
-    this.players = gameState.players.map((p, i) => {
-      const player: Player = new Player(p.username, colors[i], this.keyboard, this.map)
-      player.score = p.score
-      player.setPos(p.position)
-      return player
-    })
+    this.players = gameState.players.map((p, i) =>
+      new Player(p.username, colors[i], this.keyboard, this.map)
+    )
 
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
 
@@ -58,7 +53,9 @@ class Game {
     this.layout.position.y = 50
 
     this.layout.addChild(this.map.child())
-    this.players.forEach(p => this.layout.addChild(p.child()))
+    for (const player of this.players) {
+      this.layout.addChild(player.child())
+    }
 
     this.pixi.app.stage.addChild(this.layout)
     this.pixi.app.stage.addChild(this.ui.child())
@@ -70,30 +67,7 @@ class Game {
     if (!this.ownPlayer) return
     this.ownPlayer.update(dt)
 
-    const state: IGame.Client.PlayerState = {
-      position: this.map.coord(this.ownPlayer.pos(), true),
-    }
-
-    this.comm.sendPlayerState(state)
-
-    this.ui.update()
-  }
-
-
-  private onPlayerState(state: IGame.Server.PlayerState) {
-    const player = this.players.find(p => p.username === state.username)
-    if (!player) return
-
-    player.setPos(this.map.pos(state.position))
-    player.score = state.score
-
-    for (const coord of state.tiles) {
-      const tile = this.map.tile(coord) as Tile
-      tile.setOwner(player)
-      if (player.tiles.indexOf(tile) == -1) {
-        player.tiles.push(tile)
-      }
-    }
+    this.ui.update(dt)
   }
 
 }

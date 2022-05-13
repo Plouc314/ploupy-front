@@ -17,11 +17,6 @@ export namespace Firebase {
 }
 
 export namespace IGame {
-  export type RGB = {
-    r: number
-    g: number
-    b: number
-  }
 
   export interface Point2D {
     x: number
@@ -34,6 +29,7 @@ export namespace IGame {
   export type Direction = Point2D
 
   export interface Sprite {
+    update: (dt: number) => void
     child: () => Container
   }
 
@@ -71,4 +67,10 @@ export namespace IComm {
     username: string
     email: string
   }
+}
+
+export type RGB = {
+  r: number
+  g: number
+  b: number
 }

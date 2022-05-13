@@ -1,5 +1,5 @@
 // types
-import { IGame } from '../../types'
+import { RGB } from '../../types'
 
 class Color {
   private raw: number
@@ -8,18 +8,24 @@ class Color {
     this.raw = raw
   }
 
-  public static fromRgb(r: IGame.RGB | number, g?: number, b?: number): Color {
-    if (typeof r === "number" && typeof g === "number" && typeof b === "number") {
-      r = { r, g, b }
+  private static handleArgs(r: RGB | number, g?: number, b?: number): RGB {
+    if (typeof r === "number") {
+      if (typeof g === "number" && typeof b === "number") {
+        return { r, g, b }
+      } else {
+        return { r: r, g: r, b: r }
+      }
     }
-    return new Color(Color.toHex(r as IGame.RGB))
+    return r
   }
 
-  public withDiff(r: IGame.RGB | number, g?: number, b?: number): Color {
-    if (typeof r === "number" && typeof g === "number" && typeof b === "number") {
-      r = { r, g, b }
-    }
-    const diff = r as IGame.RGB
+  public static fromRgb(r: RGB | number, g?: number, b?: number): Color {
+    const c = this.handleArgs(r, g, b)
+    return new Color(Color.toHex(c))
+  }
+
+  public withDiff(r: RGB | number, g?: number, b?: number): Color {
+    const diff = Color.handleArgs(r, g, b)
     const rgb = this.rgb()
     const clamp = (v: number, min: number, max: number) => {
       return Math.max(Math.min(v, max), min)
@@ -31,7 +37,7 @@ class Color {
     )
   }
 
-  private static toRgb(raw: number): IGame.RGB {
+  private static toRgb(raw: number): RGB {
     return {
       r: (raw >> 16) & 255,
       g: (raw >> 8) & 255,
@@ -39,7 +45,7 @@ class Color {
     }
   }
 
-  private static toHex(rgb: IGame.RGB): number {
+  private static toHex(rgb: RGB): number {
     return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
   }
 
@@ -47,7 +53,7 @@ class Color {
     return this.raw
   }
 
-  public rgb(): IGame.RGB {
+  public rgb(): RGB {
     return Color.toRgb(this.raw)
   }
 
