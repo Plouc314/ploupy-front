@@ -33,41 +33,65 @@ export namespace IGame {
     child: () => Container
   }
 
-  export namespace Client {
-    export type PlayerState = {
-      position: Position
-    }
-  }
-
-  export namespace Server {
-    export type PlayerState = {
-      username: string
-      position: Position
-      score: number
-      tiles: Game.Coordinate[]
-    }
-
-    export type GameState = {
-      dim: Dimension
-      players: PlayerState[]
-    }
-  }
-
 }
 
-export namespace IComm {
-  export type Response<T = {}> = {
-    success: boolean
-    msg: string
-    data: T
-  }
+export namespace IModel {
 
-  export type UserData = {
+  export type User = {
     uid: string
     username: string
     email: string
   }
+
+  export type GameConfig = {
+    dim: IGame.Coordinate
+    initial_money: number
+    factory_price: number
+  }
+
+  export type Player = {
+    username: string
+    money: number
+    score: number
+    factories: Factory[]
+    probes: Probe[]
+  }
+
+  export type Factory = {
+    coord: IGame.Coordinate
+  }
+
+  export type Probe = {
+    pos: IGame.Position
+  }
+
+  export type Game = {
+    config: GameConfig
+    players: Player[]
+  }
+
+  export type ActionBuild = {
+    coord: IGame.Coordinate
+  }
 }
+
+export namespace IComm {
+
+  export type Response<T extends {} = {}> = T & {
+    success: boolean
+    msg: string
+  }
+
+  export type UserResponse = {
+    user: IModel.User
+  }
+
+  export type ActionBuildResponse = {
+    username: string
+    factory: IModel.Factory
+  }
+}
+
 
 export type RGB = {
   r: number

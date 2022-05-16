@@ -36,6 +36,14 @@ class Map implements IGame.Sprite {
     return container
   }
 
+  public setOnClick(onClick: (coord: IGame.Coordinate) => void) {
+    for (const col of this.tiles) {
+      for (const tile of col) {
+        tile.onClick = () => onClick(tile.getCoord())
+      }
+    }
+  }
+
   /**
    * Convert the given position to coordinate
    * if keepPrecision is specified, don't floor coordinate

@@ -1,5 +1,5 @@
 // types
-import { Firebase, IGame } from "../../types"
+import { Firebase, IGame, IModel } from "../../types"
 
 // pixi.js
 import { Container } from "pixi.js"
@@ -26,7 +26,7 @@ class Game {
   public ui: UI
   public layout: Container
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, gameState: IGame.Server.GameState) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, gameState: IModel.Game) {
     this.pixi = pixi
     this.comm = comm
     this.user = user
@@ -34,7 +34,7 @@ class Game {
 
     this.keyboard.listen(["a", "d", "w", "s", "p"])
 
-    this.map = new Map(gameState.dim)
+    this.map = new Map(gameState.config.dim)
 
     // setup game
     const colors = [
