@@ -17,7 +17,9 @@ class Comm {
     }
 
     public sendActionBuild(data: IModel.ActionBuild) {
-        this.sio.emit("action_build", data)
+        this.sio.emit("action_build", data, (response: IComm.Response) => {
+            console.log(response)
+        })
     }
 
     public setOnStartGame(cb: (data: IModel.Game) => void) {

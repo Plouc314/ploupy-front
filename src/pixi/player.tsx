@@ -37,6 +37,12 @@ class Player implements IGame.Sprite {
     this.container = new Container()
   }
 
+  public addFactory(factory: Factory) {
+    if (this.factories.includes(factory)) return
+    this.factories.push(factory)
+    this.container.addChild(factory.child())
+  }
+
   public update(dt: number) { }
 
   public child(): Container {

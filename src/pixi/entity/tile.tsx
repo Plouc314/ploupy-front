@@ -19,6 +19,8 @@ class Tile extends Entity {
 
   constructor(map: Map, coord: IGame.Coordinate) {
     super(map)
+    this.buildContainer()
+
     this.setCoord(coord)
     this.setColor(Color.fromRgb(Tile.DEFAULT_COLOR))
 

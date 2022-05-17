@@ -13,6 +13,7 @@ import Player from "./player"
 import UI from "./ui"
 import Tile from "./entity/tile"
 import Comm from "./comm"
+import Factory from "./entity/factory"
 
 
 class Game {
@@ -47,6 +48,19 @@ class Game {
     )
 
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
+
+    this.map.setOnClick((coord) => {
+      this.comm.sendActionBuild({
+        coord: coord
+      })
+    })
+
+    this.comm.setOnActionBuild((data) => {
+      const player = this.players.find(p => p.username === data.username)
+      if (!player) return
+      const factory = new Factory(player, data.factory.coord)
+      player.addFactory(factory)
+    })
 
     this.ui = new UI(this, this.pixi.app.view.width)
     this.layout = new Container()

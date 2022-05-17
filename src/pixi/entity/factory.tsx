@@ -18,6 +18,8 @@ class Factory extends Entity {
   constructor(player: Player, coord: IGame.Coordinate) {
     super(player.map)
     this.player = player
+    this.buildContainer()
+
     this.setCoord(coord)
   }
 

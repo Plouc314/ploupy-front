@@ -25,7 +25,6 @@ abstract class Entity implements IGame.Sprite {
     this.pos = { x: 0, y: 0 }
     this.color = new Color(0)
     this.container = new Container()
-    this.buildContainer()
   }
 
   protected buildContainer() { }

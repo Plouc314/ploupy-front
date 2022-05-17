@@ -53,11 +53,12 @@ class API {
   public static async getUserData(
     args: { uid?: string, username?: string }
   ): Promise<IModel.User | null> {
-    const response = await this.get<IModel.User>("user-data", args)
-
+    const response = await this.get<IComm.UserResponse>("user-data", args)
+    console.group("user-data")
+    console.log(response)
+    console.groupEnd()
     if (!response.success) return null
-    const { success, msg, ...data } = response
-    return data
+    return response.user
   }
 
   public static async createUser(
