@@ -1,5 +1,5 @@
 // types
-import { IGame } from '../../../types'
+import { IGame, IModel } from '../../../types'
 
 // pixi.js
 import { Graphics, Container } from 'pixi.js'
@@ -15,12 +15,16 @@ class Factory extends Entity {
 
   private player: Player
 
-  constructor(player: Player, coord: IGame.Coordinate) {
+  constructor(player: Player, model: IModel.Factory) {
     super(player.map)
     this.player = player
     this.buildContainer()
 
-    this.setCoord(coord)
+    this.setCoord(model.coord)
+  }
+
+  public setModel(model: IModel.FactoryState) {
+    this.setCoord(model.coord)
   }
 
   public size() {

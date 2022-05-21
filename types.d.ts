@@ -2,6 +2,9 @@ import React from 'react'
 
 export type FC<T> = React.FC<React.PropsWithChildren<T>>
 
+export type Loose<T, K extends keyof T> = Partial<T> & Pick<T, K>
+
+
 export namespace Firebase {
   export type User = {
     connected: boolean
@@ -47,6 +50,7 @@ export namespace IModel {
     dim: IGame.Coordinate
     initial_money: number
     factory_price: number
+    building_occupation_min: number
   }
 
   export type Player = {
@@ -57,17 +61,52 @@ export namespace IModel {
     probes: Probe[]
   }
 
+  export type PlayerState = {
+    username: string
+    money?: number
+    score?: number
+    factories: FactoryState[]
+    probes: ProbeState[]
+  }
+
   export type Factory = {
     coord: IGame.Coordinate
   }
+
+  export type FactoryState = Loose<Factory, "coord">
 
   export type Probe = {
     pos: IGame.Position
   }
 
-  export type Game = {
+  export type ProbeState = Loose<Probe, "pos">
+
+  export type Tile<K = string> = {
+    coord: IGame.Coordinate
+    owner: K | null
+    occupation: number
+  }
+
+  export type TileState<K = string> = Loose<Tile<K>, "coord">
+
+  export type Map<K = string> = {
+    tiles: Tile<K>[]
+  }
+
+  export type MapState<K = string> = {
+    tiles?: TileState<K>[]
+  }
+
+  export type Game<K = string> = {
     config: GameConfig
+    map: Map<K>
     players: Player[]
+  }
+
+  export type GameState<K = string> = {
+    config: GameConfig
+    map?: MapState<K>
+    players: PlayerState[]
   }
 
   export type ActionBuild = {

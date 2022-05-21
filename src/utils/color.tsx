@@ -24,6 +24,9 @@ class Color {
     return new Color(Color.toHex(c))
   }
 
+  /**
+   * Return a new Color with an added offset on the instance color
+   */
   public withDiff(r: RGB | number, g?: number, b?: number): Color {
     const diff = Color.handleArgs(r, g, b)
     const rgb = this.rgb()
@@ -35,6 +38,23 @@ class Color {
       clamp(rgb.g + diff.g, 0, 255),
       clamp(rgb.b + diff.b, 0, 255),
     )
+  }
+
+  /**
+   * Return a new Color from the mean of the given colors
+   */
+  public static fromMerged(...colors: Color[]): Color {
+    const merge = { r: 0, g: 0, b: 0 }
+    for (const color of colors) {
+      const rgb = color.rgb()
+      merge.r += rgb.r
+      merge.g += rgb.g
+      merge.b += rgb.b
+    }
+    merge.r = Math.round(merge.r / colors.length)
+    merge.g = Math.round(merge.g / colors.length)
+    merge.b = Math.round(merge.b / colors.length)
+    return Color.fromRgb(merge)
   }
 
   private static toRgb(raw: number): RGB {

@@ -1,11 +1,12 @@
 // types
-import { IGame } from '../../types'
+import { IGame, IModel } from '../../types'
 
 // pixi.js
 import { Container } from 'pixi.js'
 
 // pixi
 import Tile from './entity/tile'
+import Player from './player'
 
 
 class Map implements IGame.Sprite {
@@ -14,34 +15,48 @@ class Map implements IGame.Sprite {
   private tiles: Tile[][]
   private container: Container
 
-  constructor(dim: IGame.Dimension) {
+  constructor(dim: IGame.Dimension, model: IModel.Map<string>) {
     this.dimension = { ...dim }
     this.tiles = []
-    this.container = this.buildMap()
+    this.container = this.buildMap(model)
   }
 
-  private buildMap(): Container {
-    this.tiles = []
-    const container = new Container()
-    for (let x = 0; x < this.dimension.x; x++) {
-      const col: Tile[] = []
-      this.tiles.push(col)
+  private buildMap(model: IModel.Map<string>): Container {
 
-      for (let y = 0; y < this.dimension.y; y++) {
-        const tile = new Tile(this, { x, y })
-        col.push(tile)
-        container.addChild(tile.child())
-      }
+    // create empty 2d array
+    this.tiles = Array(this.dimension.x).fill(0).map(v => Array(this.dimension.y)) as Tile[][]
+
+    const container = new Container()
+
+    for (const tm of model.tiles) {
+      const tile = new Tile(this, { ...tm, owner: null })
+      this.tiles[tm.coord.x][tm.coord.y] = tile
+      container.addChild(tile.child())
     }
     return container
   }
 
-  public setOnClick(onClick: (coord: IGame.Coordinate) => void) {
-    for (const col of this.tiles) {
-      for (const tile of col) {
-        tile.onClick = () => onClick(tile.getCoord())
-      }
+  /**
+   * Must be called after the constructor in case some tiles have owners
+   */
+  public setModel(model: IModel.MapState<Player>) {
+    if (!model.tiles) return
+    for (const tm of model.tiles) {
+      const tile = this.tile(tm.coord)
+      if (!tile) continue
+
+      tile.setModel(tm)
     }
+  }
+
+  public setOnClick(onClick: (coord: IGame.Coordinate) => void) {
+    this.container.interactive = true
+    this.container.on("pointertap", (e) => {
+      const pos: IGame.Position = e.data.global
+      pos.y -= 50
+      const tile = this.tile(this.coord(pos)) as Tile
+      onClick(tile.getCoord())
+    })
   }
 
   /**

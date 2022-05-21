@@ -1,5 +1,5 @@
 // types
-import { IGame } from '../../../types'
+import { IGame, IModel } from '../../../types'
 
 // pixi.js
 import { Graphics, Container } from 'pixi.js'
@@ -15,16 +15,20 @@ class Probe extends Entity {
 
   private player: Player
 
-  constructor(player: Player, coord: IGame.Coordinate) {
+  constructor(player: Player, model: IModel.Probe) {
     super(player.map)
     this.player = player
     this.buildContainer()
 
-    this.setCoord(coord)
+    this.setCoord(model.pos)
   }
 
   public size() {
     return Probe.SIZE
+  }
+
+  public setModel(model: IModel.ProbeState) {
+    this.setCoord(model.pos)
   }
 
   protected buildContainer() {

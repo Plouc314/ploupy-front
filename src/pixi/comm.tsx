@@ -22,6 +22,10 @@ class Comm {
         })
     }
 
+    public setOnGameState(cb: (data: IModel.GameState) => void) {
+        this.sio.on("game_state", (data) => { cb(data) })
+    }
+
     public setOnStartGame(cb: (data: IModel.Game) => void) {
         this.sio.on("start_game", (data) => { cb(data) })
     }

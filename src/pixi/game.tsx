@@ -27,7 +27,7 @@ class Game {
   public ui: UI
   public layout: Container
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, gameState: IModel.Game) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IModel.Game) {
     this.pixi = pixi
     this.comm = comm
     this.user = user
@@ -35,19 +35,30 @@ class Game {
 
     this.keyboard.listen(["a", "d", "w", "s", "p"])
 
-    this.map = new Map(gameState.config.dim)
+    this.map = new Map(model.config.dim, model.map)
 
     // setup game
     const colors = [
-      Color.fromRgb(220, 100, 100),
-      Color.fromRgb(100, 220, 100),
+      Color.fromRgb(250, 100, 100),
+      Color.fromRgb(100, 100, 250),
     ]
 
-    this.players = gameState.players.map((p, i) =>
-      new Player(p.username, colors[i], this.keyboard, this.map)
+    this.players = model.players.map((pm, i) =>
+      new Player(pm, colors[i], this.keyboard, this.map)
     )
 
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
+
+    // format map model
+    const mapModel: IModel.Map<Player> = {
+      tiles: model.map.tiles.map(tm => ({
+        ...tm,
+        owner: this.players.find(p => p.username === tm.owner) ?? null
+      }))
+    }
+
+    this.map.setModel(mapModel)
+
 
     this.map.setOnClick((coord) => {
       this.comm.sendActionBuild({
@@ -58,8 +69,12 @@ class Game {
     this.comm.setOnActionBuild((data) => {
       const player = this.players.find(p => p.username === data.username)
       if (!player) return
-      const factory = new Factory(player, data.factory.coord)
+      const factory = new Factory(player, data.factory)
       player.addFactory(factory)
+    })
+
+    this.comm.setOnGameState((data) => {
+      this.setModel(data)
     })
 
     this.ui = new UI(this, this.pixi.app.view.width)
@@ -84,6 +99,22 @@ class Game {
     this.ui.update(dt)
   }
 
+  private setModel(model: IModel.GameState<string>) {
+    for (const pm of model.players) {
+      const player = this.players.find(p => p.username === pm.username)
+      if (!player) continue
+      player.setModel(pm)
+    }
+    if (model.map && model.map.tiles) {
+      const mm: IModel.MapState<Player> = {
+        tiles: model.map.tiles.map(tm => ({
+          ...tm,
+          owner: this.players.find(p => p.username === tm.owner) ?? null
+        }))
+      }
+      this.map.setModel(mm)
+    }
+  }
 }
 
 export default Game

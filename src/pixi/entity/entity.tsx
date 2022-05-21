@@ -38,22 +38,24 @@ abstract class Entity implements IGame.Sprite {
   }
 
   public getPos(): IGame.Position {
-    return this.pos
+    return { ...this.pos }
   }
 
+  /**unit: pixel */
   public setPos(pos: IGame.Position) {
-    this.pos = pos
+    this.pos = { ...pos }
     this.coord = this.map.coord(pos)
     this.container.position.x = this.pos.x
     this.container.position.y = this.pos.y
   }
 
   public getCoord(): IGame.Position {
-    return this.coord
+    return { ...this.coord }
   }
 
+  /**unit: coordinate */
   public setCoord(coord: IGame.Position) {
-    this.coord = coord
+    this.coord = { ...coord }
     this.pos = this.map.pos(coord)
     this.container.position.x = this.pos.x
     this.container.position.y = this.pos.y
