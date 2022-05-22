@@ -7,11 +7,12 @@ import { Graphics, Container } from 'pixi.js'
 // pixi
 import Player from '../player'
 import Entity from './entity'
+import Tile from './tile'
 
 
 class Factory extends Entity {
 
-  public static readonly SIZE = 50
+  public static readonly SIZE = 30
 
   private player: Player
 
@@ -35,7 +36,12 @@ class Factory extends Entity {
     this.container.removeChildren()
     const surf = new Graphics()
     surf.beginFill(this.player.color.withDiff(-40).hex())
-    surf.drawRect(5, 5, 40, 40)
+    surf.drawRect(
+      (Tile.SIZE - Factory.SIZE) / 2,
+      (Tile.SIZE - Factory.SIZE) / 2,
+      Factory.SIZE,
+      Factory.SIZE,
+    )
     this.container.addChild(surf)
   }
 }

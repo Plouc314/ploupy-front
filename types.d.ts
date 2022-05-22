@@ -51,6 +51,7 @@ export namespace IModel {
     initial_money: number
     factory_price: number
     building_occupation_min: number
+    max_occupation: int
   }
 
   export type Player = {

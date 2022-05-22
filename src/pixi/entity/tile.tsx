@@ -12,7 +12,7 @@ import Player from '../player';
 
 class Tile extends Entity {
 
-  public static readonly SIZE = 50
+  public static readonly SIZE = 40
   public static readonly DEFAULT_COLOR: Color = Color.fromRgb({ r: 150, g: 150, b: 150 })
 
   private hover: boolean
@@ -30,8 +30,6 @@ class Tile extends Entity {
     this.setColor(this.getOccupationColor())
 
     this.hover = false
-
-    this.setInteractions()
   }
 
   public size() {
@@ -48,6 +46,14 @@ class Tile extends Entity {
     this.setColor(this.getOccupationColor())
   }
 
+  /** Set the hover effect on the tile */
+  public setHover(hover: boolean) {
+    if (this.hover == hover) return
+    this.hover = hover
+    const diff = hover ? 30 : -30
+    this.setColor(this.color.withDiff(diff))
+  }
+
   protected buildContainer() {
     this.container.removeChildren()
     const surf = new Graphics()
@@ -61,25 +67,14 @@ class Tile extends Entity {
     if (!this.owner) {
       return Tile.DEFAULT_COLOR
     }
+    const d = this.map.config.max_occupation + 2 - this.occupation
+    const o = this.occupation > 0 ? this.occupation + 2 : 0
     return Color.fromMerged(
-      ...Array(10 - this.occupation).fill(Tile.DEFAULT_COLOR),
-      ...Array(this.occupation).fill(this.owner.color)
+      ...Array(d).fill(Tile.DEFAULT_COLOR),
+      ...Array(o).fill(this.owner.color)
     )
   }
 
-  private setInteractions() {
-    this.container.interactive = true
-    this.container.on("pointerover", () => {
-      if (this.hover) return
-      this.hover = true
-      this.setColor(this.color.withDiff(-30))
-    })
-    this.container.on("pointerout", () => {
-      if (!this.hover) return
-      this.hover = false
-      this.setColor(this.color.withDiff(30))
-    })
-  }
 }
 
 export default Tile

@@ -35,7 +35,7 @@ class Game {
 
     this.keyboard.listen(["a", "d", "w", "s", "p"])
 
-    this.map = new Map(model.config.dim, model.map)
+    this.map = new Map(model.config, model.map)
 
     // setup game
     const colors = [

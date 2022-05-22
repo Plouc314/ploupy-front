@@ -7,6 +7,7 @@ import { Graphics, Container } from 'pixi.js'
 // pixi
 import Player from '../player'
 import Entity from './entity'
+import Tile from './tile'
 
 
 class Probe extends Entity {
@@ -35,7 +36,12 @@ class Probe extends Entity {
     this.container.removeChildren()
     const surf = new Graphics()
     surf.beginFill(this.player.color.hex())
-    surf.drawRect(15, 15, 20, 20)
+    surf.drawRect(
+      (Tile.SIZE - Probe.SIZE) / 2,
+      (Tile.SIZE - Probe.SIZE) / 2,
+      Probe.SIZE,
+      Probe.SIZE,
+    )
     this.container.addChild(surf)
   }
 }

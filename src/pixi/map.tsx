@@ -2,23 +2,30 @@
 import { IGame, IModel } from '../../types'
 
 // pixi.js
-import { Container } from 'pixi.js'
+import { Container, InteractionEvent } from 'pixi.js'
 
 // pixi
 import Tile from './entity/tile'
 import Player from './player'
+import Pixi from './pixi'
 
 
 class Map implements IGame.Sprite {
 
+  public config: IModel.GameConfig
   public dimension: IGame.Dimension
   private tiles: Tile[][]
   private container: Container
 
-  constructor(dim: IGame.Dimension, model: IModel.Map<string>) {
-    this.dimension = { ...dim }
+  /** Tile that is currently hovered */
+  private currentTile: Tile | null
+
+  constructor(config: IModel.GameConfig, model: IModel.Map<string>) {
+    this.config = config
+    this.dimension = { ...config.dim }
     this.tiles = []
     this.container = this.buildMap(model)
+    this.currentTile = null
   }
 
   private buildMap(model: IModel.Map<string>): Container {
@@ -49,12 +56,37 @@ class Map implements IGame.Sprite {
     }
   }
 
+  /**
+   * Return the coordinates corresponding to the mouse position
+   */
+  private getMouseCoord(e: InteractionEvent): IGame.Coordinate {
+    const pos = e.data.global
+    return this.coord({ x: pos.x, y: pos.y - 50 })
+  }
+
   public setOnClick(onClick: (coord: IGame.Coordinate) => void) {
     this.container.interactive = true
+    // this.container.interactiveChildren = false
+
+    // hover
+    this.container.on("pointermove", (e) => {
+      const coord = this.getMouseCoord(e)
+      const tile = this.tile(coord)
+      if (this.currentTile === tile) return
+      if (this.currentTile) {
+        this.currentTile.setHover(false)
+      }
+      if (tile) {
+        tile.setHover(true)
+      }
+      this.currentTile = tile
+    })
+
+    // interactions
     this.container.on("pointertap", (e) => {
-      const pos: IGame.Position = e.data.global
-      pos.y -= 50
-      const tile = this.tile(this.coord(pos)) as Tile
+      const coord = this.getMouseCoord(e)
+      const tile = this.tile(coord)
+      if (!tile) return
       onClick(tile.getCoord())
     })
   }
