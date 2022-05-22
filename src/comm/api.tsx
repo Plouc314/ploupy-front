@@ -1,5 +1,5 @@
 // types
-import { IComm } from "../../types"
+import { IComm, IModel } from "../../types"
 
 // comm
 import { URL_API } from './config'
@@ -52,15 +52,17 @@ class API {
 
   public static async getUserData(
     args: { uid?: string, username?: string }
-  ): Promise<IComm.UserData | null> {
-    const response = await this.get<IComm.UserData>("user-data", args)
-
+  ): Promise<IModel.User | null> {
+    const response = await this.get<IComm.UserResponse>("user-data", args)
+    console.group("user-data")
+    console.log(response)
+    console.groupEnd()
     if (!response.success) return null
-    return response.data
+    return response.user
   }
 
   public static async createUser(
-    user: IComm.UserData
+    user: IModel.User
   ): Promise<IComm.Response> {
     return await this.post("create-user", user)
   }

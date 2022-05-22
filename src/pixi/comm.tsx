@@ -1,11 +1,8 @@
 // types
-import { IGame } from "../../types"
+import { IComm, IModel } from "../../types"
 
 // socket io
 import { Socket } from "socket.io-client"
-
-// pixi
-import Player from "./player"
 
 class Comm {
 
@@ -19,16 +16,22 @@ class Comm {
         this.sio.emit("join_queue")
     }
 
-    public sendPlayerState(state: IGame.Client.PlayerState) {
-        this.sio.emit("player_state", state)
+    public sendActionBuild(data: IModel.ActionBuild) {
+        this.sio.emit("action_build", data, (response: IComm.Response) => {
+            console.log(response)
+        })
     }
 
-    public setOnStartGame(cb: (state: IGame.Server.GameState) => void) {
-        this.sio.on("start_game", (state) => { cb(state) })
+    public setOnGameState(cb: (data: IModel.GameState) => void) {
+        this.sio.on("game_state", (data) => { cb(data) })
     }
 
-    public setOnPlayerState(cb: (state: IGame.Server.PlayerState) => void) {
-        this.sio.on("player_state", (state) => { cb(state) })
+    public setOnStartGame(cb: (data: IModel.Game) => void) {
+        this.sio.on("start_game", (data) => { cb(data) })
+    }
+
+    public setOnActionBuild(cb: (data: IComm.ActionBuildResponse) => void) {
+        this.sio.on("action_build", (data) => { cb(data) })
     }
 
 }

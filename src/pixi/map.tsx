@@ -1,39 +1,94 @@
 // types
-import { IGame } from '../../types'
+import { IGame, IModel } from '../../types'
 
 // pixi.js
-import { Container } from 'pixi.js'
+import { Container, InteractionEvent } from 'pixi.js'
 
 // pixi
-import Tile from './tile'
+import Tile from './entity/tile'
 import Player from './player'
+import Pixi from './pixi'
+
 
 class Map implements IGame.Sprite {
 
+  public config: IModel.GameConfig
   public dimension: IGame.Dimension
   private tiles: Tile[][]
   private container: Container
 
-  constructor(dim: IGame.Dimension) {
-    this.dimension = { ...dim }
+  /** Tile that is currently hovered */
+  private currentTile: Tile | null
+
+  constructor(config: IModel.GameConfig, model: IModel.Map<string>) {
+    this.config = config
+    this.dimension = { ...config.dim }
     this.tiles = []
-    this.container = this.buildMap()
+    this.container = this.buildMap(model)
+    this.currentTile = null
   }
 
-  private buildMap(): Container {
-    this.tiles = []
-    const container = new Container()
-    for (let x = 0; x < this.dimension.x; x++) {
-      const col: Tile[] = []
-      this.tiles.push(col)
+  private buildMap(model: IModel.Map<string>): Container {
 
-      for (let y = 0; y < this.dimension.y; y++) {
-        const tile = new Tile(x, y)
-        col.push(tile)
-        container.addChild(tile.child())
-      }
+    // create empty 2d array
+    this.tiles = Array(this.dimension.x).fill(0).map(v => Array(this.dimension.y)) as Tile[][]
+
+    const container = new Container()
+
+    for (const tm of model.tiles) {
+      const tile = new Tile(this, { ...tm, owner: null })
+      this.tiles[tm.coord.x][tm.coord.y] = tile
+      container.addChild(tile.child())
     }
     return container
+  }
+
+  /**
+   * Must be called after the constructor in case some tiles have owners
+   */
+  public setModel(model: IModel.MapState<Player>) {
+    if (!model.tiles) return
+    for (const tm of model.tiles) {
+      const tile = this.tile(tm.coord)
+      if (!tile) continue
+
+      tile.setModel(tm)
+    }
+  }
+
+  /**
+   * Return the coordinates corresponding to the mouse position
+   */
+  private getMouseCoord(e: InteractionEvent): IGame.Coordinate {
+    const pos = e.data.global
+    return this.coord({ x: pos.x, y: pos.y - 50 })
+  }
+
+  public setOnClick(onClick: (coord: IGame.Coordinate) => void) {
+    this.container.interactive = true
+    // this.container.interactiveChildren = false
+
+    // hover
+    this.container.on("pointermove", (e) => {
+      const coord = this.getMouseCoord(e)
+      const tile = this.tile(coord)
+      if (this.currentTile === tile) return
+      if (this.currentTile) {
+        this.currentTile.setHover(false)
+      }
+      if (tile) {
+        tile.setHover(true)
+      }
+      this.currentTile = tile
+    })
+
+    // interactions
+    this.container.on("pointertap", (e) => {
+      const coord = this.getMouseCoord(e)
+      const tile = this.tile(coord)
+      if (!tile) return
+      onClick(tile.getCoord())
+    })
   }
 
   /**
@@ -70,28 +125,11 @@ class Map implements IGame.Sprite {
     return this.tiles[coord.x][coord.y]
   }
 
-  public claimTile(player: Player, coord: IGame.Coordinate): boolean {
-
-    const tile = this.tile(coord)
-
-    if (!tile) return false
-    if (tile.owner === player) return false
-
-    if (tile.owner) {
-      tile.owner.score--
-      const idx = tile.owner.tiles.indexOf(tile)
-      tile.owner.tiles.splice(idx, 1)
-    }
-    tile.setOwner(player)
-    player.score++
-    player.tiles.push(tile)
-    return true
-  }
+  public update(dt: number) { }
 
   public child(): Container {
     return this.container
   }
-
 }
 
 export default Map

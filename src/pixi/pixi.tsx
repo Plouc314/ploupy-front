@@ -20,7 +20,7 @@ class Pixi {
       resolution: window.devicePixelRatio,
       autoDensity: true,
     })
-    this.app.ticker.maxFPS = 30
+    this.app.ticker.maxFPS = 60
 
     this.textures = new Textures()
   }

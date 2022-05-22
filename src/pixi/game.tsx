@@ -1,18 +1,19 @@
 // types
-import { Firebase, IGame } from "../../types"
+import { Firebase, IGame, IModel } from "../../types"
 
 // pixi.js
 import { Container } from "pixi.js"
 
 // pixi
 import Pixi from "./pixi"
-import Color from "./color"
+import Color from "../utils/color"
 import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
-import Tile from "./tile"
+import Tile from "./entity/tile"
 import Comm from "./comm"
+import Factory from "./entity/factory"
 
 
 class Game {
@@ -26,39 +27,64 @@ class Game {
   public ui: UI
   public layout: Container
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, gameState: IGame.Server.GameState) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IModel.Game) {
     this.pixi = pixi
     this.comm = comm
     this.user = user
     this.keyboard = new Keyboard()
 
-    this.comm.setOnPlayerState((state) => this.onPlayerState(state))
-
     this.keyboard.listen(["a", "d", "w", "s", "p"])
 
-    this.map = new Map(gameState.dim)
+    this.map = new Map(model.config, model.map)
 
     // setup game
     const colors = [
-      Color.fromRgb(220, 100, 100),
-      Color.fromRgb(100, 220, 100),
+      Color.fromRgb(250, 100, 100),
+      Color.fromRgb(100, 100, 250),
     ]
 
-    this.players = gameState.players.map((p, i) => {
-      const player: Player = new Player(p.username, colors[i], this.keyboard, this.map)
-      player.score = p.score
-      player.setPos(p.position)
-      return player
-    })
+    this.players = model.players.map((pm, i) =>
+      new Player(pm, colors[i], this.keyboard, this.map)
+    )
 
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
+
+    // format map model
+    const mapModel: IModel.Map<Player> = {
+      tiles: model.map.tiles.map(tm => ({
+        ...tm,
+        owner: this.players.find(p => p.username === tm.owner) ?? null
+      }))
+    }
+
+    this.map.setModel(mapModel)
+
+
+    this.map.setOnClick((coord) => {
+      this.comm.sendActionBuild({
+        coord: coord
+      })
+    })
+
+    this.comm.setOnActionBuild((data) => {
+      const player = this.players.find(p => p.username === data.username)
+      if (!player) return
+      const factory = new Factory(player, data.factory)
+      player.addFactory(factory)
+    })
+
+    this.comm.setOnGameState((data) => {
+      this.setModel(data)
+    })
 
     this.ui = new UI(this, this.pixi.app.view.width)
     this.layout = new Container()
     this.layout.position.y = 50
 
     this.layout.addChild(this.map.child())
-    this.players.forEach(p => this.layout.addChild(p.child()))
+    for (const player of this.players) {
+      this.layout.addChild(player.child())
+    }
 
     this.pixi.app.stage.addChild(this.layout)
     this.pixi.app.stage.addChild(this.ui.child())
@@ -70,32 +96,25 @@ class Game {
     if (!this.ownPlayer) return
     this.ownPlayer.update(dt)
 
-    const state: IGame.Client.PlayerState = {
-      position: this.map.coord(this.ownPlayer.pos(), true),
-    }
-
-    this.comm.sendPlayerState(state)
-
-    this.ui.update()
+    this.ui.update(dt)
   }
 
-
-  private onPlayerState(state: IGame.Server.PlayerState) {
-    const player = this.players.find(p => p.username === state.username)
-    if (!player) return
-
-    player.setPos(this.map.pos(state.position))
-    player.score = state.score
-
-    for (const coord of state.tiles) {
-      const tile = this.map.tile(coord) as Tile
-      tile.setOwner(player)
-      if (player.tiles.indexOf(tile) == -1) {
-        player.tiles.push(tile)
+  private setModel(model: IModel.GameState<string>) {
+    for (const pm of model.players) {
+      const player = this.players.find(p => p.username === pm.username)
+      if (!player) continue
+      player.setModel(pm)
+    }
+    if (model.map && model.map.tiles) {
+      const mm: IModel.MapState<Player> = {
+        tiles: model.map.tiles.map(tm => ({
+          ...tm,
+          owner: this.players.find(p => p.username === tm.owner) ?? null
+        }))
       }
+      this.map.setModel(mm)
     }
   }
-
 }
 
 export default Game
