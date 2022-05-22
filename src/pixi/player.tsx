@@ -13,8 +13,8 @@ import Probe from './entity/probe'
 
 class Player implements IGame.Sprite {
 
-  public keyboard: Keyboard
   public map: Map
+  public config: IModel.GameConfig
 
   public username: string
   public money: number
@@ -26,14 +26,14 @@ class Player implements IGame.Sprite {
 
   private container: Container
 
-  constructor(model: IModel.Player, color: Color, keyboard: Keyboard, map: Map) {
+  constructor(model: IModel.Player, color: Color, map: Map) {
     this.username = model.username
     this.money = model.money
     this.score = model.score
     this.color = color
 
-    this.keyboard = keyboard
     this.map = map
+    this.config = map.config
 
     this.factories = model.factories.map(m => new Factory(this, m))
     this.probes = model.probes.map(m => new Probe(this, m))
@@ -46,18 +46,12 @@ class Player implements IGame.Sprite {
     this.score = model.score ?? this.score
 
     for (const fm of model.factories) {
-      const factory = this.factories.find(f => {
-        const coord = f.getCoord()
-        return coord.x == fm.coord.x && coord.y == fm.coord.y
-      })
+      const factory = this.factories.find(f => f.getId() === fm.id)
       if (!factory) continue
       factory.setModel(fm)
     }
     for (const pm of model.probes) {
-      const probe = this.probes.find(f => {
-        const pos = f.getCoord()
-        return pos.x == pm.pos.x && pos.y == pm.pos.y
-      })
+      const probe = this.probes.find(p => p.getId() === pm.id)
       if (!probe) continue
       probe.setModel(pm)
     }
@@ -69,7 +63,17 @@ class Player implements IGame.Sprite {
     this.container.addChild(factory.child())
   }
 
-  public update(dt: number) { }
+  public addProbe(probe: Probe) {
+    if (this.probes.includes(probe)) return
+    this.probes.push(probe)
+    this.container.addChild(probe.child())
+  }
+
+  public update(dt: number) {
+    for (const probe of this.probes) {
+      probe.update(dt)
+    }
+  }
 
   public child(): Container {
     return this.container

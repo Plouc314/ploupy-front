@@ -14,7 +14,8 @@ class Map implements IGame.Sprite {
 
   public config: IModel.GameConfig
   public dimension: IGame.Dimension
-  private tiles: Tile[][]
+  private tiles2d: Tile[][]
+  private tilesMap: Record<IGame.ID, Tile>
   private container: Container
 
   /** Tile that is currently hovered */
@@ -23,7 +24,8 @@ class Map implements IGame.Sprite {
   constructor(config: IModel.GameConfig, model: IModel.Map<string>) {
     this.config = config
     this.dimension = { ...config.dim }
-    this.tiles = []
+    this.tiles2d = []
+    this.tilesMap = {}
     this.container = this.buildMap(model)
     this.currentTile = null
   }
@@ -31,13 +33,14 @@ class Map implements IGame.Sprite {
   private buildMap(model: IModel.Map<string>): Container {
 
     // create empty 2d array
-    this.tiles = Array(this.dimension.x).fill(0).map(v => Array(this.dimension.y)) as Tile[][]
+    this.tiles2d = Array(this.dimension.x).fill(0).map(v => Array(this.dimension.y)) as Tile[][]
 
     const container = new Container()
 
     for (const tm of model.tiles) {
       const tile = new Tile(this, { ...tm, owner: null })
-      this.tiles[tm.coord.x][tm.coord.y] = tile
+      this.tiles2d[tm.coord.x][tm.coord.y] = tile
+      this.tilesMap[tm.id] = tile
       container.addChild(tile.child())
     }
     return container
@@ -49,7 +52,7 @@ class Map implements IGame.Sprite {
   public setModel(model: IModel.MapState<Player>) {
     if (!model.tiles) return
     for (const tm of model.tiles) {
-      const tile = this.tile(tm.coord)
+      const tile = this.tile(tm.id)
       if (!tile) continue
 
       tile.setModel(tm)
@@ -113,16 +116,23 @@ class Map implements IGame.Sprite {
     }
   }
 
-  public tile(coord: IGame.Coordinate): Tile | null {
+  /**
+   * Return a tile given its id or coordinate
+   */
+  public tile(key: IGame.Coordinate | IGame.ID): Tile | null {
+    if (typeof key === "string") {
+      if (!(key in this.tilesMap)) throw new Error(`invalid tile id ${key}`)
+      return this.tilesMap[key] ?? null
+    }
     if (
-      coord.x < 0 ||
-      coord.x >= this.dimension.x ||
-      coord.y < 0 ||
-      coord.y >= this.dimension.y
+      key.x < 0 ||
+      key.x >= this.dimension.x ||
+      key.y < 0 ||
+      key.y >= this.dimension.y
     ) {
       return null
     }
-    return this.tiles[coord.x][coord.y]
+    return this.tiles2d[key.x][key.y]
   }
 
   public update(dt: number) { }

@@ -1,5 +1,5 @@
 // types
-import { IGame } from '../../../types'
+import { IGame, IModel } from '../../../types'
 
 // pixi.js
 import { Graphics, Container } from 'pixi.js'
@@ -13,14 +13,18 @@ import Map from '../map'
 abstract class Entity implements IGame.Sprite {
 
   protected container: Container
+  protected id: IGame.ID
   protected coord: IGame.Coordinate
   protected pos: IGame.Coordinate
   protected color: Color
 
   public map: Map
+  public config: IModel.GameConfig
 
-  constructor(map: Map) {
+  constructor(id: IGame.ID, map: Map) {
     this.map = map
+    this.config = map.config
+    this.id = id
     this.coord = { x: 0, y: 0 }
     this.pos = { x: 0, y: 0 }
     this.color = new Color(0)
@@ -31,10 +35,14 @@ abstract class Entity implements IGame.Sprite {
 
   public abstract size(): number
 
-  public update(dt: number) { }
+  public update(dt: number): void { }
 
   public child(): Container {
     return this.container
+  }
+
+  public getId(): IGame.ID {
+    return this.id
   }
 
   public getPos(): IGame.Position {

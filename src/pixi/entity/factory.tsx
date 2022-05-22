@@ -14,18 +14,25 @@ class Factory extends Entity {
 
   public static readonly SIZE = 30
 
+  public alive: boolean
   private player: Player
 
   constructor(player: Player, model: IModel.Factory) {
-    super(player.map)
+    super(model.id, player.map)
     this.player = player
     this.buildContainer()
 
+    this.alive = model.alive
     this.setCoord(model.coord)
   }
 
   public setModel(model: IModel.FactoryState) {
-    this.setCoord(model.coord)
+    if (model.coord) {
+      this.setCoord(model.coord)
+    }
+    if (model.alive !== undefined) {
+      this.alive = model.alive
+    }
   }
 
   public size() {

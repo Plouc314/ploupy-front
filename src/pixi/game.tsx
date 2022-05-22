@@ -2,7 +2,7 @@
 import { Firebase, IGame, IModel } from "../../types"
 
 // pixi.js
-import { Container } from "pixi.js"
+import { Container, settings } from "pixi.js"
 
 // pixi
 import Pixi from "./pixi"
@@ -11,9 +11,9 @@ import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
-import Tile from "./entity/tile"
 import Comm from "./comm"
 import Factory from "./entity/factory"
+import Probe from "./entity/probe"
 
 
 class Game {
@@ -27,6 +27,8 @@ class Game {
   public ui: UI
   public layout: Container
 
+  private currentTime: number
+
   constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IModel.Game) {
     this.pixi = pixi
     this.comm = comm
@@ -37,6 +39,8 @@ class Game {
 
     this.map = new Map(model.config, model.map)
 
+    this.currentTime = Date.now()
+
     // setup game
     const colors = [
       Color.fromRgb(250, 100, 100),
@@ -44,7 +48,7 @@ class Game {
     ]
 
     this.players = model.players.map((pm, i) =>
-      new Player(pm, colors[i], this.keyboard, this.map)
+      new Player(pm, colors[i], this.map)
     )
 
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
@@ -66,11 +70,18 @@ class Game {
       })
     })
 
-    this.comm.setOnActionBuild((data) => {
+    this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
       if (!player) return
       const factory = new Factory(player, data.factory)
       player.addFactory(factory)
+    })
+
+    this.comm.setOnBuildProbe((data) => {
+      const player = this.players.find(p => p.username === data.username)
+      if (!player) return
+      const probe = new Probe(player, data.probe)
+      player.addProbe(probe)
     })
 
     this.comm.setOnGameState((data) => {
@@ -89,12 +100,18 @@ class Game {
     this.pixi.app.stage.addChild(this.layout)
     this.pixi.app.stage.addChild(this.ui.child())
 
-    this.pixi.app.ticker.add((dt) => this.run(dt))
+    this.pixi.app.ticker.add((dt) => this.run())
   }
 
-  private run(dt: number) {
-    if (!this.ownPlayer) return
-    this.ownPlayer.update(dt)
+  private run() {
+
+    const now = Date.now()
+    const dt = (now - this.currentTime) / 1000
+    this.currentTime = now
+
+    for (const player of this.players) {
+      player.update(dt)
+    }
 
     this.ui.update(dt)
   }

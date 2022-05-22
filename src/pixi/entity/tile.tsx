@@ -21,7 +21,7 @@ class Tile extends Entity {
   public occupation: number
 
   constructor(map: Map, model: IModel.Tile<Player>) {
-    super(map)
+    super(model.id, map)
     this.buildContainer()
 
     this.owner = model.owner
@@ -42,7 +42,9 @@ class Tile extends Entity {
     }
     this.occupation = model.occupation ?? 0
 
-    this.setCoord(model.coord)
+    if (model.coord) {
+      this.setCoord(model.coord)
+    }
     this.setColor(this.getOccupationColor())
   }
 

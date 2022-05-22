@@ -14,14 +14,22 @@ class Probe extends Entity {
 
   public static readonly SIZE = 20
 
+  public alive: boolean
   private player: Player
+  private target: IGame.Coordinate
+
+  /** Movement vector (unit: pos) */
+  private vector: IGame.Position
 
   constructor(player: Player, model: IModel.Probe) {
-    super(player.map)
+    super(model.id, player.map)
     this.player = player
     this.buildContainer()
 
+    this.alive = model.alive
     this.setCoord(model.pos)
+    this.target = model.target
+    this.vector = this.computeMoveVector()
   }
 
   public size() {
@@ -29,7 +37,39 @@ class Probe extends Entity {
   }
 
   public setModel(model: IModel.ProbeState) {
-    this.setCoord(model.pos)
+    if (model.pos) {
+      this.setCoord(model.pos)
+    }
+    if (model.alive !== undefined) {
+      this.alive = model.alive
+    }
+    if (model.target) {
+      this.target = model.target
+    }
+    this.vector = this.computeMoveVector()
+  }
+
+  private computeMoveVector(): IGame.Position {
+    const vect = {
+      x: this.target.x - this.pos.x,
+      y: this.target.y - this.pos.y,
+    }
+    // normalize vector
+    const norm = Math.sqrt(vect.x * vect.x + vect.y + vect.y)
+    vect.x /= norm
+    vect.y /= norm
+
+    // multiply by speed (unit: coord)
+    vect.x *= this.config.probe_speed
+    vect.y *= this.config.probe_speed
+    return this.map.pos(vect)
+  }
+
+  public update(dt: number): void {
+    this.setPos({
+      x: this.pos.x + this.vector.x * dt,
+      y: this.pos.y + this.vector.y * dt,
+    })
   }
 
   protected buildContainer() {

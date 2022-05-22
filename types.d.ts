@@ -31,6 +31,8 @@ export namespace IGame {
   export type Position = Point2D
   export type Direction = Point2D
 
+  export type ID = string
+
   export interface Sprite {
     update: (dt: number) => void
     child: () => Container
@@ -51,7 +53,8 @@ export namespace IModel {
     initial_money: number
     factory_price: number
     building_occupation_min: number
-    max_occupation: int
+    max_occupation: number
+    probe_speed: number
   }
 
   export type Player = {
@@ -71,24 +74,30 @@ export namespace IModel {
   }
 
   export type Factory = {
+    id: string
     coord: IGame.Coordinate
+    alive: boolean
   }
 
-  export type FactoryState = Loose<Factory, "coord">
+  export type FactoryState = Loose<Factory, "id">
 
   export type Probe = {
+    id: string
     pos: IGame.Position
+    alive: boolean
+    target: IGame.Coordinate
   }
 
-  export type ProbeState = Loose<Probe, "pos">
+  export type ProbeState = Loose<Probe, "id">
 
   export type Tile<K = string> = {
+    id: string
     coord: IGame.Coordinate
     owner: K | null
     occupation: number
   }
 
-  export type TileState<K = string> = Loose<Tile<K>, "coord">
+  export type TileState<K = string> = Loose<Tile<K>, "id">
 
   export type Map<K = string> = {
     tiles: Tile<K>[]
@@ -110,7 +119,7 @@ export namespace IModel {
     players: PlayerState[]
   }
 
-  export type ActionBuild = {
+  export type ActionBuildFactory = {
     coord: IGame.Coordinate
   }
 }
@@ -126,9 +135,14 @@ export namespace IComm {
     user: IModel.User
   }
 
-  export type ActionBuildResponse = {
+  export type BuildFactoryResponse = {
     username: string
     factory: IModel.Factory
+  }
+
+  export type BuildProbeResponse = {
+    username: string
+    probe: IModel.Probe
   }
 }
 
