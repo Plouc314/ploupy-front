@@ -12,10 +12,11 @@ import Tile from './tile'
 
 class Probe extends Entity {
 
-  public static readonly SIZE = 20
+  public static readonly SIZE = 10
 
   public alive: boolean
   private player: Player
+  /** target (unit: coord) */
   private target: IGame.Coordinate
 
   /** Movement vector (unit: pos) */
@@ -37,6 +38,7 @@ class Probe extends Entity {
   }
 
   public setModel(model: IModel.ProbeState) {
+
     if (model.pos) {
       this.setCoord(model.pos)
     }
@@ -51,11 +53,17 @@ class Probe extends Entity {
 
   private computeMoveVector(): IGame.Position {
     const vect = {
-      x: this.target.x - this.pos.x,
-      y: this.target.y - this.pos.y,
+      x: this.target.x - this.coord.x,
+      y: this.target.y - this.coord.y,
     }
+
     // normalize vector
-    const norm = Math.sqrt(vect.x * vect.x + vect.y + vect.y)
+    const norm = Math.sqrt(vect.x * vect.x + vect.y * vect.y)
+
+    if (norm == 0) {
+      return { x: 0, y: 0 }
+    }
+
     vect.x /= norm
     vect.y /= norm
 

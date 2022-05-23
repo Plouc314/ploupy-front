@@ -52,6 +52,7 @@ export namespace IModel {
     dim: IGame.Coordinate
     initial_money: number
     factory_price: number
+    factory_max_probe: number
     building_occupation_min: number
     max_occupation: number
     probe_speed: number
