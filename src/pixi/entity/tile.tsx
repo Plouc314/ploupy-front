@@ -13,11 +13,11 @@ import Player from '../player';
 class Tile extends Entity {
 
   public static readonly SIZE = 40
-  public static readonly DEFAULT_COLOR: Color = Color.fromRgb({ r: 150, g: 150, b: 150 })
+  public static readonly DEFAULT_COLOR: Color = Color.fromRgb({ r: 50, g: 50, b: 50 })
 
   private hover: boolean
 
-  public owner: Player | null
+  public owner: Player | undefined
   public occupation: number
 
   constructor(map: Map, model: IModel.Tile<Player>) {
@@ -37,7 +37,7 @@ class Tile extends Entity {
   }
 
   public setModel(model: IModel.TileState<Player>) {
-    if (model.owner !== undefined) {
+    if (model.owner !== null) {
       this.owner = model.owner
     }
     this.occupation = model.occupation ?? 0

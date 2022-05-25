@@ -13,6 +13,7 @@ import Tile from './tile'
 class Probe extends Entity {
 
   public static readonly SIZE = 10
+  public static readonly LINE_WIDTH = 3
 
   public alive: boolean
   private player: Player
@@ -42,7 +43,7 @@ class Probe extends Entity {
     if (model.pos) {
       this.setCoord(model.pos)
     }
-    if (model.alive !== undefined) {
+    if (model.alive !== null) {
       this.alive = model.alive
     }
     if (model.target) {
@@ -84,6 +85,7 @@ class Probe extends Entity {
     this.container.removeChildren()
     const surf = new Graphics()
     surf.beginFill(this.player.color.hex())
+    surf.lineStyle(Probe.LINE_WIDTH, 0xFF0000);
     surf.drawRect(
       (Tile.SIZE - Probe.SIZE) / 2,
       (Tile.SIZE - Probe.SIZE) / 2,

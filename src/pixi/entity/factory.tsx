@@ -30,7 +30,7 @@ class Factory extends Entity {
     if (model.coord) {
       this.setCoord(model.coord)
     }
-    if (model.alive !== undefined) {
+    if (model.alive !== null) {
       this.alive = model.alive
     }
   }

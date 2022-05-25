@@ -68,8 +68,8 @@ export namespace IModel {
 
   export type PlayerState = {
     username: string
-    money?: number
-    score?: number
+    money: number | null
+    score: number | null
     factories: FactoryState[]
     probes: ProbeState[]
   }
@@ -80,7 +80,11 @@ export namespace IModel {
     alive: boolean
   }
 
-  export type FactoryState = Loose<Factory, "id">
+  export type FactoryState = {
+    id: string
+    coord: IGame.Coordinate | null
+    alive: boolean | null
+  }
 
   export type Probe = {
     id: string
@@ -89,23 +93,34 @@ export namespace IModel {
     target: IGame.Coordinate
   }
 
-  export type ProbeState = Loose<Probe, "id">
+  export type ProbeState = {
+    id: string
+    pos: IGame.Position | null
+    alive: boolean | null
+    target: IGame.Coordinate | null
+  }
 
   export type Tile<K = string> = {
     id: string
     coord: IGame.Coordinate
-    owner: K | null
+    /** No owner is defined as an empty string "" */
+    owner: K | undefined
     occupation: number
   }
 
-  export type TileState<K = string> = Loose<Tile<K>, "id">
+  export type TileState<K = string> = {
+    id: string
+    coord: IGame.Coordinate | null
+    owner: K | undefined | null
+    occupation: number | null
+  }
 
   export type Map<K = string> = {
     tiles: Tile<K>[]
   }
 
   export type MapState<K = string> = {
-    tiles?: TileState<K>[]
+    tiles: TileState<K>[] | null
   }
 
   export type Game<K = string> = {
@@ -116,7 +131,7 @@ export namespace IModel {
 
   export type GameState<K = string> = {
     config: GameConfig
-    map?: MapState<K>
+    map: MapState<K> | null
     players: PlayerState[]
   }
 

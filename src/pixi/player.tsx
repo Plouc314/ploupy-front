@@ -45,16 +45,31 @@ class Player implements IGame.Sprite {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
 
+    // update factories
     for (const fm of model.factories) {
       const factory = this.factories.find(f => f.getId() === fm.id)
       if (!factory) continue
       factory.setModel(fm)
     }
+    // remove dead factories
+    this.factories
+      .filter(f => !f.alive)
+      .forEach(f => this.container.removeChild(f.child()))
+
+    this.factories = this.factories.filter(f => f.alive)
+
+    // update probes
     for (const pm of model.probes) {
       const probe = this.probes.find(p => p.getId() === pm.id)
       if (!probe) continue
       probe.setModel(pm)
     }
+    // remove dead probes
+    this.probes
+      .filter(p => !p.alive)
+      .forEach(p => this.container.removeChild(p.child()))
+
+    this.probes = this.probes.filter(p => p.alive)
   }
 
   public addFactory(factory: Factory) {

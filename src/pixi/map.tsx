@@ -38,7 +38,7 @@ class Map implements IGame.Sprite {
     const container = new Container()
 
     for (const tm of model.tiles) {
-      const tile = new Tile(this, { ...tm, owner: null })
+      const tile = new Tile(this, { ...tm, owner: undefined })
       this.tiles2d[tm.coord.x][tm.coord.y] = tile
       this.tilesMap[tm.id] = tile
       container.addChild(tile.child())
