@@ -16,8 +16,14 @@ class Comm {
     this.sio.emit("join_queue")
   }
 
-  public sendActionBuild(data: IModel.ActionBuildFactory) {
+  public sendActionBuildFactory(data: IModel.ActionBuildFactory) {
     this.sio.emit("action_build_factory", data, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
+  public sendActionMoveProbes(data: IModel.ActionMoveProbes) {
+    this.sio.emit("action_move_probes", data, (response: IComm.Response) => {
       console.log(response)
     })
   }

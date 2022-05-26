@@ -2,12 +2,11 @@
 import { IGame, IModel } from '../../../types'
 
 // pixi.js
-import { Graphics, Container } from 'pixi.js'
+import { Container } from 'pixi.js'
 
 // pixi
-import Player from '../player'
 import Color from '../../utils/color'
-import Map from '../map'
+import Context from '../context'
 
 
 abstract class Entity implements IGame.Sprite {
@@ -18,12 +17,10 @@ abstract class Entity implements IGame.Sprite {
   protected pos: IGame.Coordinate
   protected color: Color
 
-  public map: Map
-  public config: IModel.GameConfig
+  public context: Context
 
-  constructor(id: IGame.ID, map: Map) {
-    this.map = map
-    this.config = map.config
+  constructor(id: IGame.ID, context: Context) {
+    this.context = context
     this.id = id
     this.coord = { x: 0, y: 0 }
     this.pos = { x: 0, y: 0 }
@@ -32,8 +29,6 @@ abstract class Entity implements IGame.Sprite {
   }
 
   protected buildContainer() { }
-
-  public abstract size(): number
 
   public update(dt: number): void { }
 
@@ -52,7 +47,7 @@ abstract class Entity implements IGame.Sprite {
   /**unit: pixel */
   public setPos(pos: IGame.Position) {
     this.pos = { ...pos }
-    this.coord = this.map.coord(pos)
+    this.coord = this.context.coord(pos)
     this.container.position.x = this.pos.x
     this.container.position.y = this.pos.y
   }
@@ -64,7 +59,7 @@ abstract class Entity implements IGame.Sprite {
   /**unit: coordinate */
   public setCoord(coord: IGame.Position) {
     this.coord = { ...coord }
-    this.pos = this.map.pos(coord)
+    this.pos = this.context.pos(coord)
     this.container.position.x = this.pos.x
     this.container.position.y = this.pos.y
   }

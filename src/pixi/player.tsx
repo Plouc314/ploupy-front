@@ -2,19 +2,19 @@
 import { IGame, IModel } from '../../types'
 
 // pixi.js
-import { Graphics, Container } from 'pixi.js'
+import { Container } from 'pixi.js'
 
 // pixi
-import Keyboard from './keyboard'
 import Color from '../utils/color'
 import Map from './map'
 import Factory from './entity/factory'
 import Probe from './entity/probe'
+import Context from './context'
 
 class Player implements IGame.Sprite {
 
   public map: Map
-  public config: IModel.GameConfig
+  public context: Context
 
   public username: string
   public money: number
@@ -22,7 +22,7 @@ class Player implements IGame.Sprite {
   public color: Color
 
   private factories: Factory[]
-  private probes: Probe[]
+  public probes: Probe[]
 
   private container: Container
 
@@ -33,7 +33,7 @@ class Player implements IGame.Sprite {
     this.color = color
 
     this.map = map
-    this.config = map.config
+    this.context = map.context
 
     this.factories = model.factories.map(m => new Factory(this, m))
     this.probes = model.probes.map(m => new Probe(this, m))

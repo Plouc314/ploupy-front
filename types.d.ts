@@ -58,6 +58,17 @@ export namespace IModel {
     probe_speed: number
   }
 
+  export type ContextSizes = {
+    /** Unit: pixel */
+    dim: IGame.Dimension
+    /** Unit: pixel */
+    tile: number
+    /** Unit: pixel */
+    factory: number
+    /** Unit: pixel */
+    probe: number
+  }
+
   export type Player = {
     username: string
     money: number
@@ -137,6 +148,11 @@ export namespace IModel {
 
   export type ActionBuildFactory = {
     coord: IGame.Coordinate
+  }
+
+  export type ActionMoveProbes = {
+    ids: string[]
+    targets: IGame.Coordinate[]
   }
 }
 

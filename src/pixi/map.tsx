@@ -2,32 +2,28 @@
 import { IGame, IModel } from '../../types'
 
 // pixi.js
-import { Container, InteractionEvent } from 'pixi.js'
+import { Container } from 'pixi.js'
 
 // pixi
 import Tile from './entity/tile'
 import Player from './player'
-import Pixi from './pixi'
+import Context from './context'
 
 
 class Map implements IGame.Sprite {
 
-  public config: IModel.GameConfig
+  public context: Context
   public dimension: IGame.Dimension
   private tiles2d: Tile[][]
   private tilesMap: Record<IGame.ID, Tile>
   private container: Container
 
-  /** Tile that is currently hovered */
-  private currentTile: Tile | null
-
-  constructor(config: IModel.GameConfig, model: IModel.Map<string>) {
-    this.config = config
-    this.dimension = { ...config.dim }
+  constructor(context: Context, model: IModel.Map<string>) {
+    this.context = context
+    this.dimension = { ...context.config.dim }
     this.tiles2d = []
     this.tilesMap = {}
     this.container = this.buildMap(model)
-    this.currentTile = null
   }
 
   private buildMap(model: IModel.Map<string>): Container {
@@ -38,7 +34,7 @@ class Map implements IGame.Sprite {
     const container = new Container()
 
     for (const tm of model.tiles) {
-      const tile = new Tile(this, { ...tm, owner: undefined })
+      const tile = new Tile(this.context, { ...tm, owner: undefined })
       this.tiles2d[tm.coord.x][tm.coord.y] = tile
       this.tilesMap[tm.id] = tile
       container.addChild(tile.child())
@@ -56,63 +52,6 @@ class Map implements IGame.Sprite {
       if (!tile) continue
 
       tile.setModel(tm)
-    }
-  }
-
-  /**
-   * Return the coordinates corresponding to the mouse position
-   */
-  private getMouseCoord(e: InteractionEvent): IGame.Coordinate {
-    const pos = e.data.global
-    return this.coord({ x: pos.x, y: pos.y - 50 })
-  }
-
-  public setOnClick(onClick: (coord: IGame.Coordinate) => void) {
-    this.container.interactive = true
-    // this.container.interactiveChildren = false
-
-    // hover
-    this.container.on("pointermove", (e) => {
-      const coord = this.getMouseCoord(e)
-      const tile = this.tile(coord)
-      if (this.currentTile === tile) return
-      if (this.currentTile) {
-        this.currentTile.setHover(false)
-      }
-      if (tile) {
-        tile.setHover(true)
-      }
-      this.currentTile = tile
-    })
-
-    // interactions
-    this.container.on("pointertap", (e) => {
-      const coord = this.getMouseCoord(e)
-      const tile = this.tile(coord)
-      if (!tile) return
-      onClick(tile.getCoord())
-    })
-  }
-
-  /**
-   * Convert the given position to coordinate
-   * if keepPrecision is specified, don't floor coordinate
-   */
-  public coord(pos: IGame.Position, keepPrecision?: boolean): IGame.Coordinate {
-    const floor = keepPrecision ? (x: number) => x : Math.floor
-    return {
-      x: floor(pos.x / Tile.SIZE),
-      y: floor(pos.y / Tile.SIZE),
-    }
-  }
-
-  /**
-   * Convert the given coordinate to position
-   */
-  public pos(coord: IGame.Coordinate): IGame.Position {
-    return {
-      x: coord.x * Tile.SIZE,
-      y: coord.y * Tile.SIZE,
     }
   }
 

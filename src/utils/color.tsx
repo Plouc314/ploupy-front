@@ -8,6 +8,10 @@ class Color {
     this.raw = raw
   }
 
+  private static clamp(v: number, min: number, max: number) {
+    return Math.max(Math.min(v, max), min)
+  }
+
   private static handleArgs(r: RGB | number, g?: number, b?: number): RGB {
     if (typeof r === "number") {
       if (typeof g === "number" && typeof b === "number") {
@@ -24,19 +28,27 @@ class Color {
     return new Color(Color.toHex(c))
   }
 
+  public withSharpen(i: number): Color {
+    const { r, g, b } = this.rgb()
+    const cs = [r, g, b]
+    const idx = cs.indexOf(Math.max.apply(Math, cs))
+    return Color.fromRgb(
+      Color.clamp(idx == 0 ? r + i : r - i, 0, 255),
+      Color.clamp(idx == 1 ? g + i : g - i, 0, 255),
+      Color.clamp(idx == 2 ? b + i : b - i, 0, 255),
+    )
+  }
+
   /**
    * Return a new Color with an added offset on the instance color
    */
   public withDiff(r: RGB | number, g?: number, b?: number): Color {
     const diff = Color.handleArgs(r, g, b)
     const rgb = this.rgb()
-    const clamp = (v: number, min: number, max: number) => {
-      return Math.max(Math.min(v, max), min)
-    }
     return Color.fromRgb(
-      clamp(rgb.r + diff.r, 0, 255),
-      clamp(rgb.g + diff.g, 0, 255),
-      clamp(rgb.b + diff.b, 0, 255),
+      Color.clamp(rgb.r + diff.r, 0, 255),
+      Color.clamp(rgb.g + diff.g, 0, 255),
+      Color.clamp(rgb.b + diff.b, 0, 255),
     )
   }
 

@@ -8,15 +8,26 @@ import { Graphics, Container } from 'pixi.js'
 import Player from '../player'
 import Entity from './entity'
 import Tile from './tile'
+import Color from '../../utils/color'
 
+export enum ProbeState {
+  FARMING = "FARMING",
+  SELECTED = "SELECTED",
+}
 
 class Probe extends Entity {
 
-  public static readonly SIZE = 10
-  public static readonly LINE_WIDTH = 3
+  public static readonly SIZE = 0.25
+  public static readonly LINE_WIDTH = 0.04
+
+  public static readonly FARM_COLOR = Color.fromRgb(255, 255, 255)
+  public static readonly SELECTED_COLOR = Color.fromRgb(150, 255, 150)
 
   public alive: boolean
   private player: Player
+  private state: ProbeState
+  private outlineColor: Color
+
   /** target (unit: coord) */
   private target: IGame.Coordinate
 
@@ -24,24 +35,26 @@ class Probe extends Entity {
   private vector: IGame.Position
 
   constructor(player: Player, model: IModel.Probe) {
-    super(model.id, player.map)
+    super(model.id, player.context)
     this.player = player
+    this.alive = model.alive
+    this.state = ProbeState.FARMING
+    this.outlineColor = Probe.FARM_COLOR
+
     this.buildContainer()
 
-    this.alive = model.alive
-    this.setCoord(model.pos)
+    // set the position - update the unit (coordinate -> pixel)
+    this.setPos(this.context.pos(model.pos))
+
     this.target = model.target
     this.vector = this.computeMoveVector()
-  }
-
-  public size() {
-    return Probe.SIZE
   }
 
   public setModel(model: IModel.ProbeState) {
 
     if (model.pos) {
-      this.setCoord(model.pos)
+      // set the position - update the unit (coordinate -> pixel)
+      this.setPos(this.context.pos(model.pos))
     }
     if (model.alive !== null) {
       this.alive = model.alive
@@ -52,10 +65,23 @@ class Probe extends Entity {
     this.vector = this.computeMoveVector()
   }
 
+  public setState(state: ProbeState) {
+    this.state = state
+    if (this.state == ProbeState.FARMING) {
+      this.outlineColor = Probe.FARM_COLOR
+    } else if (this.state == ProbeState.SELECTED) {
+      this.outlineColor = Probe.SELECTED_COLOR
+    }
+    this.buildContainer()
+  }
+
   private computeMoveVector(): IGame.Position {
+    // convert target to position
+    const target = this.context.pos(this.target)
+
     const vect = {
-      x: this.target.x - this.coord.x,
-      y: this.target.y - this.coord.y,
+      x: target.x - this.pos.x,
+      y: target.y - this.pos.y,
     }
 
     // normalize vector
@@ -69,9 +95,9 @@ class Probe extends Entity {
     vect.y /= norm
 
     // multiply by speed (unit: coord)
-    vect.x *= this.config.probe_speed
-    vect.y *= this.config.probe_speed
-    return this.map.pos(vect)
+    vect.x *= this.context.config.probe_speed
+    vect.y *= this.context.config.probe_speed
+    return this.context.pos(vect)
   }
 
   public update(dt: number): void {
@@ -84,14 +110,26 @@ class Probe extends Entity {
   protected buildContainer() {
     this.container.removeChildren()
     const surf = new Graphics()
-    surf.beginFill(this.player.color.hex())
-    surf.lineStyle(Probe.LINE_WIDTH, 0xFF0000);
+    surf.beginFill(this.player.color.withSharpen(50).hex())
+
+    const sizes = this.context.sizes()
+    const margin = (sizes.tile - sizes.probe) / 2
+
     surf.drawRect(
-      (Tile.SIZE - Probe.SIZE) / 2,
-      (Tile.SIZE - Probe.SIZE) / 2,
-      Probe.SIZE,
-      Probe.SIZE,
+      margin,
+      margin,
+      sizes.probe,
+      sizes.probe,
     )
+    surf.lineStyle(
+      this.context.unit * Probe.LINE_WIDTH, this.outlineColor.hex()
+    )
+      .moveTo(margin, margin)
+      .lineTo(margin + sizes.probe, margin)
+      .lineTo(margin + sizes.probe, margin + sizes.probe)
+      .lineTo(margin, margin + sizes.probe)
+      .lineTo(margin, margin)
+
     this.container.addChild(surf)
   }
 }

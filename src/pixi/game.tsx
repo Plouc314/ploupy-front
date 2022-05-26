@@ -14,16 +14,21 @@ import UI from "./ui"
 import Comm from "./comm"
 import Factory from "./entity/factory"
 import Probe from "./entity/probe"
+import Interactions from "./interactions"
+import Context from "./context"
+
 
 
 class Game {
   public pixi: Pixi
   public comm: Comm
   public user: Firebase.User
+  public context: Context
   public keyboard: Keyboard
   public players: Player[] = []
   public ownPlayer: Player
   public map: Map
+  public interactions: Interactions
   public ui: UI
   public layout: Container
 
@@ -34,10 +39,8 @@ class Game {
     this.comm = comm
     this.user = user
     this.keyboard = new Keyboard()
-
-    this.keyboard.listen(["a", "d", "w", "s", "p"])
-
-    this.map = new Map(model.config, model.map)
+    this.context = new Context(pixi, model.config)
+    this.map = new Map(this.context, model.map)
 
     this.currentTime = Date.now()
 
@@ -57,18 +60,11 @@ class Game {
     const mapModel: IModel.Map<Player> = {
       tiles: model.map.tiles.map(tm => ({
         ...tm,
-        owner: this.players.find(p => p.username === tm.owner) ?? null
+        owner: this.players.find(p => p.username === tm.owner) ?? undefined
       }))
     }
 
     this.map.setModel(mapModel)
-
-
-    this.map.setOnClick((coord) => {
-      this.comm.sendActionBuild({
-        coord: coord
-      })
-    })
 
     this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
@@ -97,6 +93,22 @@ class Game {
       this.layout.addChild(player.child())
     }
 
+    this.interactions = new Interactions(this.map, this.keyboard, this.ownPlayer)
+
+    this.interactions.setLayout(this.layout)
+
+    this.interactions.onBuildFactory = (coord) => {
+      this.comm.sendActionBuildFactory({
+        coord: coord
+      })
+    }
+    this.interactions.onMoveProbes = (probes, target) => {
+      this.comm.sendActionMoveProbes({
+        ids: probes.map(p => p.getId()),
+        targets: probes.map(p => target),
+      })
+    }
+
     this.pixi.app.stage.addChild(this.layout)
     this.pixi.app.stage.addChild(this.ui.child())
 
@@ -115,6 +127,7 @@ class Game {
 
     this.ui.update(dt)
   }
+
 
   private setModel(model: IModel.GameState<string>) {
     for (const pm of model.players) {

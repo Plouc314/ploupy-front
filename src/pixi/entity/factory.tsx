@@ -12,13 +12,13 @@ import Tile from './tile'
 
 class Factory extends Entity {
 
-  public static readonly SIZE = 30
+  public static readonly SIZE = 0.75
 
   public alive: boolean
   private player: Player
 
   constructor(player: Player, model: IModel.Factory) {
-    super(model.id, player.map)
+    super(model.id, player.context)
     this.player = player
     this.buildContainer()
 
@@ -35,19 +35,19 @@ class Factory extends Entity {
     }
   }
 
-  public size() {
-    return Factory.SIZE
-  }
-
   protected buildContainer() {
     this.container.removeChildren()
     const surf = new Graphics()
     surf.beginFill(this.player.color.withDiff(-40).hex())
+
+    const sizes = this.context.sizes()
+    const margin = (sizes.tile - sizes.factory) / 2
+
     surf.drawRect(
-      (Tile.SIZE - Factory.SIZE) / 2,
-      (Tile.SIZE - Factory.SIZE) / 2,
-      Factory.SIZE,
-      Factory.SIZE,
+      margin,
+      margin,
+      sizes.factory,
+      sizes.factory,
     )
     this.container.addChild(surf)
   }
