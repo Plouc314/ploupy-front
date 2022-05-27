@@ -56,6 +56,9 @@ export namespace IModel {
     building_occupation_min: number
     max_occupation: number
     probe_speed: number
+    probe_price: number
+    income_rate: number
+    deprecate_rate: number
   }
 
   export type ContextSizes = {
@@ -154,6 +157,10 @@ export namespace IModel {
     ids: string[]
     targets: IGame.Coordinate[]
   }
+
+  export type ActionExplodeProbes = {
+    ids: string[]
+  }
 }
 
 export namespace IComm {
@@ -169,11 +176,13 @@ export namespace IComm {
 
   export type BuildFactoryResponse = {
     username: string
+    money: number
     factory: IModel.Factory
   }
 
   export type BuildProbeResponse = {
     username: string
+    money: number
     probe: IModel.Probe
   }
 }

@@ -60,6 +60,17 @@ class Context {
     }
   }
 
+  /**
+   * Return if the position is in the context dimension
+   */
+  public clampToDim(pos: IGame.Position): IGame.Position {
+    const dim = this.pos(this.config.dim)
+    return {
+      x: Math.max(Math.min(pos.x, dim.x), 0),
+      y: Math.max(Math.min(pos.y, dim.y), 0),
+    }
+  }
+
   public sizes(): IModel.ContextSizes {
     return {
       dim: this.pos(this.config.dim),

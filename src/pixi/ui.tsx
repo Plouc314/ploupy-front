@@ -10,7 +10,8 @@ import Game from './game'
 import Interactions from './interactions'
 
 class UI implements IGame.Sprite {
-  public static readonly SCORE_WIDTH = 100
+  public static readonly HEIGHT = 50
+  public static readonly SCORE_WIDTH = 140
 
   public game: Game
 
@@ -48,7 +49,7 @@ class UI implements IGame.Sprite {
     for (let i = 0; i < this.game.players.length; i++) {
       const player = this.game.players[i]
       const text = this.scores[i]
-      text.text = `${player.username}`
+      text.text = `${player.username}: ${player.money}`
     }
     this.state.text = this.game.interactions.getState()
   }

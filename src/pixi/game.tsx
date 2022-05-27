@@ -69,6 +69,7 @@ class Game {
     this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
       if (!player) return
+      player.money = data.money
       const factory = new Factory(player, data.factory)
       player.addFactory(factory)
     })
@@ -76,6 +77,7 @@ class Game {
     this.comm.setOnBuildProbe((data) => {
       const player = this.players.find(p => p.username === data.username)
       if (!player) return
+      player.money = data.money
       const probe = new Probe(player, data.probe)
       player.addProbe(probe)
     })
@@ -86,7 +88,7 @@ class Game {
 
     this.ui = new UI(this, this.pixi.app.view.width)
     this.layout = new Container()
-    this.layout.position.y = 50
+    this.layout.position.y = UI.HEIGHT
 
     this.layout.addChild(this.map.child())
     for (const player of this.players) {
@@ -106,6 +108,11 @@ class Game {
       this.comm.sendActionMoveProbes({
         ids: probes.map(p => p.getId()),
         targets: probes.map(p => target),
+      })
+    }
+    this.interactions.onExplodeProbes = (probes) => {
+      this.comm.sendActionExplodeProbes({
+        ids: probes.map(p => p.getId()),
       })
     }
 

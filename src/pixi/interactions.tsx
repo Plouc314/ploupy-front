@@ -11,6 +11,7 @@ import Select from './gui/select'
 import Keyboard from './keyboard'
 import Player from './player'
 import Probe, { ProbeState } from './entity/probe'
+import UI from './ui'
 import Context from './context'
 
 export enum InteractionState {
@@ -28,6 +29,7 @@ class Interactions implements IGame.Sprite {
 
   public onBuildFactory?: (coord: IGame.Coordinate) => void
   public onMoveProbes?: (probes: Probe[], target: IGame.Coordinate) => void
+  public onExplodeProbes?: (probes: Probe[]) => void
 
   private state: InteractionState
 
@@ -82,7 +84,7 @@ class Interactions implements IGame.Sprite {
       for (const probe of this.selectedProbes) {
         probe.setState(ProbeState.FARMING)
       }
-      this.selectedProbes = []
+      this.selectedProbes.length = 0
     }
 
     this.state = state
@@ -93,7 +95,7 @@ class Interactions implements IGame.Sprite {
    */
   private getMousePos(e: InteractionEvent): IGame.Position {
     const pos = e.data.global
-    return { x: pos.x, y: pos.y - 50 }
+    return this.context.clampToDim({ x: pos.x, y: pos.y - 50 })
   }
 
   /**
@@ -101,7 +103,9 @@ class Interactions implements IGame.Sprite {
    */
   private getMouseCoord(e: InteractionEvent): IGame.Coordinate {
     const pos = e.data.global
-    return this.context.coord({ x: pos.x, y: pos.y - 50 })
+    return this.context.coord(this.context.clampToDim({
+      x: pos.x, y: pos.y - 50
+    }))
   }
 
   /**
@@ -116,8 +120,9 @@ class Interactions implements IGame.Sprite {
   }
 
   private setupKeyboard() {
-    this.keyboard.listen(["b"])
+    this.keyboard.listen(["b", "a"])
     this.keyboard.addOnPress("b", () => this.updateBuildFactoryState())
+    this.keyboard.addOnPress("a", () => this.explodeProbes())
   }
 
   /**
@@ -132,6 +137,13 @@ class Interactions implements IGame.Sprite {
     }
   }
 
+  private explodeProbes() {
+    if (this.onExplodeProbes) {
+      this.onExplodeProbes(this.selectedProbes)
+    }
+    this.setState(InteractionState.IDLE)
+  }
+
   private selectProbes(pos: IGame.Position) {
     const start = this.select.getStart()
     const end = pos
@@ -144,7 +156,7 @@ class Interactions implements IGame.Sprite {
     for (const probe of this.selectedProbes) {
       probe.setState(ProbeState.FARMING)
     }
-    this.selectedProbes = []
+    this.selectedProbes.length = 0
 
     for (const probe of this.ownPlayer.probes) {
       const { x, y } = probe.getPos()
@@ -159,9 +171,18 @@ class Interactions implements IGame.Sprite {
       }
     }
 
-    if (this.selectedProbes.length > 0) {
+    if (
+      this.selectedProbes.length > 0 &&
+      this.state != InteractionState.SELECT_PROBES
+    ) {
       this.setState(InteractionState.SELECT_PROBES)
+    } else if (
+      this.selectedProbes.length == 0 &&
+      this.state == InteractionState.SELECT_PROBES
+    ) {
+      this.setState(InteractionState.IDLE)
     }
+
   }
 
   private handleClick(pos: IGame.Position) {
@@ -180,10 +201,10 @@ class Interactions implements IGame.Sprite {
       this.setState(InteractionState.IDLE)
     } else if (this.state == InteractionState.SELECT_PROBES) {
       if (!tile) return
+      console.log(this.selectedProbes)
       if (this.onMoveProbes) {
         this.onMoveProbes(this.selectedProbes, tile.getCoord())
       }
-      this.setState(InteractionState.IDLE)
     }
   }
 
@@ -228,6 +249,8 @@ class Interactions implements IGame.Sprite {
 
     // interaction
     this.container.on("pointerdown", (e) => {
+      console.log("down")
+      console.log(this.getMousePos(e))
       this.mouseDownPos = this.getMousePos(e)
       this.handleDown(this.mouseDownPos)
     })

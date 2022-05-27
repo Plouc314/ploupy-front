@@ -28,6 +28,12 @@ class Comm {
     })
   }
 
+  public sendActionExplodeProbes(data: IModel.ActionExplodeProbes) {
+    this.sio.emit("action_explode_probes", data, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
   public setOnGameState(cb: (data: IModel.GameState) => void) {
     this.sio.on("game_state", (data) => { cb(data) })
   }
