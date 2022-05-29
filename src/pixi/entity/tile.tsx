@@ -9,19 +9,20 @@ import Color from '../../utils/color';
 import Entity from './entity';
 import Map from '../map';
 import Player from '../player';
+import Context from '../context';
 
 class Tile extends Entity {
 
-  public static readonly SIZE = 40
-  public static readonly DEFAULT_COLOR: Color = Color.fromRgb({ r: 150, g: 150, b: 150 })
+  public static readonly SIZE = 1
+  public static readonly DEFAULT_COLOR: Color = Color.fromRgb(50, 50, 50)
+
+  public owner: Player | undefined
+  public occupation: number
 
   private hover: boolean
 
-  public owner: Player | null
-  public occupation: number
-
-  constructor(map: Map, model: IModel.Tile<Player>) {
-    super(map)
+  constructor(context: Context, model: IModel.Tile<Player>) {
+    super(model.id, context)
     this.buildContainer()
 
     this.owner = model.owner
@@ -32,17 +33,15 @@ class Tile extends Entity {
     this.hover = false
   }
 
-  public size() {
-    return Tile.SIZE
-  }
-
   public setModel(model: IModel.TileState<Player>) {
-    if (model.owner !== undefined) {
+    if (model.owner !== null) {
       this.owner = model.owner
     }
     this.occupation = model.occupation ?? 0
 
-    this.setCoord(model.coord)
+    if (model.coord) {
+      this.setCoord(model.coord)
+    }
     this.setColor(this.getOccupationColor())
   }
 
@@ -58,7 +57,10 @@ class Tile extends Entity {
     this.container.removeChildren()
     const surf = new Graphics()
     surf.beginFill(this.color.hex())
-    surf.drawRect(0, 0, this.size(), this.size())
+
+    const sizes = this.context.sizes()
+
+    surf.drawRect(0, 0, sizes.tile, sizes.tile)
     this.container.addChild(surf)
   }
 
@@ -67,7 +69,7 @@ class Tile extends Entity {
     if (!this.owner) {
       return Tile.DEFAULT_COLOR
     }
-    const d = this.map.config.max_occupation + 2 - this.occupation
+    const d = this.context.config.max_occupation + 2 - this.occupation
     const o = this.occupation > 0 ? this.occupation + 2 : 0
     return Color.fromMerged(
       ...Array(d).fill(Tile.DEFAULT_COLOR),

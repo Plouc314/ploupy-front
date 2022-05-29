@@ -2,19 +2,19 @@
 import { IGame, IModel } from '../../types'
 
 // pixi.js
-import { Graphics, Container } from 'pixi.js'
+import { Container } from 'pixi.js'
 
 // pixi
-import Keyboard from './keyboard'
 import Color from '../utils/color'
 import Map from './map'
 import Factory from './entity/factory'
 import Probe from './entity/probe'
+import Context from './context'
 
 class Player implements IGame.Sprite {
 
-  public keyboard: Keyboard
   public map: Map
+  public context: Context
 
   public username: string
   public money: number
@@ -22,54 +22,83 @@ class Player implements IGame.Sprite {
   public color: Color
 
   private factories: Factory[]
-  private probes: Probe[]
+  public probes: Probe[]
 
   private container: Container
+  private layoutFactories: Container
+  private layoutProbes: Container
 
-  constructor(model: IModel.Player, color: Color, keyboard: Keyboard, map: Map) {
+  constructor(model: IModel.Player, color: Color, map: Map) {
     this.username = model.username
     this.money = model.money
     this.score = model.score
     this.color = color
 
-    this.keyboard = keyboard
     this.map = map
+    this.context = map.context
 
-    this.factories = model.factories.map(m => new Factory(this, m))
-    this.probes = model.probes.map(m => new Probe(this, m))
+    this.factories = []
+    this.probes = []
 
+    this.layoutFactories = new Container()
+    this.layoutProbes = new Container()
     this.container = new Container()
+    this.container.addChild(this.layoutFactories)
+    this.container.addChild(this.layoutProbes)
+
+    // build probes / factories
+    model.factories.forEach(m => this.addFactory(new Factory(this, m)))
+    model.probes.forEach(m => this.addProbe(new Probe(this, m)))
   }
 
   public setModel(model: IModel.PlayerState) {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
 
+    // update factories
     for (const fm of model.factories) {
-      const factory = this.factories.find(f => {
-        const coord = f.getCoord()
-        return coord.x == fm.coord.x && coord.y == fm.coord.y
-      })
+      const factory = this.factories.find(f => f.getId() === fm.id)
       if (!factory) continue
       factory.setModel(fm)
     }
+    // remove dead factories
+    this.factories
+      .filter(f => !f.alive)
+      .forEach(f => this.layoutFactories.removeChild(f.child()))
+
+    this.factories = this.factories.filter(f => f.alive)
+
+    // update probes
     for (const pm of model.probes) {
-      const probe = this.probes.find(f => {
-        const pos = f.getCoord()
-        return pos.x == pm.pos.x && pos.y == pm.pos.y
-      })
+      const probe = this.probes.find(p => p.getId() === pm.id)
       if (!probe) continue
       probe.setModel(pm)
     }
+    // remove dead probes
+    this.probes
+      .filter(p => !p.alive)
+      .forEach(p => this.layoutProbes.removeChild(p.child()))
+
+    this.probes = this.probes.filter(p => p.alive)
   }
 
   public addFactory(factory: Factory) {
     if (this.factories.includes(factory)) return
     this.factories.push(factory)
-    this.container.addChild(factory.child())
+    this.layoutFactories.addChild(factory.child())
   }
 
-  public update(dt: number) { }
+  public addProbe(probe: Probe) {
+    if (this.probes.includes(probe)) return
+    this.probes.push(probe)
+    this.layoutProbes.addChild(probe.child())
+  }
+
+  public update(dt: number) {
+    for (const probe of this.probes) {
+      probe.update(dt)
+    }
+  }
 
   public child(): Container {
     return this.container
