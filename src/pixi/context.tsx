@@ -21,6 +21,8 @@ import Tile from "./entity/tile"
  */
 class Context {
 
+  public static readonly MARGIN = 30
+
   public pixi: Pixi
   public config: IModel.GameConfig
 
@@ -33,8 +35,8 @@ class Context {
     this.pixi = pixi
     this.config = config
     this.unit = Math.min(
-      pixi.app.view.width / config.dim.x,
-      (pixi.app.view.height - 50) / config.dim.y,
+      (pixi.app.view.width - 2 * Context.MARGIN) / config.dim.x,
+      (pixi.app.view.height - UI.HEIGHT - 2 * Context.MARGIN) / config.dim.y,
     )
   }
 
@@ -64,10 +66,9 @@ class Context {
    * Return if the position is in the context dimension
    */
   public clampToDim(pos: IGame.Position): IGame.Position {
-    const dim = this.pos(this.config.dim)
     return {
-      x: Math.max(Math.min(pos.x, dim.x), 0),
-      y: Math.max(Math.min(pos.y, dim.y), 0),
+      x: Math.max(Math.min(pos.x, this.pixi.app.view.width), 0),
+      y: Math.max(Math.min(pos.y, this.pixi.app.view.height), 0),
     }
   }
 

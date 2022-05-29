@@ -25,6 +25,8 @@ class Player implements IGame.Sprite {
   public probes: Probe[]
 
   private container: Container
+  private layoutFactories: Container
+  private layoutProbes: Container
 
   constructor(model: IModel.Player, color: Color, map: Map) {
     this.username = model.username
@@ -35,10 +37,18 @@ class Player implements IGame.Sprite {
     this.map = map
     this.context = map.context
 
-    this.factories = model.factories.map(m => new Factory(this, m))
-    this.probes = model.probes.map(m => new Probe(this, m))
+    this.factories = []
+    this.probes = []
 
+    this.layoutFactories = new Container()
+    this.layoutProbes = new Container()
     this.container = new Container()
+    this.container.addChild(this.layoutFactories)
+    this.container.addChild(this.layoutProbes)
+
+    // build probes / factories
+    model.factories.forEach(m => this.addFactory(new Factory(this, m)))
+    model.probes.forEach(m => this.addProbe(new Probe(this, m)))
   }
 
   public setModel(model: IModel.PlayerState) {
@@ -54,7 +64,7 @@ class Player implements IGame.Sprite {
     // remove dead factories
     this.factories
       .filter(f => !f.alive)
-      .forEach(f => this.container.removeChild(f.child()))
+      .forEach(f => this.layoutFactories.removeChild(f.child()))
 
     this.factories = this.factories.filter(f => f.alive)
 
@@ -67,7 +77,7 @@ class Player implements IGame.Sprite {
     // remove dead probes
     this.probes
       .filter(p => !p.alive)
-      .forEach(p => this.container.removeChild(p.child()))
+      .forEach(p => this.layoutProbes.removeChild(p.child()))
 
     this.probes = this.probes.filter(p => p.alive)
   }
@@ -75,13 +85,13 @@ class Player implements IGame.Sprite {
   public addFactory(factory: Factory) {
     if (this.factories.includes(factory)) return
     this.factories.push(factory)
-    this.container.addChild(factory.child())
+    this.layoutFactories.addChild(factory.child())
   }
 
   public addProbe(probe: Probe) {
     if (this.probes.includes(probe)) return
     this.probes.push(probe)
-    this.container.addChild(probe.child())
+    this.layoutProbes.addChild(probe.child())
   }
 
   public update(dt: number) {

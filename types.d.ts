@@ -53,7 +53,8 @@ export namespace IModel {
     initial_money: number
     factory_price: number
     factory_max_probe: number
-    building_occupation_min: number
+    factory_occupation_min: number
+    factory_build_probe_delay: number
     max_occupation: number
     probe_speed: number
     probe_price: number
@@ -159,6 +160,10 @@ export namespace IModel {
   }
 
   export type ActionExplodeProbes = {
+    ids: string[]
+  }
+
+  export type ActionProbesAttack = {
     ids: string[]
   }
 }

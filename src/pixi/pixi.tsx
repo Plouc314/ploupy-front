@@ -11,7 +11,7 @@ class Pixi {
 
   constructor(canvas: HTMLCanvasElement) {
 
-    const size = Math.min(window.innerHeight, window.innerWidth) * 0.8
+    const size = Math.min(window.innerHeight, window.innerWidth) * 0.9
 
     this.app = new Application({
       view: canvas,

@@ -2,7 +2,7 @@
 import { Firebase, IGame, IModel } from "../../types"
 
 // pixi.js
-import { Container, settings } from "pixi.js"
+import { Container, Graphics } from "pixi.js"
 
 // pixi
 import Pixi from "./pixi"
@@ -86,14 +86,29 @@ class Game {
       this.setModel(data)
     })
 
-    this.ui = new UI(this, this.pixi.app.view.width)
+    this.ui = new UI(this, this.context.sizes().dim.x)
+    this.ui.child().position.x = Context.MARGIN
+    this.ui.child().position.y = Context.MARGIN
+
+
+    // create main layout
     this.layout = new Container()
-    this.layout.position.y = UI.HEIGHT
+    const background = new Graphics()
+    background.beginFill(0xffffff)
+    background.drawRect(0, 0, this.pixi.app.view.width, this.pixi.app.view.height)
+    this.layout.addChild(background)
+
+    this.map.child().position.x = Context.MARGIN
+    this.map.child().position.y = UI.HEIGHT + Context.MARGIN
 
     this.layout.addChild(this.map.child())
     for (const player of this.players) {
+      player.child().position.x = Context.MARGIN
+      player.child().position.y = UI.HEIGHT + Context.MARGIN
       this.layout.addChild(player.child())
     }
+    this.layout.addChild(this.ui.child())
+
 
     this.interactions = new Interactions(this.map, this.keyboard, this.ownPlayer)
 
@@ -115,9 +130,13 @@ class Game {
         ids: probes.map(p => p.getId()),
       })
     }
+    this.interactions.onProbesAttack = (probes) => {
+      this.comm.sendActionProbesAttack({
+        ids: probes.map(p => p.getId()),
+      })
+    }
 
     this.pixi.app.stage.addChild(this.layout)
-    this.pixi.app.stage.addChild(this.ui.child())
 
     this.pixi.app.ticker.add((dt) => this.run())
   }

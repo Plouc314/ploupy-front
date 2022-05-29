@@ -34,12 +34,23 @@ class Comm {
     })
   }
 
+  public sendActionProbesAttack(data: IModel.ActionProbesAttack) {
+    this.sio.emit("action_probes_attack", data, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
   public setOnGameState(cb: (data: IModel.GameState) => void) {
     this.sio.on("game_state", (data) => { cb(data) })
   }
 
   public setOnStartGame(cb: (data: IModel.Game) => void) {
-    this.sio.on("start_game", (data) => { cb(data) })
+    this.sio.on("start_game", (data) => {
+      console.group("start_game")
+      console.log(data)
+      console.groupEnd()
+      cb(data)
+    })
   }
 
   public setOnBuildFactory(cb: (data: IComm.BuildFactoryResponse) => void) {

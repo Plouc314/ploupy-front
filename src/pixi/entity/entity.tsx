@@ -64,6 +64,17 @@ abstract class Entity implements IGame.Sprite {
     this.container.position.y = this.pos.y
   }
 
+  /**
+   * Return the center of the entity (unit: pixel)
+   */
+  public getCenter(): IGame.Position {
+    const sizes = this.context.sizes()
+    return {
+      x: this.pos.x + sizes.tile / 2,
+      y: this.pos.y + sizes.tile / 2,
+    }
+  }
+
   public getColor(): Color {
     return this.color
   }
