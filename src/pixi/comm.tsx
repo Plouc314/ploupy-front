@@ -22,6 +22,12 @@ class Comm {
     })
   }
 
+  public sendActionBuildTurret(data: IModel.ActionBuildTurret) {
+    this.sio.emit("action_build_turret", data, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
   public sendActionMoveProbes(data: IModel.ActionMoveProbes) {
     this.sio.emit("action_move_probes", data, (response: IComm.Response) => {
       console.log(response)
@@ -62,11 +68,26 @@ class Comm {
     })
   }
 
+  public setOnBuildTurret(cb: (data: IComm.BuildTurretResponse) => void) {
+    this.sio.on("build_turret", (data) => {
+      console.group("build_turret")
+      console.log(data)
+      console.groupEnd()
+      cb(data)
+    })
+  }
+
   public setOnBuildProbe(cb: (data: IComm.BuildProbeResponse) => void) {
     this.sio.on("build_probe", (data) => {
       console.group("build_probe")
       console.log(data)
       console.groupEnd()
+      cb(data)
+    })
+  }
+
+  public setOnTurretFireProbe(cb: (data: IComm.TurretFireProbeResponse) => void) {
+    this.sio.on("turret_fire_probe", (data) => {
       cb(data)
     })
   }

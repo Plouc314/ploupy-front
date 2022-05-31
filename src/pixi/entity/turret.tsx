@@ -8,16 +8,18 @@ import { Graphics, Container } from 'pixi.js'
 import Player from '../player'
 import Entity from './entity'
 import Tile from './tile'
+import Color from '../../utils/color'
 
 
-class Factory extends Entity {
+class Turret extends Entity {
 
-  public static readonly SIZE = 0.75
+  public static readonly SIZE = 0.6
+  public static readonly LINE_WIDTH = 0.04
 
   public alive: boolean
   private player: Player
 
-  constructor(player: Player, model: IModel.Factory) {
+  constructor(player: Player, model: IModel.Turret) {
     super(model.id, player.context)
     this.player = player
     this.buildContainer()
@@ -26,7 +28,7 @@ class Factory extends Entity {
     this.setCoord(model.coord)
   }
 
-  public setModel(model: IModel.FactoryState) {
+  public setModel(model: IModel.TurretState) {
     if (model.coord) {
       this.setCoord(model.coord)
     }
@@ -38,19 +40,19 @@ class Factory extends Entity {
   protected buildContainer() {
     this.container.removeChildren()
     const surf = new Graphics()
-    surf.beginFill(this.player.color.withSharpen(20).withDiff(-40).hex())
+    surf.beginFill(this.player.color.withSharpen(20).withDiff(-60).hex())
 
     const sizes = this.context.sizes
-    const margin = (sizes.tile - sizes.factory) / 2
+    const margin = (sizes.tile - sizes.turret) / 2
 
-    surf.drawRect(
-      margin,
-      margin,
-      sizes.factory,
-      sizes.factory,
-    )
+    surf.drawPolygon([
+      margin, margin,
+      margin + sizes.turret, margin,
+      margin + sizes.turret / 2, margin + sizes.turret,
+    ])
+
     this.container.addChild(surf)
   }
 }
 
-export default Factory
+export default Turret

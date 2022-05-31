@@ -51,6 +51,8 @@ export namespace IModel {
   export type GameConfig = {
     dim: IGame.Coordinate
     initial_money: number
+    initial_n_probes: number
+    base_income: number
     factory_price: number
     factory_max_probe: number
     factory_occupation_min: number
@@ -58,19 +60,29 @@ export namespace IModel {
     max_occupation: number
     probe_speed: number
     probe_price: number
+    probe_maintenance_costs: number
+    turret_price: number
+    turret_fire_delay: number
+    turret_scope: number
     income_rate: number
     deprecate_rate: number
   }
 
+  /** Unit: pixel */
   export type ContextSizes = {
-    /** Unit: pixel */
     dim: IGame.Dimension
-    /** Unit: pixel */
     tile: number
-    /** Unit: pixel */
     factory: number
-    /** Unit: pixel */
+    turret: number
     probe: number
+    ui: ContextUISizes
+  }
+
+  export type ContextUISizes = {
+    /** Global height of the ui */
+    height: number
+    /** Global width of the ui */
+    width: number
   }
 
   export type Player = {
@@ -78,6 +90,7 @@ export namespace IModel {
     money: number
     score: number
     factories: Factory[]
+    turrets: Turret[]
     probes: Probe[]
   }
 
@@ -86,6 +99,7 @@ export namespace IModel {
     money: number | null
     score: number | null
     factories: FactoryState[]
+    turrets: TurretState[]
     probes: ProbeState[]
   }
 
@@ -96,6 +110,18 @@ export namespace IModel {
   }
 
   export type FactoryState = {
+    id: string
+    coord: IGame.Coordinate | null
+    alive: boolean | null
+  }
+
+  export type Turret = {
+    id: string
+    coord: IGame.Coordinate
+    alive: boolean
+  }
+
+  export type TurretState = {
     id: string
     coord: IGame.Coordinate | null
     alive: boolean | null
@@ -154,6 +180,10 @@ export namespace IModel {
     coord: IGame.Coordinate
   }
 
+  export type ActionBuildTurret = {
+    coord: IGame.Coordinate
+  }
+
   export type ActionMoveProbes = {
     ids: string[]
     targets: IGame.Coordinate[]
@@ -185,13 +215,35 @@ export namespace IComm {
     factory: IModel.Factory
   }
 
+  export type BuildTurretResponse = {
+    username: string
+    money: number
+    turret: IModel.Turret
+  }
+
   export type BuildProbeResponse = {
     username: string
     money: number
     probe: IModel.Probe
   }
+
+  export type TurretFireProbeResponse = {
+    username: string
+    turret_id: IGame.ID
+    probe: IModel.ProbeState
+  }
 }
 
+export namespace IUI {
+  export type AlignX = "left" | "right"
+  export type AlignY = "top" | "bottom"
+
+  export type Dimension = {
+    width: number
+    height: number
+  }
+
+}
 
 export type RGB = {
   r: number

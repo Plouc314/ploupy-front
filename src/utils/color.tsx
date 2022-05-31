@@ -2,6 +2,10 @@
 import { RGB } from '../../types'
 
 class Color {
+
+  public static readonly WHITE = Color.fromRgb(255, 255, 255)
+  public static readonly BLACK = Color.fromRgb(0, 0, 0)
+
   private raw: number
 
   constructor(raw: number) {

@@ -77,10 +77,19 @@ function useFirebaseAuth() {
   // use an useEffect hook to prevent setting up the observer at each rerender
   useEffect(() => {
     onAuthStateChanged(auth, async (_user) => {
+
       if (_user) { // signed in
 
         // start loading state
         setLoading(true)
+
+        // check if the user has just be created
+        const creation = _user.metadata.creationTime ? new Date(_user.metadata.creationTime).getTime() : Date.now()
+        const lastSignIn = _user.metadata.lastSignInTime ? new Date(_user.metadata.lastSignInTime).getTime() : Date.now()
+        // if the user was created less than a minute ago -> wait for 2 sec
+        if (lastSignIn - creation < 60000) {
+          await new Promise(r => setTimeout(r, 2000));
+        }
 
         // get user data from server
         const data = await API.getUserData({ uid: _user.uid })
