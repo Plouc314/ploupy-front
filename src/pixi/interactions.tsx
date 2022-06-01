@@ -7,7 +7,7 @@ import { Container, InteractionEvent } from 'pixi.js'
 // pixi
 import Tile from './entity/tile'
 import Map from './map'
-import Select from './gui/select'
+import Select from './ui/select'
 import Keyboard from './keyboard'
 import Player from './player'
 import Probe, { ProbeState } from './entity/probe'
@@ -17,6 +17,7 @@ import Context from './context'
 export enum InteractionState {
   IDLE = "IDLE",
   BUILD_FACTORY = "BUILD_FACTORY",
+  BUILD_TURRET = "BUILD_TURRET",
   SELECT_PROBES = "SELECT_PROBES",
 }
 
@@ -28,6 +29,7 @@ class Interactions implements IGame.Sprite {
   public ownPlayer: Player
 
   public onBuildFactory?: (coord: IGame.Coordinate) => void
+  public onBuildTurret?: (coord: IGame.Coordinate) => void
   public onMoveProbes?: (probes: Probe[], target: IGame.Coordinate) => void
   public onExplodeProbes?: (probes: Probe[]) => void
   public onProbesAttack?: (probes: Probe[]) => void
@@ -129,8 +131,9 @@ class Interactions implements IGame.Sprite {
   }
 
   private setupKeyboard() {
-    this.keyboard.listen(["b", "a", "x"])
-    this.keyboard.addOnPress("b", () => this.updateBuildFactoryState())
+    this.keyboard.listen(["f", "t", "a", "x"])
+    this.keyboard.addOnPress("f", () => this.updateBuildFactoryState())
+    this.keyboard.addOnPress("t", () => this.updateBuildTurretState())
     this.keyboard.addOnPress("x", () => this.explodeProbes())
     this.keyboard.addOnPress("a", () => this.probesAttack())
   }
@@ -144,6 +147,18 @@ class Interactions implements IGame.Sprite {
       this.setState(InteractionState.IDLE)
     } else {
       this.setState(InteractionState.BUILD_FACTORY)
+    }
+  }
+
+  /**
+   * If not in build turret state: switch to it
+   * if in build turret state: switch to idle
+  */
+  private updateBuildTurretState() {
+    if (this.state == InteractionState.BUILD_TURRET) {
+      this.setState(InteractionState.IDLE)
+    } else {
+      this.setState(InteractionState.BUILD_TURRET)
     }
   }
 
@@ -220,6 +235,14 @@ class Interactions implements IGame.Sprite {
         this.onBuildFactory(tile.getCoord())
       }
       this.setState(InteractionState.IDLE)
+
+    } else if (this.state == InteractionState.BUILD_TURRET) {
+      if (!tile) return
+      if (this.onBuildTurret) {
+        this.onBuildTurret(tile.getCoord())
+      }
+      this.setState(InteractionState.IDLE)
+
     } else if (this.state == InteractionState.SELECT_PROBES) {
       if (!tile) return
       console.log(this.selectedProbes)

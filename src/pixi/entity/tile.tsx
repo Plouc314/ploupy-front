@@ -58,7 +58,7 @@ class Tile extends Entity {
     const surf = new Graphics()
     surf.beginFill(this.color.hex())
 
-    const sizes = this.context.sizes()
+    const sizes = this.context.sizes
 
     surf.drawRect(0, 0, sizes.tile, sizes.tile)
     this.container.addChild(surf)

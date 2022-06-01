@@ -6,52 +6,86 @@ import { IGame } from '../../types'
 
 // pixi
 import Color from '../utils/color'
+import Context from './context'
 import Game from './game'
-import Interactions from './interactions'
+import TextUI from './ui/node/text'
+import PlayerBar from './ui/playerbar'
+
+interface UISizes {
+  heightPlayerBar: number
+}
 
 class UI implements IGame.Sprite {
-  public static readonly HEIGHT = 50
-  public static readonly SCORE_WIDTH = 140
+
+  public static readonly HEIGHT = 80
 
   public game: Game
+  public context: Context
+
+  public sizes: UISizes
 
   private container: Container
-  private bg: Graphics
-  private scores: Text[]
-  private state: Text
+  private background: Graphics
+  private playerBars: PlayerBar[]
+  private errorText: TextUI
 
-  constructor(game: Game, width: number) {
+  private errorCounter: number
+
+  constructor(game: Game, context: Context) {
     this.game = game
+    this.context = context
+
+    this.sizes = context.scaleUI({
+      heightPlayerBar: 40,
+    })
+
+    this.errorCounter = 0
 
     this.container = new Container()
-    this.bg = new Graphics()
-    this.bg.beginFill(Color.fromRgb(20, 20, 20).hex())
-    this.bg.drawRect(0, 0, width, 50)
-    this.container.addChild(this.bg)
+    this.background = new Graphics()
+    this.background.beginFill(Color.fromRgb(20, 20, 20).hex())
+    this.background.drawRect(0, 0, context.sizes.ui.width, context.sizes.ui.height)
+    this.container.addChild(this.background)
 
-    this.scores = []
+    this.playerBars = []
+
     for (let i = 0; i < this.game.players.length; i++) {
       const player = this.game.players[i]
-      const text = new Text("")
-      text.style.fill = player.color.withDiff(60).hex()
-      text.position.x = i * UI.SCORE_WIDTH
-      this.container.addChild(text)
-      this.scores.push(text)
+      const bar = new PlayerBar(this, player, context)
+      bar.child().position.y = i * this.sizes.heightPlayerBar
+      this.playerBars.push(bar)
+      this.container.addChild(bar.child())
     }
 
-    this.state = new Text("")
-    this.state.style.fill = Color.fromRgb(255, 255, 255).hex()
-    this.state.position.x = this.game.context.sizes().dim.x - 100
-    this.container.addChild(this.state)
+    this.errorText = new TextUI(context)
+    this.errorText.pos.x = context.sizes.ui.width - 20
+    this.errorText.parent.height = this.sizes.heightPlayerBar
+    this.errorText.centeredY = true
+    this.errorText.anchorX = "right"
+    this.errorText.color = Color.WHITE
+    this.errorText.fontSize = 16
+    this.errorText.compile()
+    this.container.addChild(this.errorText.child())
   }
 
   public update(dt: number) {
-    for (let i = 0; i < this.game.players.length; i++) {
-      const player = this.game.players[i]
-      const text = this.scores[i]
-      text.text = `${player.username}: ${player.money}`
+    for (const playerBar of this.playerBars) {
+      playerBar.update(dt)
     }
-    this.state.text = this.game.interactions.getState()
+  }
+
+  public setGameActionError(msg: string) {
+    this.errorText.text = msg
+    this.errorText.compile()
+
+    this.errorCounter += 1
+    const currentValue = this.errorCounter
+    setTimeout(() => {
+      if (currentValue == this.errorCounter) {
+        this.errorText.text = ""
+        this.errorText.compile()
+      }
+    }, 3000)
   }
 
   public child(): Container {

@@ -3,16 +3,11 @@ import { IGame, IModel } from "../../types"
 
 // pixi
 import Pixi from "./pixi"
-import Color from "../utils/color"
-import Keyboard from "./keyboard"
-import Map from "./map"
-import Player from "./player"
 import UI from "./ui"
-import Comm from "./comm"
 import Factory from "./entity/factory"
 import Probe from "./entity/probe"
-import Interactions from "./interactions"
 import Tile from "./entity/tile"
+import Turret from "./entity/turret"
 
 /**
  * Graphic context
@@ -26,6 +21,8 @@ class Context {
   public pixi: Pixi
   public config: IModel.GameConfig
 
+  public sizes: IModel.ContextSizes
+
   /**
    * Number of pixels equivalent to 1 coordinate
    */
@@ -38,6 +35,18 @@ class Context {
       (pixi.app.view.width - 2 * Context.MARGIN) / config.dim.x,
       (pixi.app.view.height - UI.HEIGHT - 2 * Context.MARGIN) / config.dim.y,
     )
+
+    this.sizes = {
+      dim: this.pos(this.config.dim),
+      tile: Tile.SIZE * this.unit,
+      factory: Factory.SIZE * this.unit,
+      turret: Turret.SIZE * this.unit,
+      probe: Probe.SIZE * this.unit,
+      ui: {
+        height: UI.HEIGHT,
+        width: this.pos(this.config.dim).x
+      },
+    }
   }
 
   /**
@@ -72,14 +81,19 @@ class Context {
     }
   }
 
-  public sizes(): IModel.ContextSizes {
-    return {
-      dim: this.pos(this.config.dim),
-      tile: Tile.SIZE * this.unit,
-      factory: Factory.SIZE * this.unit,
-      probe: Probe.SIZE * this.unit,
+  /**
+   * Scale a map of sizes (designed for ui sizes)
+   * The given sizes units should be pixel-like
+   * TEMP: (for now, leave the sizes untouched)
+   */
+  public scaleUI<T extends {}>(sizes: T): T {
+    const scaled: any = {}
+    for (const [key, value] of Object.entries(sizes)) {
+      scaled[key] = value
     }
+    return scaled as T
   }
+
 }
 
 export default Context

@@ -112,7 +112,7 @@ class Probe extends Entity {
     const surf = new Graphics()
     surf.beginFill(this.player.color.withSharpen(50).hex())
 
-    const sizes = this.context.sizes()
+    const sizes = this.context.sizes
     const margin = (sizes.tile - sizes.probe) / 2
 
     surf.drawRect(

@@ -54,7 +54,7 @@ const Page: FC<PageProps> = (props) => {
             return
         }
 
-        if (!loading && !user) {
+        if (!loading && !user.connected) {
             // if it is not loading and user is null -> redirect to login page
             router.replace('/login')
         }
@@ -62,7 +62,7 @@ const Page: FC<PageProps> = (props) => {
 
     let body: JSX.Element
 
-    if (props.withAuth && !user) {
+    if (props.withAuth && !user.connected) {
         // render loading page
         body = <Loading label="Loading..." />
     } else if (props.noAppHeader) {

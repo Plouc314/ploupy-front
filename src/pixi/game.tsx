@@ -16,6 +16,7 @@ import Factory from "./entity/factory"
 import Probe from "./entity/probe"
 import Interactions from "./interactions"
 import Context from "./context"
+import Turret from "./entity/turret"
 
 
 
@@ -47,7 +48,11 @@ class Game {
     // setup game
     const colors = [
       Color.fromRgb(250, 100, 100),
+      Color.fromRgb(100, 250, 100),
       Color.fromRgb(100, 100, 250),
+      Color.fromRgb(200, 200, 100),
+      Color.fromRgb(100, 200, 200),
+      Color.fromRgb(200, 100, 200),
     ]
 
     this.players = model.players.map((pm, i) =>
@@ -74,6 +79,14 @@ class Game {
       player.addFactory(factory)
     })
 
+    this.comm.setOnBuildTurret((data) => {
+      const player = this.players.find(p => p.username === data.username)
+      if (!player) return
+      player.money = data.money
+      const turret = new Turret(player, data.turret)
+      player.addTurret(turret)
+    })
+
     this.comm.setOnBuildProbe((data) => {
       const player = this.players.find(p => p.username === data.username)
       if (!player) return
@@ -86,7 +99,24 @@ class Game {
       this.setModel(data)
     })
 
-    this.ui = new UI(this, this.context.sizes().dim.x)
+    this.comm.setOnTurretFireProbe((data) => {
+
+      // get firing player
+      const player = this.players.find(p => p.username === data.username)
+      if (!player) return
+
+      // get fired probe
+      let probe: Probe | undefined
+      for (const opponent of this.players) {
+        if (opponent === player) continue
+        probe = opponent.probes.find(p => p.getId() === data.probe.id)
+        if (!probe) continue
+        opponent.removeProbe(probe)
+        break
+      }
+    })
+
+    this.ui = new UI(this, this.context)
     this.ui.child().position.x = Context.MARGIN
     this.ui.child().position.y = Context.MARGIN
 
@@ -109,6 +139,10 @@ class Game {
     }
     this.layout.addChild(this.ui.child())
 
+    // link action errors to ui
+    this.comm.setOnGameActionError((msg) => {
+      this.ui.setGameActionError(msg)
+    })
 
     this.interactions = new Interactions(this.map, this.keyboard, this.ownPlayer)
 
@@ -116,6 +150,11 @@ class Game {
 
     this.interactions.onBuildFactory = (coord) => {
       this.comm.sendActionBuildFactory({
+        coord: coord
+      })
+    }
+    this.interactions.onBuildTurret = (coord) => {
+      this.comm.sendActionBuildTurret({
         coord: coord
       })
     }
