@@ -38,6 +38,7 @@ import useSio from '../src/comm/sio'
 import Pixi from '../src/pixi/pixi'
 import Comm from '../src/pixi/comm'
 import Game from '../src/pixi/game'
+import { COLORS } from '../src/pixi/constants'
 
 
 export interface PageHomeProps { }
@@ -86,7 +87,9 @@ const PageHome: FC<PageHomeProps> = (props) => {
       _comm.setOnStartGame((gameState) => {
         const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
         const pixi = new Pixi(canvas)
-        setGame(new Game(pixi, _comm, user, gameState))
+        pixi.textures.load(() => {
+          setGame(new Game(pixi, _comm, user, gameState))
+        })
       })
       _comm.setOnQueueState((queue) => onQueueState(queue))
       setComm(_comm)

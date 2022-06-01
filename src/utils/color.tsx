@@ -93,6 +93,14 @@ class Color {
     return Color.toRgb(this.raw)
   }
 
+  /**
+   * Representation used for textures, as {r}-{g}-{b}
+   */
+  public name(): string {
+    const { r, g, b } = Color.toRgb(this.raw)
+    return `${r}-${g}-${b}`
+  }
+
   public toString(): string {
     const { r, g, b } = Color.toRgb(this.raw)
     return `rgb(${r}, ${g}, ${b})`

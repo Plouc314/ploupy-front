@@ -1,4 +1,4 @@
-export const FLAG_DEPLOY: boolean = true
+export const FLAG_DEPLOY: boolean = false
 
 export const URL_API: string = FLAG_DEPLOY ?
   "https://ploupy.herokuapp.com/api/"
