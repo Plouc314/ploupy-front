@@ -38,7 +38,7 @@ class Factory extends Entity {
   protected buildContainer() {
     this.container.removeChildren()
     const surf = new Graphics()
-    surf.beginFill(this.player.color.withSharpen(20).withDiff(-40).hex())
+    surf.beginFill(this.player.color.withSharpen(60).withDiff(-60).hex())
 
     const sizes = this.context.sizes
     const margin = (sizes.tile - sizes.factory) / 2

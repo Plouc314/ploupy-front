@@ -48,8 +48,16 @@ export namespace IModel {
     email: string
   }
 
+  export type Queue = {
+    qid: IGame.ID
+    active: boolean
+    n_player: number
+    users: string[]
+  }
+
   export type GameConfig = {
     dim: IGame.Coordinate
+    n_player: number
     initial_money: number
     initial_n_probes: number
     base_income: number
@@ -199,6 +207,19 @@ export namespace IModel {
 }
 
 export namespace IComm {
+
+  export type ActionCreateQueue = {
+    n_player: number
+  }
+
+  export type ActionJoinQueue = {
+    qid: IGame.ID
+  }
+
+  export type ActionLeaveQueue = {
+    qid: IGame.ID
+  }
+
 
   export type Response<T extends {} = {}> = T & {
     success: boolean

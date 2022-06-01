@@ -139,6 +139,10 @@ class Game {
     }
     this.layout.addChild(this.ui.child())
 
+    // link action errors to ui
+    this.comm.setOnGameActionError((msg) => {
+      this.ui.setGameActionError(msg)
+    })
 
     this.interactions = new Interactions(this.map, this.keyboard, this.ownPlayer)
 
