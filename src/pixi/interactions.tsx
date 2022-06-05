@@ -13,6 +13,9 @@ import Player from './player'
 import Probe, { ProbeState } from './entity/probe'
 import UI from './ui'
 import Context from './context'
+import Pixi from './pixi'
+import Color from '../utils/color'
+import ImageUI from './ui/node/image'
 
 export enum InteractionState {
   IDLE = "IDLE",
@@ -23,9 +26,12 @@ export enum InteractionState {
 
 class Interactions implements IGame.Sprite {
 
+  public static readonly CURSOR_SIZE = 0.35
+
   public map: Map
   public context: Context
   public keyboard: Keyboard
+  public pixi: Pixi
   public ownPlayer: Player
 
   public onBuildFactory?: (coord: IGame.Coordinate) => void
@@ -41,6 +47,8 @@ class Interactions implements IGame.Sprite {
   /** Select pane when dragging */
   private select: Select
 
+  private cursor: ImageUI
+
   /** Tile that is currently hovered */
   private currentTile: Tile | null
 
@@ -50,12 +58,24 @@ class Interactions implements IGame.Sprite {
   /** Position of the mouse when down */
   private mouseDownPos: IGame.Position
 
-  constructor(map: Map, keyboard: Keyboard, ownPlayer: Player) {
+  constructor(map: Map, keyboard: Keyboard, pixi: Pixi, ownPlayer: Player) {
     this.map = map
     this.context = map.context
     this.keyboard = keyboard
+    this.pixi = pixi
     this.ownPlayer = ownPlayer
     this.state = InteractionState.IDLE
+
+    this.cursor = new ImageUI(this.context)
+    this.cursor.dim = {
+      width: this.context.sizes.ui.cursor,
+      height: this.context.sizes.ui.cursor,
+    }
+    this.cursor.anchorX = "right"
+    this.cursor.anchorY = "bottom"
+    this.cursor.texture = this.pixi.textures.getIcon("factory", Color.WHITE)
+    this.cursor.child().visible = false
+
     this.container = new Container()
     this.select = new Select(map.context)
     this.currentTile = null
@@ -70,6 +90,9 @@ class Interactions implements IGame.Sprite {
     this.container.interactive = true
     if (!this.container.children.includes(this.select.child())) {
       this.container.addChild(this.select.child())
+    }
+    if (!this.container.children.includes(this.cursor.child())) {
+      this.container.addChild(this.cursor.child())
     }
     this.setupMouseInteraction()
   }
@@ -90,7 +113,24 @@ class Interactions implements IGame.Sprite {
       this.selectedProbes.length = 0
     }
 
+    this.updateCursor(state)
     this.state = state
+  }
+
+  /** update the cursor depending on the state */
+  private updateCursor(state: InteractionState) {
+    let visible: boolean
+    if (state == InteractionState.BUILD_FACTORY) {
+      this.cursor.texture = this.pixi.textures.getIcon("factory", Color.WHITE)
+      visible = true
+    } else if (state == InteractionState.BUILD_TURRET) {
+      this.cursor.texture = this.pixi.textures.getIcon("turret", Color.WHITE)
+      visible = true
+    } else {
+      visible = false
+    }
+    this.cursor.compile()
+    this.cursor.child().visible = visible
   }
 
   /**
@@ -131,11 +171,12 @@ class Interactions implements IGame.Sprite {
   }
 
   private setupKeyboard() {
-    this.keyboard.listen(["f", "t", "a", "x"])
+    this.keyboard.listen(["f", "t", "a", "x", "s"])
     this.keyboard.addOnPress("f", () => this.updateBuildFactoryState())
     this.keyboard.addOnPress("t", () => this.updateBuildTurretState())
     this.keyboard.addOnPress("x", () => this.explodeProbes())
     this.keyboard.addOnPress("a", () => this.probesAttack())
+    this.keyboard.addOnPress("s", () => this.selectAllProbes())
   }
 
   /**
@@ -176,6 +217,19 @@ class Interactions implements IGame.Sprite {
       this.onProbesAttack(this.selectedProbes)
     }
     this.setState(InteractionState.IDLE)
+  }
+
+  private selectAllProbes() {
+    this.selectedProbes = [...this.ownPlayer.probes]
+    for (const probe of this.selectedProbes) {
+      probe.setState(ProbeState.SELECTED)
+    }
+    if (
+      this.selectedProbes.length > 0 &&
+      this.state != InteractionState.SELECT_PROBES
+    ) {
+      this.setState(InteractionState.SELECT_PROBES)
+    }
   }
 
   /**
@@ -245,7 +299,7 @@ class Interactions implements IGame.Sprite {
 
     } else if (this.state == InteractionState.SELECT_PROBES) {
       if (!tile) return
-      console.log(this.selectedProbes)
+
       if (this.onMoveProbes) {
         this.onMoveProbes(this.selectedProbes, tile.getCoord())
       }
@@ -273,9 +327,14 @@ class Interactions implements IGame.Sprite {
 
     this.container.on("pointermove", (e) => {
 
+      const pos = this.getMousePos(e)
+
+      this.cursor.pos = pos
+      this.cursor.compile()
+
       // update select rect
       if (this.select.getVisible()) {
-        this.select.setEnd(this.getMousePos(e))
+        this.select.setEnd(pos)
       }
 
       // update hover tile

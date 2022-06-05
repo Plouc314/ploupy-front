@@ -20,6 +20,7 @@ class Player implements IGame.Sprite {
   public username: string
   public money: number
   public score: number
+  public alive: boolean
   public color: Color
 
   public factories: Factory[]
@@ -35,6 +36,7 @@ class Player implements IGame.Sprite {
     this.username = model.username
     this.money = model.money
     this.score = model.score
+    this.alive = model.alive
     this.color = color
 
     this.map = map
@@ -61,6 +63,7 @@ class Player implements IGame.Sprite {
   public setModel(model: IModel.PlayerState) {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
+    this.alive = model.alive ?? this.alive
 
     // update factories
     for (const fm of model.factories) {

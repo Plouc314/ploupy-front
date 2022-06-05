@@ -70,6 +70,7 @@ function useFirebaseAuth() {
     uid: "",
     username: "",
     email: "",
+    avatar: "",
   })
   const [loading, setLoading] = useState(true)
 
@@ -103,6 +104,7 @@ function useFirebaseAuth() {
           uid: data.uid,
           email: data.email,
           username: data.username,
+          avatar: data.avatar,
         })
 
         // stop loading state
@@ -128,6 +130,7 @@ const userContext = createContext<Firebase.Auth>({
     uid: "",
     username: "",
     email: "",
+    avatar: "",
   },
   loading: true
 })

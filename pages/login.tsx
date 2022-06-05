@@ -22,7 +22,6 @@ import {
   Typography,
   Container,
 } from '@mui/material'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 
 // firebase
 import {
@@ -40,8 +39,16 @@ import { useToast } from '../src/hooks/useToast'
 // comm
 import API from '../src/comm/api'
 
+// pixi
+import { AVATARS } from '../src/pixi/constants'
+import Textures from '../src/pixi/textures'
 
 const theme = createTheme()
+
+const getRandomAvatar = () => {
+  const idx = Math.floor(Math.random() * AVATARS.length)
+  return AVATARS[idx]
+}
 
 export interface PageLoginProps { }
 
@@ -56,6 +63,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [displayAvatar, setDisplayAvatar] = useState(getRandomAvatar())
 
   const reset = () => {
     setEmail("")
@@ -88,6 +96,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             uid: response.user.uid,
             username: username,
             email: email,
+            avatar: getRandomAvatar(),
           }
           await API.createUser(user)
 
@@ -112,9 +121,10 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             alignItems: 'center',
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
+          <Avatar
+            src={Textures.getAvatarURL(displayAvatar)}
+            sx={{ m: 1, bgcolor: 'secondary.main' }}
+          />
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>

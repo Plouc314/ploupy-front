@@ -12,7 +12,6 @@ import Color from "../../utils/color"
 import UI from "../ui"
 import UniformUI from "./node/uniform"
 import ImageUI from "./node/image"
-import { COLORS } from "../constants"
 import Textures from "../textures"
 
 interface PlayerBarSizes {
@@ -24,6 +23,8 @@ interface PlayerBarSizes {
   xValueMoney: number
   xIconFactories: number
   xValueFactories: number
+  xIconTurrets: number
+  xValueTurrets: number
   xIconProbes: number
   xValueProbes: number
 }
@@ -35,6 +36,9 @@ class PlayerBar implements IGame.Sprite {
   public player: Player
   public context: Context
 
+  /**keep trak of player alive attribute */
+  public alive: boolean
+
   public sizes: PlayerBarSizes
 
   private container: Container
@@ -44,6 +48,8 @@ class PlayerBar implements IGame.Sprite {
   private valueMoney: TextUI
   private iconFactories: ImageUI
   private valueFactories: TextUI
+  private iconTurrets: ImageUI
+  private valueTurrets: TextUI
   private iconProbes: ImageUI
   private valueProbes: TextUI
 
@@ -51,6 +57,7 @@ class PlayerBar implements IGame.Sprite {
     this.ui = ui
     this.textures = ui.game.pixi.textures
     this.player = player
+    this.alive = player.alive
     this.context = context
 
     this.sizes = context.scaleUI({
@@ -62,8 +69,10 @@ class PlayerBar implements IGame.Sprite {
       xValueMoney: 210,
       xIconFactories: 260,
       xValueFactories: 320,
-      xIconProbes: 370,
-      xValueProbes: 430,
+      xIconTurrets: 370,
+      xValueTurrets: 430,
+      xIconProbes: 480,
+      xValueProbes: 540,
     })
 
     this.container = new Container()
@@ -127,6 +136,20 @@ class PlayerBar implements IGame.Sprite {
     this.valueFactories.pos.x = this.sizes.xValueFactories
     this.valueFactories.compile()
 
+    this.iconTurrets = new ImageUI(context)
+    this.iconTurrets.texture = this.textures.getIcon("turret", Color.WHITE)
+    this.iconTurrets.setProps(propsIcon)
+    this.iconTurrets.setProps(propsCenter)
+    this.iconTurrets.pos.x = this.sizes.xIconTurrets
+    this.iconTurrets.compile()
+
+    this.valueTurrets = new TextUI(context)
+    this.valueTurrets.setProps(propsCenter)
+    this.valueTurrets.setProps(propsText)
+    this.valueTurrets.anchorX = "right"
+    this.valueTurrets.pos.x = this.sizes.xValueTurrets
+    this.valueTurrets.compile()
+
     this.iconProbes = new ImageUI(context)
     this.iconProbes.texture = this.textures.getIcon("probe", Color.WHITE)
     this.iconProbes.setProps(propsIcon)
@@ -147,6 +170,8 @@ class PlayerBar implements IGame.Sprite {
     this.container.addChild(this.valueMoney.child())
     this.container.addChild(this.iconFactories.child())
     this.container.addChild(this.valueFactories.child())
+    this.container.addChild(this.iconTurrets.child())
+    this.container.addChild(this.valueTurrets.child())
     this.container.addChild(this.iconProbes.child())
     this.container.addChild(this.valueProbes.child())
   }
@@ -154,10 +179,28 @@ class PlayerBar implements IGame.Sprite {
   public update(dt: number) {
     this.valueFactories.text = this.player.factories.length.toString()
     this.valueFactories.compile()
+    this.valueTurrets.text = this.player.turrets.length.toString()
+    this.valueTurrets.compile()
     this.valueProbes.text = this.player.probes.length.toString()
     this.valueProbes.compile()
     this.valueMoney.text = this.player.money.toString()
     this.valueMoney.compile()
+
+    if (this.alive != this.player.alive) {
+      this.alive = this.player.alive
+      const color = Color.fromRgb(150, 150, 150)
+      this.username.color = color
+      this.valueMoney.color = color
+      this.valueFactories.color = color
+      this.valueTurrets.color = color
+      this.valueProbes.color = color
+      this.username.compile()
+      this.valueMoney.compile()
+      this.valueFactories.compile()
+      this.valueTurrets.compile()
+      this.valueProbes.compile()
+    }
+
   }
 
   public child(): Container {

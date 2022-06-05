@@ -11,12 +11,14 @@ import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
-import Comm from "./comm"
+import Comm from "../comm/comm"
 import Factory from "./entity/factory"
 import Probe from "./entity/probe"
 import Interactions from "./interactions"
 import Context from "./context"
 import Turret from "./entity/turret"
+import { COLORS } from "./constants"
+import Animations from "./animations"
 
 
 
@@ -31,6 +33,7 @@ class Game {
   public map: Map
   public interactions: Interactions
   public ui: UI
+  public animations: Animations
   public layout: Container
 
   private currentTime: number
@@ -45,18 +48,8 @@ class Game {
 
     this.currentTime = Date.now()
 
-    // setup game
-    const colors = [
-      Color.fromRgb(250, 100, 100),
-      Color.fromRgb(100, 250, 100),
-      Color.fromRgb(100, 100, 250),
-      Color.fromRgb(200, 200, 100),
-      Color.fromRgb(100, 200, 200),
-      Color.fromRgb(200, 100, 200),
-    ]
-
     this.players = model.players.map((pm, i) =>
-      new Player(pm, colors[i], this.map)
+      new Player(pm, COLORS[i], this.map)
     )
 
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
@@ -70,6 +63,11 @@ class Game {
     }
 
     this.map.setModel(mapModel)
+
+    this.animations = new Animations(this.context)
+    this.animations.child().position.x = Context.MARGIN
+    this.animations.child().position.y = UI.HEIGHT + Context.MARGIN
+
 
     this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
@@ -112,6 +110,10 @@ class Game {
         probe = opponent.probes.find(p => p.getId() === data.probe.id)
         if (!probe) continue
         opponent.removeProbe(probe)
+        const turret = player.turrets.find(t => t.getId() === data.turret_id)
+        if (turret) {
+          this.animations.addTurretFire(turret, probe)
+        }
         break
       }
     })
@@ -119,7 +121,6 @@ class Game {
     this.ui = new UI(this, this.context)
     this.ui.child().position.x = Context.MARGIN
     this.ui.child().position.y = Context.MARGIN
-
 
     // create main layout
     this.layout = new Container()
@@ -137,6 +138,7 @@ class Game {
       player.child().position.y = UI.HEIGHT + Context.MARGIN
       this.layout.addChild(player.child())
     }
+    this.layout.addChild(this.animations.child())
     this.layout.addChild(this.ui.child())
 
     // link action errors to ui
@@ -144,7 +146,7 @@ class Game {
       this.ui.setGameActionError(msg)
     })
 
-    this.interactions = new Interactions(this.map, this.keyboard, this.ownPlayer)
+    this.interactions = new Interactions(this.map, this.keyboard, this.pixi, this.ownPlayer)
 
     this.interactions.setLayout(this.layout)
 

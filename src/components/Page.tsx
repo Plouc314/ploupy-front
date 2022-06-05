@@ -10,7 +10,7 @@ import { FC } from '../../types'
 
 // mui
 import {
-    Container,
+  Container,
 } from '@mui/material'
 
 // utils
@@ -18,71 +18,65 @@ import { useAuth } from '../utils/Firebase'
 
 // components
 import Loading from './Loading'
+import { useComm } from '../hooks/useComm'
 
 export interface PageProps {
-    /**
-     * Handeln the authentification, render the page only
-     * if the user is logged in, otherwise render a loading page.
-     */
-    withAuth?: boolean
-    /**
-     * If the page needs the data of the db.
-     * It will wait to have fetched them to render the page.
-     */
-    withData?: boolean
-    /** The AppHeader won't be rendered */
-    noAppHeader?: boolean
-    /** The title set in the head tag */
-    title: string
-    /** Displayed in the AppHeader bar */
-    headerActions?: JSX.Element
+  /**
+   * Handeln the authentification, render the page only
+   * if the user is logged in, otherwise render a loading page.
+   */
+  withAuth?: boolean
+  /**
+   * If the page need socket-io to be connected
+   */
+  withComm?: boolean
+  /** The title set in the head tag */
+  title: string
 }
 
 const Page: FC<PageProps> = (props) => {
 
-    // doc: https://firebase.google.com/docs/auth/web/manage-users#web-v8_3
-    const { loading, user } = useAuth()
-    const router = useRouter()
+  // doc: https://firebase.google.com/docs/auth/web/manage-users#web-v8_3
+  const { loading, user } = useAuth()
+  const comm = useComm()
+  const router = useRouter()
 
-    // Implement the redirecting as an effect
-    // Doing it during rendering (ex: in the if/else statement below)
-    // would result in a Unhandled RuntimeError.
-    useEffect(() => {
+  // Implement the redirecting as an effect
+  // Doing it during rendering (ex: in the if/else statement below)
+  // would result in a Unhandled RuntimeError.
+  useEffect(() => {
 
-        // only care about auth if specified
-        if (!props.withAuth) {
-            return
-        }
-
-        if (!loading && !user.connected) {
-            // if it is not loading and user is null -> redirect to login page
-            router.replace('/login')
-        }
-    }, [loading, user])
-
-    let body: JSX.Element
-
-    if (props.withAuth && !user.connected) {
-        // render loading page
-        body = <Loading label="Loading..." />
-    } else if (props.noAppHeader) {
-        // render page without header
-        body = <>{props.children}</>
-    } else {
-        // render page with header
-        body = <>{props.children}</>
+    // only care about auth if specified
+    if (!props.withAuth) {
+      return
     }
 
-    return (
-        <>
-            <Head>
-                <title>{props.title}</title>
-            </Head>
-            <Container maxWidth='xl'>
-                {body}
-            </Container>
-        </>
-    )
+    if (!loading && !user.connected) {
+      // if it is not loading and user is null -> redirect to login page
+      router.replace('/login')
+    }
+  }, [loading, user])
+
+  let body: JSX.Element
+
+  if ((props.withAuth && !user.connected) || (props.withComm && !comm)) {
+    // render loading page
+    body = <Loading label="Loading..." />
+  } else {
+    // render page with header
+    body = <>{props.children}</>
+  }
+
+  return (
+    <>
+      <Head>
+        <title>{props.title}</title>
+      </Head>
+      <Container maxWidth='xl'>
+        {body}
+      </Container>
+    </>
+  )
 }
 
 export default Page

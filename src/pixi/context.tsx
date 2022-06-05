@@ -8,6 +8,7 @@ import Factory from "./entity/factory"
 import Probe from "./entity/probe"
 import Tile from "./entity/tile"
 import Turret from "./entity/turret"
+import Interactions from "./interactions"
 
 /**
  * Graphic context
@@ -44,7 +45,8 @@ class Context {
       probe: Probe.SIZE * this.unit,
       ui: {
         height: UI.HEIGHT,
-        width: this.pos(this.config.dim).x
+        width: this.pos(this.config.dim).x,
+        cursor: Interactions.CURSOR_SIZE * this.unit,
       },
     }
   }
