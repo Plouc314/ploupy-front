@@ -2,177 +2,191 @@
 import { useRouter } from 'next/router'
 
 // react
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 
 // types
 import { FC, IModel } from '../types'
 
 // mui
 import {
-  AppBar,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Grid,
+  Avatar,
+  Collapse,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   Paper,
-  TextField,
-  Toolbar,
+  Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
-
-// firebase
-import { signOut } from "firebase/auth"
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 
 // components
 import Page from '../src/components/Page'
+import MenuBar from '../src/components/MenuBar'
+import Lobby from '../src/components/Lobby'
+import Textures from '../src/pixi/textures';
+import { Box } from '@mui/system';
 
-// hooks
-import { useToast } from '../src/hooks/useToast'
+const docEntities = [
+  {
+    "primary": "Factory",
+    "price": 100,
+    "secondary": ["Build robots at regular interval"],
+  },
+  {
+    "primary": "Turret",
+    "price": 70,
+    "secondary": [
+      "Fire at one opponent robot at regular intervals",
+      "(if any in range)",
+    ],
+  },
+  {
+    "primary": "Robot",
+    "price": 10,
+    "secondary": [
+      "Factory built, move to nearby tiles to increase their occupation",
+      "(makes the tile more colourful). Can be selected and receive",
+      "manual orders",
+    ],
+  },
+]
 
-// utils
-import { auth, useAuth } from '../src/utils/Firebase'
-
-// pixi
-import useSio from '../src/comm/sio'
-import Pixi from '../src/pixi/pixi'
-import Comm from '../src/pixi/comm'
-import Game from '../src/pixi/game'
-
+const docControls = [
+  {
+    "control": "F",
+    "primary": "Toggle build factory",
+    "secondary": ["Press F and click on a tile to build a factory"],
+  },
+  {
+    "control": "T",
+    "primary": "Toggle build turret",
+    "secondary": ["Press T and click on a tile to build a turret"],
+  },
+  {
+    "control": "X",
+    "primary": "Explode selected robots",
+    "secondary": ["Press X with selected robots will instantly explode them"],
+  },
+  {
+    "control": "A",
+    "primary": "Make selected robots attack",
+    "secondary": [
+      "Press A with selected robots will make them target the closest opponent",
+      "territory and explode on arrival"
+    ],
+  },
+  {
+    "control": "S",
+    "primary": "Select all",
+    "secondary": ["Press S will select all robots"],
+  },
+]
 
 export interface PageHomeProps { }
-
 
 const PageHome: FC<PageHomeProps> = (props) => {
 
   const router = useRouter()
-  const { generateToast } = useToast()
-  const { user } = useAuth()
-  const { connected, sio } = useSio()
-  const [comm, setComm] = useState<Comm | null>(null)
-  const [game, setGame] = useState<Game | null>(null)
-  const [nPlayer, setNPlayer] = useState(2)
-  const refQueues = useRef<IModel.Queue[]>([])
-  const [queues, setQueues] = useState<IModel.Queue[]>([])
 
-  // list of all ids of queues where the user is currently in
-  const [activeQueueIds, setActiveQueueIds] = useState<string[]>([])
-
-  const onQueueState = (queue: IModel.Queue) => {
-
-    // check if queue exists
-    const idx = refQueues.current.findIndex(q => q.qid === queue.qid)
-    if (idx == -1) {
-      // add it
-      refQueues.current.push(queue)
-    } else {
-      // update players in queue
-      refQueues.current[idx] = queue
-    }
-    refQueues.current = refQueues.current.filter(q => q.active && q.users.length > 0)
-
-    // update active queue ids
-    setActiveQueueIds(refQueues.current
-      .filter(q => q.users.includes(user.username))
-      .map(q => q.qid)
-    )
-
-    setQueues([...refQueues.current])
-  }
-
-  useEffect(() => {
-    if (connected && sio) {
-      const _comm = new Comm(sio)
-      _comm.setOnStartGame((gameState) => {
-        const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
-        const pixi = new Pixi(canvas)
-        setGame(new Game(pixi, _comm, user, gameState))
-      })
-      _comm.setOnQueueState((queue) => onQueueState(queue))
-      setComm(_comm)
-    }
-  }, [connected])
+  const [shows, setShows] = useState({
+    entities: false,
+    controls: false,
+  })
 
   return (
     <Page
       withAuth
       title='Home'
     >
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
-            Ploupy
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={() => {
-              signOut(auth)
-                .then(() => {
-                  router.replace("/login")
-                })
-            }}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <MenuBar />
       <Paper sx={{ margin: 2, padding: 2 }}>
-        <Typography>
-          {"This site is in so early development I don't know what it's going to look like. \n Come back someday, maybe."}
-        </Typography>
-        <Grid
-          alignItems="center"
-        >
-          <TextField
-            id="n-player"
-            variant="standard"
-            type="number"
-            value={nPlayer}
-            onChange={(e) => { setNPlayer(Number(e.target.value)) }}
-          />
-          <Button
-            onClick={() => {
-              if (!comm) {
-                generateToast("Not connected", "error")
-                return
-              }
-              comm.sendActionCreateQueue({ n_player: nPlayer })
-            }}
+        <Typography variant="h4" sx={{ color: "text.secondary" }}>
+          <IconButton
+            onClick={() => { setShows({ ...shows, entities: !shows.entities }) }}
           >
-            Create game
-          </Button>
-        </Grid>
+            {shows.entities ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+          </IconButton>
+          Entities
+        </Typography>
+        <Collapse
+          in={shows.entities}
+        >
+          {docEntities.map((doc, i) => (
+            <Box
+              key={`doc-entt-${i}`}
+              sx={{ px: 2, py: 1 }}
+            >
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="h6">
+                  {doc.primary}
+                </Typography>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  sx={{ mr: 1 }}
+                >
+                  <Avatar
+                    src={Textures.getIconURL("money")}
+                    sx={{ width: 15, height: 15, pb: 0.5 }}
+                  />
+                  <Typography sx={{ fontWeight: "600" }}>
+                    {doc.price}
+                  </Typography>
+                </Stack>
+              </Stack>
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                align="justify"
+                sx={{ px: 1 }}
+              >
+                {doc.secondary.join(" ")}
+              </Typography>
+            </Box>
+          ))
+          }
+        </Collapse>
+
+        <Typography variant="h4" sx={{ color: "text.secondary" }}>
+          <IconButton
+            onClick={() => { setShows({ ...shows, controls: !shows.controls }) }}
+          >
+            {shows.controls ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+          </IconButton>
+          Controls
+        </Typography>
+        <Collapse
+          in={shows.controls}
+        >
+          <List>
+            {docControls.map((doc, i) => (
+              <ListItem key={`doc-ctrl-${i}`}>
+                <Typography
+                  sx={{ pr: 3, fontWeight: 900, flexGrow: 0 }}
+                >
+                  {doc.control}
+                </Typography>
+                <ListItemText
+                  primary={doc.primary}
+                  secondary={doc.secondary.join(" ")}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Collapse>
       </Paper>
-      {queues.map(queue => (
-        <Card key={queue.qid}>
-          <CardContent>
-            <Typography
-              variant="subtitle1"
-            >
-              {`Basic game ${queue.users.length} / ${queue.n_player}`}
-            </Typography>
-            {queue.users.join(", ")}
-          </CardContent>
-          <CardActions>
-            <Button
-              onClick={() => {
-                if (!comm) {
-                  generateToast("Not connected", "error")
-                  return
-                }
-                if (activeQueueIds.includes(queue.qid)) {
-                  comm.sendActionLeaveQueue({ qid: queue.qid })
-                } else {
-                  comm.sendActionJoinQueue({ qid: queue.qid })
-                }
-              }}
-            >
-              {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
-            </Button>
-          </CardActions>
-        </Card>
-      ))}
-      <canvas id="PixiCanvas" />
+      <Lobby />
+
     </Page >
   )
 }

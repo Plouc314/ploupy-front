@@ -11,6 +11,7 @@ export namespace Firebase {
     uid: string
     username: string
     email: string
+    avatar: string
   }
 
   export type Auth = {
@@ -46,13 +47,14 @@ export namespace IModel {
     uid: string
     username: string
     email: string
+    avatar: string
   }
 
   export type Queue = {
     qid: IGame.ID
     active: boolean
     n_player: number
-    users: string[]
+    users: User[]
   }
 
   export type GameConfig = {
@@ -91,12 +93,15 @@ export namespace IModel {
     height: number
     /** Global width of the ui */
     width: number
+    /** size of sprite that may be displayed next to the cursor */
+    cursor: number
   }
 
   export type Player = {
     username: string
     money: number
     score: number
+    alive: boolean
     factories: Factory[]
     turrets: Turret[]
     probes: Probe[]
@@ -106,6 +111,7 @@ export namespace IModel {
     username: string
     money: number | null
     score: number | null
+    alive: boolean | null
     factories: FactoryState[]
     turrets: TurretState[]
     probes: ProbeState[]
@@ -184,6 +190,10 @@ export namespace IModel {
     players: PlayerState[]
   }
 
+  export type ActionResignGame = {
+
+  }
+
   export type ActionBuildFactory = {
     coord: IGame.Coordinate
   }
@@ -220,7 +230,6 @@ export namespace IComm {
     qid: IGame.ID
   }
 
-
   export type Response<T extends {} = {}> = T & {
     success: boolean
     msg: string
@@ -228,6 +237,10 @@ export namespace IComm {
 
   export type UserResponse = {
     user: IModel.User
+  }
+
+  export type GameResultResponse = {
+    ranking: IModel.User[]
   }
 
   export type BuildFactoryResponse = {

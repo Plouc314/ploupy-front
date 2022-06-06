@@ -1,3 +1,5 @@
+export const VERSION = "0.01"
+
 export const FLAG_DEPLOY: boolean = true
 
 export const URL_API: string = FLAG_DEPLOY ?
