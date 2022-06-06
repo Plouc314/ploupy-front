@@ -140,7 +140,7 @@ const PageGame: FC<PageGameProps> = (props) => {
         <DialogContent>
           <List>
             {result?.ranking.map((user, i) => (
-              <ListItem>
+              <ListItem key={`game-rank-${i}`}>
                 <ListItemAvatar>
                   <Avatar src={Textures.getAvatarURL(user.avatar)} />
                 </ListItemAvatar>

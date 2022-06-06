@@ -118,56 +118,58 @@ const Lobby: FC<LobbyProps> = (props) => {
         </Button>
       </Stack>
       {queues.map(queue => (
-        <>
+        <Stack
+          key={queue.qid}
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{
+            width: "auto",
+            padding: 1,
+          }}
+        >
           <Stack
             direction="row"
-            justifyContent="space-between"
             alignItems="center"
-            sx={{
-              width: "auto",
-              padding: 1,
-            }}
           >
-            <Stack
-              direction="row"
-              alignItems="center"
-            >
-              <Typography
-                sx={{
-                  display: "inline",
-                  fontWeight: "bold",
-                  marginRight: 5,
-                }}
-              >
-                {`${queue.users.length} / ${queue.n_player}`}
-              </Typography>
-
-              {queue.users.map((user) => (
-                <Tooltip title={user.username}>
-                  <Avatar
-                    src={Textures.getAvatarURL(user.avatar)}
-                  />
-                </Tooltip>
-              ))}
-            </Stack>
-
-            <Button
-              variant="contained"
-              size="small"
-              color={activeQueueIds.includes(queue.qid) ? "secondary" : "primary"}
-              onClick={() => {
-                if (!comm) return
-                if (activeQueueIds.includes(queue.qid)) {
-                  comm.sendActionLeaveQueue({ qid: queue.qid })
-                } else {
-                  comm.sendActionJoinQueue({ qid: queue.qid })
-                }
+            <Typography
+              sx={{
+                display: "inline",
+                fontWeight: "bold",
+                marginRight: 5,
               }}
             >
-              {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
-            </Button>
+              {`${queue.users.length} / ${queue.n_player}`}
+            </Typography>
+
+            {queue.users.map((user) => (
+              <Tooltip
+                key={`${queue.qid}-${user.uid}`}
+                title={user.username}
+              >
+                <Avatar
+                  src={Textures.getAvatarURL(user.avatar)}
+                />
+              </Tooltip>
+            ))}
           </Stack>
-        </>
+
+          <Button
+            variant="contained"
+            size="small"
+            color={activeQueueIds.includes(queue.qid) ? "secondary" : "primary"}
+            onClick={() => {
+              if (!comm) return
+              if (activeQueueIds.includes(queue.qid)) {
+                comm.sendActionLeaveQueue({ qid: queue.qid })
+              } else {
+                comm.sendActionJoinQueue({ qid: queue.qid })
+              }
+            }}
+          >
+            {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
+          </Button>
+        </Stack>
       ))}
       <div /> {/* footer -> to display a divider at the bottom*/}
     </Stack>
