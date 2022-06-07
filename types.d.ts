@@ -63,13 +63,14 @@ export namespace IModel {
     initial_money: number
     initial_n_probes: number
     base_income: number
+    building_occupation_min: number
     factory_price: number
     factory_max_probe: number
-    factory_occupation_min: number
     factory_build_probe_delay: number
     max_occupation: number
     probe_speed: number
     probe_price: number
+    probe_claim_delay: number
     probe_maintenance_costs: number
     turret_price: number
     turret_fire_delay: number
@@ -237,6 +238,10 @@ export namespace IComm {
 
   export type UserResponse = {
     user: IModel.User
+  }
+
+  export type QueueStateResponse = {
+    queues: IModel.Queue[]
   }
 
   export type GameResultResponse = {

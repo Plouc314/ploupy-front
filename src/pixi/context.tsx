@@ -11,8 +11,9 @@ import Turret from "./entity/turret"
 import Interactions from "./interactions"
 
 /**
- * Graphic context
+ * Global context
  * 
+ * Store game config
  * Handle conversion between pixel - coordinate
  */
 class Context {

@@ -74,6 +74,13 @@ class Map implements IGame.Sprite {
     return this.tiles2d[key.x][key.y]
   }
 
+  /**
+   * Return a flattened array of tiles of the map
+   */
+  public allTiles(): Tile[] {
+    return ([] as Tile[]).concat(...this.tiles2d)
+  }
+
   public update(dt: number) { }
 
   public child(): Container {

@@ -27,6 +27,12 @@ class Player implements IGame.Sprite {
   public turrets: Turret[]
   public probes: Probe[]
 
+  /**
+   * if the player's tile that can support a building are
+   * highlighted, used by `Tile`, set in `Interactions`
+   */
+  public isTileHighlightState: boolean
+
   private container: Container
   private layoutFactories: Container
   private layoutTurrets: Container
@@ -45,6 +51,8 @@ class Player implements IGame.Sprite {
     this.factories = []
     this.turrets = []
     this.probes = []
+
+    this.isTileHighlightState = false
 
     this.layoutFactories = new Container()
     this.layoutTurrets = new Container()

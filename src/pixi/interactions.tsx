@@ -113,6 +113,35 @@ class Interactions implements IGame.Sprite {
       this.selectedProbes.length = 0
     }
 
+    // remove highlight on tiles
+    if (
+      (this.state == InteractionState.BUILD_FACTORY ||
+        this.state == InteractionState.BUILD_TURRET) &&
+      (state == InteractionState.IDLE ||
+        state == InteractionState.SELECT_PROBES)
+    ) {
+      this.ownPlayer.isTileHighlightState = false
+      for (const tile of this.map.allTiles()) {
+        tile.setHighlightState(false)
+      }
+    }
+
+    // add highlight on tiles
+    if (
+      (state == InteractionState.BUILD_FACTORY ||
+        state == InteractionState.BUILD_TURRET) &&
+      (this.state == InteractionState.IDLE ||
+        this.state == InteractionState.SELECT_PROBES)
+    ) {
+
+      this.ownPlayer.isTileHighlightState = true
+      for (const tile of this.map.allTiles()) {
+        if (tile.owner === this.ownPlayer) {
+          tile.setHighlightState(true)
+        }
+      }
+    }
+
     this.updateCursor(state)
     this.state = state
   }

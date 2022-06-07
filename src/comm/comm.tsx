@@ -21,6 +21,12 @@ class Comm {
     this.onGameActionError = cb
   }
 
+  public refreshQueueState() {
+    this.sio.emit("queue_state", null, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
   public sendActionCreateQueue(data: IComm.ActionCreateQueue) {
     this.sio.emit("create_queue", data, (response: IComm.Response) => {
       console.log(response)
@@ -87,7 +93,7 @@ class Comm {
     })
   }
 
-  public setOnQueueState(cb: (data: IModel.Queue) => void) {
+  public setOnQueueState(cb: (data: IComm.QueueStateResponse) => void) {
     this.sio.removeAllListeners("queue_state")
     this.sio.on("queue_state", (data) => { cb(data) })
   }

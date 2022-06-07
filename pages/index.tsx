@@ -101,6 +101,7 @@ const PageHome: FC<PageHomeProps> = (props) => {
   return (
     <Page
       withAuth
+      withComm
       title='Home'
     >
       <MenuBar />
