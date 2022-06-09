@@ -113,6 +113,35 @@ class Interactions implements IGame.Sprite {
       this.selectedProbes.length = 0
     }
 
+    // remove highlight on tiles
+    if (
+      (this.state == InteractionState.BUILD_FACTORY ||
+        this.state == InteractionState.BUILD_TURRET) &&
+      (state == InteractionState.IDLE ||
+        state == InteractionState.SELECT_PROBES)
+    ) {
+      this.ownPlayer.isTileHighlightState = false
+      for (const tile of this.map.allTiles()) {
+        tile.setHighlightState(false)
+      }
+    }
+
+    // add highlight on tiles
+    if (
+      (state == InteractionState.BUILD_FACTORY ||
+        state == InteractionState.BUILD_TURRET) &&
+      (this.state == InteractionState.IDLE ||
+        this.state == InteractionState.SELECT_PROBES)
+    ) {
+
+      this.ownPlayer.isTileHighlightState = true
+      for (const tile of this.map.allTiles()) {
+        if (tile.owner === this.ownPlayer) {
+          tile.setHighlightState(true)
+        }
+      }
+    }
+
     this.updateCursor(state)
     this.state = state
   }
@@ -171,12 +200,13 @@ class Interactions implements IGame.Sprite {
   }
 
   private setupKeyboard() {
-    this.keyboard.listen(["f", "t", "a", "x", "s"])
+    this.keyboard.listen(["f", "t", "a", "x", "s", Keyboard.ESCAPE])
     this.keyboard.addOnPress("f", () => this.updateBuildFactoryState())
     this.keyboard.addOnPress("t", () => this.updateBuildTurretState())
     this.keyboard.addOnPress("x", () => this.explodeProbes())
     this.keyboard.addOnPress("a", () => this.probesAttack())
     this.keyboard.addOnPress("s", () => this.selectAllProbes())
+    this.keyboard.addOnPress(Keyboard.ESCAPE, () => this.backToIdle())
   }
 
   /**
@@ -230,6 +260,10 @@ class Interactions implements IGame.Sprite {
     ) {
       this.setState(InteractionState.SELECT_PROBES)
     }
+  }
+
+  private backToIdle() {
+    this.setState(InteractionState.IDLE)
   }
 
   /**

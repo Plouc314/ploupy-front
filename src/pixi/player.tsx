@@ -21,11 +21,18 @@ class Player implements IGame.Sprite {
   public money: number
   public score: number
   public alive: boolean
+  public income: number
   public color: Color
 
   public factories: Factory[]
   public turrets: Turret[]
   public probes: Probe[]
+
+  /**
+   * if the player's tile that can support a building are
+   * highlighted, used by `Tile`, set in `Interactions`
+   */
+  public isTileHighlightState: boolean
 
   private container: Container
   private layoutFactories: Container
@@ -37,6 +44,7 @@ class Player implements IGame.Sprite {
     this.money = model.money
     this.score = model.score
     this.alive = model.alive
+    this.income = model.income
     this.color = color
 
     this.map = map
@@ -45,6 +53,8 @@ class Player implements IGame.Sprite {
     this.factories = []
     this.turrets = []
     this.probes = []
+
+    this.isTileHighlightState = false
 
     this.layoutFactories = new Container()
     this.layoutTurrets = new Container()
@@ -64,6 +74,7 @@ class Player implements IGame.Sprite {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
     this.alive = model.alive ?? this.alive
+    this.income = model.income ?? this.income
 
     // update factories
     for (const fm of model.factories) {

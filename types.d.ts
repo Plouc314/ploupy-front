@@ -63,17 +63,19 @@ export namespace IModel {
     initial_money: number
     initial_n_probes: number
     base_income: number
+    building_occupation_min: number
     factory_price: number
     factory_max_probe: number
-    factory_occupation_min: number
     factory_build_probe_delay: number
     max_occupation: number
     probe_speed: number
     probe_price: number
+    probe_claim_delay: number
     probe_maintenance_costs: number
     turret_price: number
     turret_fire_delay: number
     turret_scope: number
+    turret_maintenance_costs: number
     income_rate: number
     deprecate_rate: number
   }
@@ -102,6 +104,7 @@ export namespace IModel {
     money: number
     score: number
     alive: boolean
+    income: number
     factories: Factory[]
     turrets: Turret[]
     probes: Probe[]
@@ -112,6 +115,7 @@ export namespace IModel {
     money: number | null
     score: number | null
     alive: boolean | null
+    income: number | null
     factories: FactoryState[]
     turrets: TurretState[]
     probes: ProbeState[]
@@ -237,6 +241,10 @@ export namespace IComm {
 
   export type UserResponse = {
     user: IModel.User
+  }
+
+  export type QueueStateResponse = {
+    queues: IModel.Queue[]
   }
 
   export type GameResultResponse = {

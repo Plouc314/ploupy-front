@@ -14,7 +14,7 @@ function useCommInternal(): Comm | null {
   const { connected, sio } = useSio()
 
   useEffect(() => {
-    if (connected && sio) {
+    if (connected && sio && !comm) {
       setComm(new Comm(sio))
     }
   }, [connected, sio])

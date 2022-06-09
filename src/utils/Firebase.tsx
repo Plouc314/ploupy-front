@@ -1,5 +1,5 @@
 // react
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 
 // types
 import { FC } from '../../types'
@@ -12,6 +12,9 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
 } from 'firebase/auth'
+
+// hooks
+import useSingleEffect from '../hooks/useSingleEffect'
 
 // comm
 import API from '../comm/api'
@@ -75,11 +78,11 @@ function useFirebaseAuth() {
   const [loading, setLoading] = useState(true)
 
   // listen for Firebase state change
-  // use an useEffect hook to prevent setting up the observer at each rerender
-  useEffect(() => {
-    onAuthStateChanged(auth, async (_user) => {
+  useSingleEffect(() => {
 
-      if (_user) { // signed in
+    onAuthStateChanged(auth, (_user) => {
+
+      if (_user && !user.connected) { // signed in
 
         // start loading state
         setLoading(true)
@@ -88,34 +91,37 @@ function useFirebaseAuth() {
         const creation = _user.metadata.creationTime ? new Date(_user.metadata.creationTime).getTime() : Date.now()
         const lastSignIn = _user.metadata.lastSignInTime ? new Date(_user.metadata.lastSignInTime).getTime() : Date.now()
         // if the user was created less than a minute ago -> wait for 2 sec
+        let delay = 0
         if (lastSignIn - creation < 60000) {
-          await new Promise(r => setTimeout(r, 2000));
+          delay = 2000
         }
+        setTimeout(() => {
+          API.getUserData({ uid: _user.uid })
+            .then((data) => {
+              if (!data) {
+                throw new Error(`No user found for uid: ${_user.uid}`)
+              }
 
-        // get user data from server
-        const data = await API.getUserData({ uid: _user.uid })
+              setUser({
+                connected: true,
+                uid: data.uid,
+                email: data.email,
+                username: data.username,
+                avatar: data.avatar,
+              })
 
-        if (!data) {
-          throw new Error(`No user found for uid: ${_user.uid}`)
-        }
-
-        setUser({
-          connected: true,
-          uid: data.uid,
-          email: data.email,
-          username: data.username,
-          avatar: data.avatar,
-        })
-
-        // stop loading state
-        setLoading(false)
+              // stop loading state
+              setLoading(false)
+            })
+        }, delay)
 
       } else { // not signed in
         setUser({ ...user, connected: false })
         setLoading(false)
       }
+
     })
-  }, [] /* the effect is only executed once */)
+  })
 
   return { user: user, loading: loading } as Firebase.Auth
 }

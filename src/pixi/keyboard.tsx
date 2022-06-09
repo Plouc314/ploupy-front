@@ -11,7 +11,7 @@ export interface KeyHandler {
 }
 
 class Keyboard {
-  private static readonly ESCAPE = "Escape"
+  public static readonly ESCAPE = "Escape"
   private handlers: Record<string, KeyHandler>
   private states: Record<string, KeyState>
   public active: boolean = false
@@ -38,10 +38,6 @@ class Keyboard {
 
   private onKeyDown(e: KeyboardEvent) {
     if (!this.active) return
-
-    if (e.key === Keyboard.ESCAPE) {
-      this.active = false
-    }
 
     if (!(e.key in this.states)) return
 

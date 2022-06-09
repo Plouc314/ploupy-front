@@ -1,4 +1,4 @@
-export const VERSION = "0.01"
+export const VERSION = "0.02"
 
 export const FLAG_DEPLOY: boolean = true
 

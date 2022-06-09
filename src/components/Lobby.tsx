@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect, useRef } from 'react'
 
 // types
-import { FC, IModel } from '../../types'
+import { FC, IComm, IModel } from '../../types'
 
 // mui
 import {
@@ -22,9 +22,12 @@ import {
 // hooks
 import { useComm } from '../hooks/useComm'
 import { useGameData } from '../hooks/useGameData'
+import useSingleEffect from '../hooks/useSingleEffect'
 
 // utils
 import { useAuth } from '../utils/Firebase'
+
+// pixi
 import Textures from '../pixi/textures'
 
 
@@ -47,18 +50,20 @@ const Lobby: FC<LobbyProps> = (props) => {
   // list of all ids of queues where the user is currently in
   const [activeQueueIds, setActiveQueueIds] = useState<string[]>([])
 
-  const onQueueState = (queue: IModel.Queue) => {
+  const onQueueState = (data: IComm.QueueStateResponse) => {
 
-    // check if queue exists
-    const idx = refQueues.current.findIndex(q => q.qid === queue.qid)
-    if (idx == -1) {
-      // add it
-      refQueues.current.push(queue)
-    } else {
-      // update players in queue
-      refQueues.current[idx] = queue
+    for (const queue of data.queues) {
+      // check if queue exists
+      const idx = refQueues.current.findIndex(q => q.qid === queue.qid)
+      if (idx == -1) {
+        // add it
+        refQueues.current.push(queue)
+      } else {
+        // update players in queue
+        refQueues.current[idx] = queue
+      }
+      refQueues.current = refQueues.current.filter(q => q.active && q.users.length > 0)
     }
-    refQueues.current = refQueues.current.filter(q => q.active && q.users.length > 0)
 
     // update active queue ids
     setActiveQueueIds(refQueues.current
@@ -69,16 +74,20 @@ const Lobby: FC<LobbyProps> = (props) => {
     setQueues([...refQueues.current])
   }
 
-  useEffect(() => {
+  useSingleEffect(() => {
     if (!comm) return
 
     comm.setOnStartGame((gameState) => {
       setGameData(gameState)
       router.push("/game")
     })
-    comm.setOnQueueState((queue) => onQueueState(queue))
+    comm.setOnQueueState((data) => onQueueState(data))
 
-  }, [comm])
+    comm.refreshQueueState()
+
+    // check for active game AFTER having defined onStartGame
+    comm.checkActiveGame()
+  })
 
   return (
     <Stack
@@ -103,8 +112,14 @@ const Lobby: FC<LobbyProps> = (props) => {
           label="# players"
           margin="dense"
           size="small"
+          inputProps={{
+            min: 2,
+            max: 6,
+          }}
           value={nPlayer}
-          onChange={(e) => { setNPlayer(Number(e.target.value)) }}
+          onChange={(e) => {
+            setNPlayer(Math.max(Math.min(Number(e.target.value), 6), 2))
+          }}
         />
         <Button
           variant="contained"
