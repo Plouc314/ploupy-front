@@ -84,6 +84,9 @@ const Lobby: FC<LobbyProps> = (props) => {
     comm.setOnQueueState((data) => onQueueState(data))
 
     comm.refreshQueueState()
+
+    // check for active game AFTER having defined onStartGame
+    comm.checkActiveGame()
   })
 
   return (

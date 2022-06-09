@@ -21,6 +21,7 @@ interface PlayerBarSizes {
   xUsername: number
   xIconMoney: number
   xValueMoney: number
+  xValueIncome: number
   xIconFactories: number
   xValueFactories: number
   xIconTurrets: number
@@ -46,6 +47,7 @@ class PlayerBar implements IGame.Sprite {
   private username: TextUI
   private iconMoney: ImageUI
   private valueMoney: TextUI
+  private valueIncome: TextUI
   private iconFactories: ImageUI
   private valueFactories: TextUI
   private iconTurrets: ImageUI
@@ -67,12 +69,13 @@ class PlayerBar implements IGame.Sprite {
       xUsername: 60,
       xIconMoney: 150,
       xValueMoney: 210,
-      xIconFactories: 260,
-      xValueFactories: 320,
-      xIconTurrets: 370,
-      xValueTurrets: 430,
-      xIconProbes: 480,
-      xValueProbes: 540,
+      xValueIncome: 215,
+      xIconFactories: 290,
+      xValueFactories: 350,
+      xIconTurrets: 400,
+      xValueTurrets: 460,
+      xIconProbes: 510,
+      xValueProbes: 570,
     })
 
     this.container = new Container()
@@ -122,6 +125,13 @@ class PlayerBar implements IGame.Sprite {
     this.valueMoney.pos.x = this.sizes.xValueMoney
     this.valueMoney.compile()
 
+    this.valueIncome = new TextUI(context)
+    this.valueIncome.setProps(propsCenter)
+    this.valueIncome.setProps(propsText)
+    this.valueIncome.anchorX = "left"
+    this.valueIncome.pos.x = this.sizes.xValueIncome
+    this.valueIncome.compile()
+
     this.iconFactories = new ImageUI(context)
     this.iconFactories.texture = this.textures.getIcon("factory", Color.WHITE)
     this.iconFactories.setProps(propsIcon)
@@ -168,6 +178,7 @@ class PlayerBar implements IGame.Sprite {
     this.container.addChild(this.username.child())
     this.container.addChild(this.iconMoney.child())
     this.container.addChild(this.valueMoney.child())
+    this.container.addChild(this.valueIncome.child())
     this.container.addChild(this.iconFactories.child())
     this.container.addChild(this.valueFactories.child())
     this.container.addChild(this.iconTurrets.child())
@@ -183,19 +194,32 @@ class PlayerBar implements IGame.Sprite {
     this.valueTurrets.compile()
     this.valueProbes.text = this.player.probes.length.toString()
     this.valueProbes.compile()
-    this.valueMoney.text = this.player.money.toString()
+    this.valueMoney.text = `${this.player.money}`
     this.valueMoney.compile()
+
+    let s = this.player.income > 0 ? "+" : ""
+    this.valueIncome.text = `(${s}${this.player.income})`
+    if (this.player.income > 0) {
+      this.valueIncome.color = Color.fromRgb(100, 200, 100)
+    } else if (this.player.income < 0) {
+      this.valueIncome.color = Color.fromRgb(200, 100, 100)
+    } else {
+      this.valueIncome.color = Color.WHITE
+    }
+    this.valueIncome.compile()
 
     if (this.alive != this.player.alive) {
       this.alive = this.player.alive
       const color = Color.fromRgb(150, 150, 150)
       this.username.color = color
       this.valueMoney.color = color
+      this.valueIncome.color = color
       this.valueFactories.color = color
       this.valueTurrets.color = color
       this.valueProbes.color = color
       this.username.compile()
       this.valueMoney.compile()
+      this.valueIncome.compile()
       this.valueFactories.compile()
       this.valueTurrets.compile()
       this.valueProbes.compile()

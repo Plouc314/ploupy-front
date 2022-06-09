@@ -8,11 +8,14 @@ import { IGame } from '../../types'
 import Color from '../utils/color'
 import Context from './context'
 import Game from './game'
+import ActionButton from './ui/actionbutton'
 import TextUI from './ui/node/text'
 import PlayerBar from './ui/playerbar'
 
 interface UISizes {
   heightPlayerBar: number
+  xButtons: number
+  yButtons: number
 }
 
 class UI implements IGame.Sprite {
@@ -27,6 +30,7 @@ class UI implements IGame.Sprite {
   private container: Container
   private background: Graphics
   private playerBars: PlayerBar[]
+  // private buttonFactory: ActionButton
   private errorText: TextUI
 
   private errorCounter: number
@@ -37,6 +41,8 @@ class UI implements IGame.Sprite {
 
     this.sizes = context.scaleUI({
       heightPlayerBar: 40,
+      xButtons: context.config.dim.x * context.sizes.tile,
+      yButtons: context.config.dim.y * context.sizes.tile - UI.HEIGHT,
     })
 
     this.errorCounter = 0
@@ -56,6 +62,11 @@ class UI implements IGame.Sprite {
       this.playerBars.push(bar)
       this.container.addChild(bar.child())
     }
+
+    // this.buttonFactory = new ActionButton(this, context, "factory", "F")
+    // this.buttonFactory.child().position.x = this.sizes.xButtons
+    // this.buttonFactory.child().position.y = this.sizes.yButtons
+    // this.container.addChild(this.buttonFactory.child())
 
     this.errorText = new TextUI(context)
     this.errorText.pos.x = context.sizes.ui.width - 20

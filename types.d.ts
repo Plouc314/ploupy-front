@@ -75,6 +75,7 @@ export namespace IModel {
     turret_price: number
     turret_fire_delay: number
     turret_scope: number
+    turret_maintenance_costs: number
     income_rate: number
     deprecate_rate: number
   }
@@ -103,6 +104,7 @@ export namespace IModel {
     money: number
     score: number
     alive: boolean
+    income: number
     factories: Factory[]
     turrets: Turret[]
     probes: Probe[]
@@ -113,6 +115,7 @@ export namespace IModel {
     money: number | null
     score: number | null
     alive: boolean | null
+    income: number | null
     factories: FactoryState[]
     turrets: TurretState[]
     probes: ProbeState[]

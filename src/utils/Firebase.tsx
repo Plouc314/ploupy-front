@@ -13,6 +13,9 @@ import {
   browserSessionPersistence,
 } from 'firebase/auth'
 
+// hooks
+import useSingleEffect from '../hooks/useSingleEffect'
+
 // comm
 import API from '../comm/api'
 
@@ -73,14 +76,10 @@ function useFirebaseAuth() {
     avatar: "",
   })
   const [loading, setLoading] = useState(true)
-  const isListener = useRef(false)
 
   // listen for Firebase state change
-  // use an useEffect hook to prevent setting up the observer at each rerender
-  useEffect(() => {
+  useSingleEffect(() => {
 
-    if (isListener.current) return
-    isListener.current = true
     onAuthStateChanged(auth, (_user) => {
 
       if (_user && !user.connected) { // signed in
@@ -122,7 +121,7 @@ function useFirebaseAuth() {
       }
 
     })
-  }, [] /* the effect is only executed once */)
+  })
 
   return { user: user, loading: loading } as Firebase.Auth
 }

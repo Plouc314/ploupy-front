@@ -27,6 +27,26 @@ class Comm {
     })
   }
 
+  /**
+   * Request the server to check if the user is currently in a game
+   * for example, after a disconnection
+   */
+  public checkActiveGame() {
+    this.sio.emit("is_active_game", null, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
+  /**
+   * Request to have the current game state sent from the server
+   * (must already be in a game)
+   */
+  public getGameState() {
+    this.sio.emit("game_state", null, (response: IComm.Response) => {
+      console.log(response)
+    })
+  }
+
   public sendActionCreateQueue(data: IComm.ActionCreateQueue) {
     this.sio.emit("create_queue", data, (response: IComm.Response) => {
       console.log(response)

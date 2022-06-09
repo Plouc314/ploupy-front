@@ -200,12 +200,13 @@ class Interactions implements IGame.Sprite {
   }
 
   private setupKeyboard() {
-    this.keyboard.listen(["f", "t", "a", "x", "s"])
+    this.keyboard.listen(["f", "t", "a", "x", "s", Keyboard.ESCAPE])
     this.keyboard.addOnPress("f", () => this.updateBuildFactoryState())
     this.keyboard.addOnPress("t", () => this.updateBuildTurretState())
     this.keyboard.addOnPress("x", () => this.explodeProbes())
     this.keyboard.addOnPress("a", () => this.probesAttack())
     this.keyboard.addOnPress("s", () => this.selectAllProbes())
+    this.keyboard.addOnPress(Keyboard.ESCAPE, () => this.backToIdle())
   }
 
   /**
@@ -259,6 +260,10 @@ class Interactions implements IGame.Sprite {
     ) {
       this.setState(InteractionState.SELECT_PROBES)
     }
+  }
+
+  private backToIdle() {
+    this.setState(InteractionState.IDLE)
   }
 
   /**
