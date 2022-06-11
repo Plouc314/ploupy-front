@@ -4,6 +4,7 @@ import { IGame, IModel } from "../../types"
 // pixi
 import Pixi from "./pixi"
 import UI from "./ui"
+import Map from "./map"
 import Factory from "./entity/factory"
 import Probe from "./entity/probe"
 import Tile from "./entity/tile"
@@ -18,8 +19,6 @@ import Interactions from "./interactions"
  */
 class Context {
 
-  public static readonly MARGIN = 30
-
   public pixi: Pixi
   public config: IModel.GameConfig
 
@@ -33,20 +32,37 @@ class Context {
   constructor(pixi: Pixi, config: IModel.GameConfig) {
     this.pixi = pixi
     this.config = config
+
+    this.sizes = {} as IModel.ContextSizes
+    this.unit = 0
+
+    this.update()
+  }
+
+  /**
+   * Update context sizes / unit
+   */
+  public update() {
     this.unit = Math.min(
-      (pixi.app.view.width - 2 * Context.MARGIN) / config.dim.x,
-      (pixi.app.view.height - UI.HEIGHT - 2 * Context.MARGIN) / config.dim.y,
+      this.pixi.app.view.width / (this.config.dim.x + 2 * Map.MARGIN),
+      this.pixi.app.view.height / (this.config.dim.y + 2 * Map.MARGIN),
     )
 
+    const dimMap = {
+      x: (this.config.dim.x + 2 * Map.MARGIN) * this.unit,
+      y: (this.config.dim.y + 2 * Map.MARGIN) * this.unit,
+    }
+
     this.sizes = {
-      dim: this.pos(this.config.dim),
+      dimMap: dimMap,
       tile: Tile.SIZE * this.unit,
       factory: Factory.SIZE * this.unit,
       turret: Turret.SIZE * this.unit,
       probe: Probe.SIZE * this.unit,
       ui: {
-        height: UI.HEIGHT,
-        width: this.pos(this.config.dim).x,
+        x: dimMap.x,
+        height: dimMap.y,
+        width: this.pixi.app.view.width - dimMap.x,
         cursor: Interactions.CURSOR_SIZE * this.unit,
       },
     }
@@ -59,18 +75,19 @@ class Context {
   public coord(pos: IGame.Position, keepPrecision?: boolean): IGame.Coordinate {
     const floor = keepPrecision ? (x: number) => x : Math.floor
     return {
-      x: floor(pos.x / this.unit),
-      y: floor(pos.y / this.unit),
+      x: floor((pos.x - this.sizes.tile * Map.MARGIN) / this.unit),
+      y: floor((pos.y - this.sizes.tile * Map.MARGIN) / this.unit),
     }
   }
 
   /**
    * Convert the given coordinate to position
+   * NOTE: will translate the coordinate to match layout position
    */
   public pos(coord: IGame.Coordinate): IGame.Position {
     return {
-      x: coord.x * this.unit,
-      y: coord.y * this.unit,
+      x: (coord.x + Tile.SIZE * Map.MARGIN) * this.unit,
+      y: (coord.y + Tile.SIZE * Map.MARGIN) * this.unit,
     }
   }
 

@@ -51,4 +51,6 @@ export const ICONS = [
   "probe",
   "money",
   "turret",
+  "explode",
+  "attack",
 ]

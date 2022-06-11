@@ -6,7 +6,6 @@ import { Container, Graphics } from "pixi.js"
 
 // pixi
 import Pixi from "./pixi"
-import Color from "../utils/color"
 import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
@@ -46,6 +45,11 @@ class Game {
     this.context = new Context(pixi, model.config)
     this.map = new Map(this.context, model.map)
 
+    this.pixi.app.renderer.on('resize', () => {
+      this.context.update()
+      this.onContextUpdate()
+    })
+
     this.currentTime = Date.now()
 
     this.players = model.players.map((pm, i) =>
@@ -65,9 +69,6 @@ class Game {
     this.map.setModel(mapModel)
 
     this.animations = new Animations(this.context)
-    this.animations.child().position.x = Context.MARGIN
-    this.animations.child().position.y = UI.HEIGHT + Context.MARGIN
-
 
     this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
@@ -119,23 +120,12 @@ class Game {
     })
 
     this.ui = new UI(this, this.context)
-    this.ui.child().position.x = Context.MARGIN
-    this.ui.child().position.y = Context.MARGIN
 
     // create main layout
     this.layout = new Container()
-    const background = new Graphics()
-    background.beginFill(0xffffff)
-    background.drawRect(0, 0, this.pixi.app.view.width, this.pixi.app.view.height)
-    this.layout.addChild(background)
-
-    this.map.child().position.x = Context.MARGIN
-    this.map.child().position.y = UI.HEIGHT + Context.MARGIN
 
     this.layout.addChild(this.map.child())
     for (const player of this.players) {
-      player.child().position.x = Context.MARGIN
-      player.child().position.y = UI.HEIGHT + Context.MARGIN
       this.layout.addChild(player.child())
     }
     this.layout.addChild(this.animations.child())
@@ -146,7 +136,7 @@ class Game {
       this.ui.setGameActionError(msg)
     })
 
-    this.interactions = new Interactions(this.map, this.keyboard, this.pixi, this.ownPlayer)
+    this.interactions = new Interactions(this.ui, this.keyboard, this.pixi, this.ownPlayer)
 
     this.interactions.setLayout(this.layout)
 
@@ -180,6 +170,18 @@ class Game {
     this.pixi.app.stage.addChild(this.layout)
 
     this.pixi.app.ticker.add((dt) => this.run())
+  }
+
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    this.ui.onContextUpdate()
+    this.map.onContextUpdate()
+    for (const player of this.players) {
+      player.onContextUpdate()
+    }
   }
 
   private run() {

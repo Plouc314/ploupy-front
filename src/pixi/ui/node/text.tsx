@@ -2,7 +2,7 @@
 import { IGame } from "../../../../types"
 
 // pixi.js
-import { Text, Container } from "pixi.js"
+import { Text, Container, TextStyleFontWeight } from "pixi.js"
 
 // pixi
 import Context from "../../context"
@@ -13,6 +13,7 @@ export interface TextUIProps extends NodeUIProps {
   text?: string
   color?: Color
   fontSize?: number
+  fontWeight?: TextStyleFontWeight
 }
 
 class TextUI extends NodeUI {
@@ -20,6 +21,7 @@ class TextUI extends NodeUI {
   public text: string
   public color: Color
   public fontSize: number
+  public fontWeight: TextStyleFontWeight
 
   private container: Text
 
@@ -29,6 +31,7 @@ class TextUI extends NodeUI {
     this.text = ""
     this.color = Color.BLACK
     this.fontSize = 16
+    this.fontWeight = "normal"
 
     this.container = new Text(this.text)
   }
@@ -44,6 +47,9 @@ class TextUI extends NodeUI {
     if (props.fontSize !== undefined) {
       this.fontSize = props.fontSize
     }
+    if (props.fontWeight !== undefined) {
+      this.fontWeight = props.fontWeight
+    }
   }
 
   public compile() {
@@ -51,6 +57,7 @@ class TextUI extends NodeUI {
     // set style
     this.container.style.fill = this.color.hex()
     this.container.style.fontSize = this.fontSize
+    this.container.style.fontWeight = this.fontWeight
 
     // set text
     this.container.text = this.text

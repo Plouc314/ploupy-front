@@ -64,18 +64,18 @@ class PlayerBar implements IGame.Sprite {
 
     this.sizes = context.scaleUI({
       xColor: 10,
-      color: 30,
-      icon: 22,
-      xUsername: 60,
-      xIconMoney: 150,
-      xValueMoney: 210,
-      xValueIncome: 215,
-      xIconFactories: 290,
-      xValueFactories: 350,
-      xIconTurrets: 400,
-      xValueTurrets: 460,
-      xIconProbes: 510,
-      xValueProbes: 570,
+      color: 20,
+      icon: 18,
+      xUsername: 35,
+      xIconMoney: 125,
+      xValueMoney: 175,
+      xValueIncome: 180,
+      xIconFactories: 235,
+      xValueFactories: 275,
+      xIconTurrets: 305,
+      xValueTurrets: 345,
+      xIconProbes: 375,
+      xValueProbes: 415,
     })
 
     this.container = new Container()
@@ -94,7 +94,7 @@ class PlayerBar implements IGame.Sprite {
 
     const propsText = {
       color: Color.WHITE,
-      fontSize: 16,
+      fontSize: 14,
     }
 
     this.color = new UniformUI(context)

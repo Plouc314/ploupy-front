@@ -82,7 +82,8 @@ export namespace IModel {
 
   /** Unit: pixel */
   export type ContextSizes = {
-    dim: IGame.Dimension
+    /**Dimension of the map */
+    dimMap: IGame.Dimension
     tile: number
     factory: number
     turret: number
@@ -91,6 +92,8 @@ export namespace IModel {
   }
 
   export type ContextUISizes = {
+    /** Start position of the ui */
+    x: number
     /** Global height of the ui */
     height: number
     /** Global width of the ui */

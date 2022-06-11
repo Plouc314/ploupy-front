@@ -97,7 +97,7 @@ class Probe extends Entity {
     // multiply by speed (unit: coord)
     vect.x *= this.context.config.probe_speed
     vect.y *= this.context.config.probe_speed
-    return this.context.pos(vect)
+    return { x: this.context.unit * vect.x, y: this.context.unit * vect.y }
   }
 
   public update(dt: number): void {

@@ -42,12 +42,8 @@ import { useToast } from '../src/hooks/useToast'
 import { auth, useAuth } from '../src/utils/Firebase'
 
 // pixi
-import useSio from '../src/comm/sio'
 import Pixi from '../src/pixi/pixi'
-import Comm from '../src/comm/comm'
 import Game from '../src/pixi/game'
-import { COLORS } from '../src/pixi/constants'
-import { borderTopColor } from '@mui/system'
 import { useComm } from '../src/hooks/useComm'
 import { useGameData } from '../src/hooks/useGameData'
 import Textures from '../src/pixi/textures'
@@ -66,9 +62,13 @@ const PageGame: FC<PageGameProps> = (props) => {
 
   const isGame = useRef(false)
   const [game, setGame] = useState<Game | null>(null)
+  const refGame = useRef<Game | null>(null)
 
   const [hasResigned, setHasResigned] = useState(false)
   const [result, setResult] = useState<IComm.GameResultResponse | null>(null)
+
+  const refCanvasParent = useRef<HTMLDivElement>(null)
+  const [resizeObserver, setResizeObserver] = useState<ResizeObserver | null>(null)
 
   useEffect(() => {
     if (!comm) return
@@ -81,10 +81,13 @@ const PageGame: FC<PageGameProps> = (props) => {
 
     isGame.current = true
     setHasResigned(false)
+
     const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
     const pixi = new Pixi(canvas)
+
     pixi.textures.load(() => {
-      setGame(new Game(pixi, comm, user, gameData))
+      refGame.current = new Game(pixi, comm, user, gameData)
+      setGame(refGame.current)
     })
   }, [comm, gameData])
 
@@ -95,6 +98,19 @@ const PageGame: FC<PageGameProps> = (props) => {
       setResult(data)
     })
   }, [comm])
+
+  useEffect(() => {
+    if (!refCanvasParent.current) {
+      return
+    }
+    if (resizeObserver) return
+    const observer = new ResizeObserver(() => {
+      if (!refGame.current) return
+      refGame.current.pixi.resize()
+    })
+    observer.observe(refCanvasParent.current)
+    setResizeObserver(observer)
+  }, [refCanvasParent.current])
 
   const goHome = () => {
     isGame.current = false
@@ -107,10 +123,10 @@ const PageGame: FC<PageGameProps> = (props) => {
       withComm
       title='Game'
     >
-      <MenuBar />
+      <MenuBar compact />
       <Paper
         variant="outlined"
-        sx={{ p: 1, mt: 2 }}
+        sx={{ p: 1 }}
       >
         <Stack
           direction="row"
@@ -130,7 +146,16 @@ const PageGame: FC<PageGameProps> = (props) => {
           </Button>
         </Stack>
       </Paper>
-      <canvas id="PixiCanvas" />
+      <div
+        ref={refCanvasParent}
+        style={{
+          resize: "both",
+          overflow: "hidden",
+          height: "75vh",
+        }}
+      >
+        <canvas id="PixiCanvas" />
+      </div>
       <Dialog
         open={!!result}
       >

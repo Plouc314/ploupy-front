@@ -34,7 +34,8 @@ import { auth, useAuth } from '../utils/Firebase'
 import Textures from '../pixi/textures'
 
 export interface MenuBarProps {
-
+  /** Use less margin / padding */
+  compact?: boolean
 }
 
 const MenuBar: FC<MenuBarProps> = (props) => {
@@ -53,12 +54,14 @@ const MenuBar: FC<MenuBarProps> = (props) => {
 
   return (
     <AppBar position="static">
-      <Toolbar>
+      <Toolbar
+        variant={props.compact ? "dense" : "regular"}
+      >
         <a
           style={{ cursor: "pointer" }}
           onClick={() => router.push("/")}
         >
-          <Typography variant="h1">
+          <Typography variant={props.compact ? "h3" : "h1"}>
             Ploupy
           </Typography>
         </a>
@@ -67,7 +70,14 @@ const MenuBar: FC<MenuBarProps> = (props) => {
           <IconButton
             onClick={(e) => setMenuAnchor(e.currentTarget)}
           >
-            <Avatar alt="avatar" src={Textures.getAvatarURL(user.avatar)} />
+            <Avatar
+              alt="avatar"
+              src={Textures.getAvatarURL(user.avatar)}
+              sx={{
+                width: props.compact ? 35 : 40,
+                height: props.compact ? 35 : 40,
+              }}
+            />
           </IconButton>
         </Tooltip>
         <Menu

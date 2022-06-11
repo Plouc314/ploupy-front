@@ -142,6 +142,22 @@ class Player implements IGame.Sprite {
     this.layoutProbes.removeChild(probe.child())
   }
 
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    for (const factory of this.factories) {
+      factory.onContextUpdate()
+    }
+    for (const turret of this.turrets) {
+      turret.onContextUpdate()
+    }
+    for (const probe of this.probes) {
+      probe.onContextUpdate()
+    }
+  }
+
   public update(dt: number) {
     for (const probe of this.probes) {
       probe.update(dt)

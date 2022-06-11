@@ -84,6 +84,15 @@ abstract class Entity implements IGame.Sprite {
     this.color = color
     this.buildContainer()
   }
+
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    this.setCoord(this.coord)
+    this.buildContainer()
+  }
 }
 
 export default Entity

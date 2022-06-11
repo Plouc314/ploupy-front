@@ -14,7 +14,7 @@ import Context from '../context';
 class Tile extends Entity {
 
   public static readonly SIZE = 1
-  public static readonly DEFAULT_COLOR: Color = Color.fromRgb(50, 50, 50)
+  public static readonly DEFAULT_COLOR = Color.fromRgb(50, 50, 50)
   public static readonly LINE_WIDTH = 0.04
 
   public owner: Player | undefined

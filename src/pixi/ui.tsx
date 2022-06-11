@@ -16,11 +16,19 @@ interface UISizes {
   heightPlayerBar: number
   xButtons: number
   yButtons: number
+  marginButton: number
 }
 
-class UI implements IGame.Sprite {
+type UIButtons = "factory" | "turret" | "attack" | "explode"
 
-  public static readonly HEIGHT = 80
+const buttonsData: { name: UIButtons, key: string }[] = [
+  { name: "turret", key: "T" },
+  { name: "factory", key: "F" },
+  { name: "explode", key: "X" },
+  { name: "attack", key: "A" },
+]
+
+class UI implements IGame.Sprite {
 
   public game: Game
   public context: Context
@@ -30,46 +38,63 @@ class UI implements IGame.Sprite {
   private container: Container
   private background: Graphics
   private playerBars: PlayerBar[]
-  // private buttonFactory: ActionButton
   private errorText: TextUI
+
+  public buttons: Record<UIButtons, ActionButton>
 
   private errorCounter: number
 
   constructor(game: Game, context: Context) {
     this.game = game
     this.context = context
-
-    this.sizes = context.scaleUI({
-      heightPlayerBar: 40,
-      xButtons: context.config.dim.x * context.sizes.tile,
-      yButtons: context.config.dim.y * context.sizes.tile - UI.HEIGHT,
-    })
-
     this.errorCounter = 0
 
+    this.sizes = {} as UISizes
     this.container = new Container()
+    this.background = {} as Graphics
+    this.playerBars = []
+    this.buttons = {} as any
+    this.errorText = {} as TextUI
+
+    this.build()
+  }
+
+  private build() {
+    this.sizes = this.context.scaleUI({
+      heightPlayerBar: 30,
+      xButtons: 20,
+      yButtons: this.context.sizes.dimMap.y - 100,
+      marginButton: 20,
+    })
+
+    this.container.removeChildren()
+    this.container.position.x = this.context.sizes.ui.x
+
     this.background = new Graphics()
     this.background.beginFill(Color.fromRgb(20, 20, 20).hex())
-    this.background.drawRect(0, 0, context.sizes.ui.width, context.sizes.ui.height)
+    this.background.drawRect(0, 0, this.context.sizes.ui.width, this.context.sizes.ui.height)
     this.container.addChild(this.background)
 
     this.playerBars = []
 
     for (let i = 0; i < this.game.players.length; i++) {
       const player = this.game.players[i]
-      const bar = new PlayerBar(this, player, context)
+      const bar = new PlayerBar(this, player, this.context)
       bar.child().position.y = i * this.sizes.heightPlayerBar
       this.playerBars.push(bar)
       this.container.addChild(bar.child())
     }
 
-    // this.buttonFactory = new ActionButton(this, context, "factory", "F")
-    // this.buttonFactory.child().position.x = this.sizes.xButtons
-    // this.buttonFactory.child().position.y = this.sizes.yButtons
-    // this.container.addChild(this.buttonFactory.child())
+    buttonsData.forEach(({ name, key }, i) => {
+      const btn = new ActionButton(this, this.context, name, key)
+      btn.child().position.x = this.sizes.xButtons
+      btn.child().position.y = this.sizes.yButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
+      this.buttons[name] = btn
+      this.container.addChild(btn.child())
+    })
 
-    this.errorText = new TextUI(context)
-    this.errorText.pos.x = context.sizes.ui.width - 20
+    this.errorText = new TextUI(this.context)
+    this.errorText.pos.x = this.context.sizes.ui.width - 20
     this.errorText.parent.height = this.sizes.heightPlayerBar
     this.errorText.centeredY = true
     this.errorText.anchorX = "right"
@@ -83,6 +108,14 @@ class UI implements IGame.Sprite {
     for (const playerBar of this.playerBars) {
       playerBar.update(dt)
     }
+  }
+
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    this.build()
   }
 
   public setGameActionError(msg: string) {
