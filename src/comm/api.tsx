@@ -54,11 +54,14 @@ class API {
     args: { uid?: string, username?: string }
   ): Promise<IModel.User | null> {
     const response = await this.get<IComm.UserResponse>("user-data", args)
-    console.group("user-data")
-    console.log(response)
-    console.groupEnd()
     if (!response.success) return null
     return response.user
+  }
+
+  public static async getDefaultGameConfig(): Promise<IModel.GameConfig | null> {
+    const response = await this.get<IComm.GameConfigResponse>("default-game-config")
+    if (!response.success) return null
+    return response.game_config
   }
 
   public static async createUser(

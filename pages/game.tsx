@@ -9,45 +9,26 @@ import { FC, IComm, IModel } from '../types'
 
 // mui
 import {
-  AppBar,
-  Avatar,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Paper,
   Stack,
-  TextField,
-  Toolbar,
-  Typography,
 } from '@mui/material'
-
-// firebase
-import { signOut } from "firebase/auth"
 
 // components
 import Page from '../src/components/Page'
 
 // hooks
-import { useToast } from '../src/hooks/useToast'
+import { useComm } from '../src/hooks/useComm'
+import { useGameData } from '../src/hooks/useGameData'
 
 // utils
-import { auth, useAuth } from '../src/utils/Firebase'
+import { useAuth } from '../src/utils/Firebase'
 
 // pixi
 import Pixi from '../src/pixi/pixi'
 import Game from '../src/pixi/game'
-import { useComm } from '../src/hooks/useComm'
-import { useGameData } from '../src/hooks/useGameData'
-import Textures from '../src/pixi/textures'
 import MenuBar from '../src/components/MenuBar'
+import GameResults from '../src/components/GameResults'
 
 
 export interface PageGameProps { }
@@ -156,42 +137,10 @@ const PageGame: FC<PageGameProps> = (props) => {
       >
         <canvas id="PixiCanvas" />
       </div>
-      <Dialog
-        open={!!result}
-      >
-        <DialogTitle>
-          Game Result
-        </DialogTitle>
-        <DialogContent>
-          <List>
-            {result?.ranking.map((user, i) => (
-              <ListItem key={`game-rank-${i}`}>
-                <ListItemAvatar>
-                  <Avatar src={Textures.getAvatarURL(user.avatar)} />
-                </ListItemAvatar>
-                <ListItemText>
-                  {user.username}
-                </ListItemText>
-                <Typography
-                  sx={{
-                    marginLeft: 15,
-                    fontWeight: "bold",
-                  }}
-                >
-                  {i + 1}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={goHome}
-          >
-            Home
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <GameResults
+        result={result}
+        onBackHome={goHome}
+      />
     </Page >
   )
 }

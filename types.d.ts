@@ -197,6 +197,15 @@ export namespace IModel {
     players: PlayerState[]
   }
 
+  export type GamePlayerStats = {
+    username: string
+    money: number[]
+    occupation: number[]
+    factories: number[]
+    turrets: number[]
+    probes: number[]
+  }
+
   export type ActionResignGame = {
 
   }
@@ -246,12 +255,17 @@ export namespace IComm {
     user: IModel.User
   }
 
+  export type GameConfigResponse = {
+    game_config: IModel.GameConfig
+  }
+
   export type QueueStateResponse = {
     queues: IModel.Queue[]
   }
 
   export type GameResultResponse = {
     ranking: IModel.User[]
+    stats: IModel.GamePlayerStats[]
   }
 
   export type BuildFactoryResponse = {
