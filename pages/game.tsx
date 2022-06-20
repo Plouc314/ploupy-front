@@ -5,53 +5,30 @@ import { useRouter } from 'next/router'
 import { useState, useEffect, useRef } from 'react'
 
 // types
-import { FC, IComm, IModel } from '../types'
+import { FC, IComm, ICore } from '../types'
 
 // mui
 import {
-  AppBar,
-  Avatar,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Paper,
   Stack,
-  TextField,
-  Toolbar,
-  Typography,
 } from '@mui/material'
-
-// firebase
-import { signOut } from "firebase/auth"
 
 // components
 import Page from '../src/components/Page'
 
 // hooks
-import { useToast } from '../src/hooks/useToast'
-
-// utils
-import { auth, useAuth } from '../src/utils/Firebase'
-
-// pixi
-import useSio from '../src/comm/sio'
-import Pixi from '../src/pixi/pixi'
-import Comm from '../src/comm/comm'
-import Game from '../src/pixi/game'
-import { COLORS } from '../src/pixi/constants'
-import { borderTopColor } from '@mui/system'
 import { useComm } from '../src/hooks/useComm'
 import { useGameData } from '../src/hooks/useGameData'
-import Textures from '../src/pixi/textures'
+
+// utils
+import { useAuth } from '../src/utils/Firebase'
+
+// pixi
+import Pixi from '../src/pixi/pixi'
+import Game from '../src/pixi/game'
 import MenuBar from '../src/components/MenuBar'
+import GameResults from '../src/components/GameResults'
 
 
 export interface PageGameProps { }
@@ -66,9 +43,13 @@ const PageGame: FC<PageGameProps> = (props) => {
 
   const isGame = useRef(false)
   const [game, setGame] = useState<Game | null>(null)
+  const refGame = useRef<Game | null>(null)
 
   const [hasResigned, setHasResigned] = useState(false)
   const [result, setResult] = useState<IComm.GameResultResponse | null>(null)
+
+  const refCanvasParent = useRef<HTMLDivElement>(null)
+  const [resizeObserver, setResizeObserver] = useState<ResizeObserver | null>(null)
 
   useEffect(() => {
     if (!comm) return
@@ -81,10 +62,13 @@ const PageGame: FC<PageGameProps> = (props) => {
 
     isGame.current = true
     setHasResigned(false)
+
     const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
     const pixi = new Pixi(canvas)
+
     pixi.textures.load(() => {
-      setGame(new Game(pixi, comm, user, gameData))
+      refGame.current = new Game(pixi, comm, user, gameData)
+      setGame(refGame.current)
     })
   }, [comm, gameData])
 
@@ -96,8 +80,23 @@ const PageGame: FC<PageGameProps> = (props) => {
     })
   }, [comm])
 
+  useEffect(() => {
+    if (!refCanvasParent.current) {
+      return
+    }
+    if (resizeObserver) return
+    const observer = new ResizeObserver(() => {
+      if (!refGame.current) return
+      refGame.current.pixi.resize()
+    })
+    observer.observe(refCanvasParent.current)
+    setResizeObserver(observer)
+  }, [refCanvasParent.current])
+
   const goHome = () => {
     isGame.current = false
+    setResizeObserver(null)
+    game?.destroy()
     router.replace("/")
   }
 
@@ -107,10 +106,10 @@ const PageGame: FC<PageGameProps> = (props) => {
       withComm
       title='Game'
     >
-      <MenuBar />
+      <MenuBar compact restricted />
       <Paper
         variant="outlined"
-        sx={{ p: 1, mt: 2 }}
+        sx={{ p: 1 }}
       >
         <Stack
           direction="row"
@@ -130,43 +129,20 @@ const PageGame: FC<PageGameProps> = (props) => {
           </Button>
         </Stack>
       </Paper>
-      <canvas id="PixiCanvas" />
-      <Dialog
-        open={!!result}
+      <div
+        ref={refCanvasParent}
+        style={{
+          resize: "both",
+          overflow: "hidden",
+          height: "75vh",
+        }}
       >
-        <DialogTitle>
-          Game Result
-        </DialogTitle>
-        <DialogContent>
-          <List>
-            {result?.ranking.map((user, i) => (
-              <ListItem key={`game-rank-${i}`}>
-                <ListItemAvatar>
-                  <Avatar src={Textures.getAvatarURL(user.avatar)} />
-                </ListItemAvatar>
-                <ListItemText>
-                  {user.username}
-                </ListItemText>
-                <Typography
-                  sx={{
-                    marginLeft: 15,
-                    fontWeight: "bold",
-                  }}
-                >
-                  {i + 1}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={goHome}
-          >
-            Home
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <canvas id="PixiCanvas" />
+      </div>
+      <GameResults
+        result={result}
+        onBackHome={goHome}
+      />
     </Page >
   )
 }

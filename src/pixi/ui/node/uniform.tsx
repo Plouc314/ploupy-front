@@ -13,6 +13,8 @@ class UniformUI extends NodeUI {
 
   public dim: IUI.Dimension
   public color: Color
+  public marginWidth: number
+  public marginColor: Color
 
   private container: Graphics
 
@@ -21,6 +23,8 @@ class UniformUI extends NodeUI {
 
     this.dim = { width: 10, height: 10 }
     this.color = Color.BLACK
+    this.marginWidth = 0
+    this.marginColor = Color.BLACK
 
     this.container = new Graphics()
   }
@@ -29,6 +33,15 @@ class UniformUI extends NodeUI {
 
     this.container.beginFill(this.color.hex())
     this.container.drawRect(0, 0, this.dim.width, this.dim.height)
+
+    if (this.marginWidth > 0) {
+      this.container.lineStyle(this.marginWidth, this.marginColor.hex())
+        .moveTo(0, 0)
+        .lineTo(0, this.dim.height)
+        .lineTo(this.dim.width, this.dim.height)
+        .lineTo(this.dim.width, 0)
+        .lineTo(0, 0)
+    }
 
     this.compilePosition(this.container)
   }

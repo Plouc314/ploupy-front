@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../../types'
+import { IGame, ICore } from '../../../types'
 
 // pixi.js
 import { Container } from 'pixi.js'
@@ -82,6 +82,15 @@ abstract class Entity implements IGame.Sprite {
   public setColor(color: Color) {
     if (this.color.hex() == color.hex()) return
     this.color = color
+    this.buildContainer()
+  }
+
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    this.setCoord(this.coord)
     this.buildContainer()
   }
 }

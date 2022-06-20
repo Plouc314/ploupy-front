@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../types'
+import { IGame, ICore } from '../../types'
 
 // pixi.js
 import { Container, InteractionEvent } from 'pixi.js'
@@ -28,6 +28,7 @@ class Interactions implements IGame.Sprite {
 
   public static readonly CURSOR_SIZE = 0.35
 
+  public ui: UI
   public map: Map
   public context: Context
   public keyboard: Keyboard
@@ -58,9 +59,10 @@ class Interactions implements IGame.Sprite {
   /** Position of the mouse when down */
   private mouseDownPos: IGame.Position
 
-  constructor(map: Map, keyboard: Keyboard, pixi: Pixi, ownPlayer: Player) {
-    this.map = map
-    this.context = map.context
+  constructor(ui: UI, keyboard: Keyboard, pixi: Pixi, ownPlayer: Player) {
+    this.ui = ui
+    this.map = ui.game.map
+    this.context = ui.context
     this.keyboard = keyboard
     this.pixi = pixi
     this.ownPlayer = ownPlayer
@@ -71,13 +73,12 @@ class Interactions implements IGame.Sprite {
       width: this.context.sizes.ui.cursor,
       height: this.context.sizes.ui.cursor,
     }
-    this.cursor.anchorX = "right"
     this.cursor.anchorY = "bottom"
     this.cursor.texture = this.pixi.textures.getIcon("factory", Color.WHITE)
     this.cursor.child().visible = false
 
     this.container = new Container()
-    this.select = new Select(map.context)
+    this.select = new Select(this.context)
     this.currentTile = null
     this.selectedProbes = []
     this.mouseDownPos = { x: 0, y: 0 }
@@ -173,19 +174,12 @@ class Interactions implements IGame.Sprite {
     })
   }
 
-  private toMapPos(pos: IGame.Position): IGame.Position {
-    return {
-      x: pos.x - Context.MARGIN,
-      y: pos.y - UI.HEIGHT - Context.MARGIN
-    }
-  }
-
   /**
    * Return the coordinates corresponding to the mouse position
    * Transformed to map
    */
   private getMouseCoord(e: InteractionEvent): IGame.Coordinate {
-    return this.context.coord(this.toMapPos(this.getMousePos(e)))
+    return this.context.coord(this.getMousePos(e))
   }
 
   /**
@@ -201,12 +195,17 @@ class Interactions implements IGame.Sprite {
 
   private setupKeyboard() {
     this.keyboard.listen(["f", "t", "a", "x", "s", Keyboard.ESCAPE])
-    this.keyboard.addOnPress("f", () => this.updateBuildFactoryState())
-    this.keyboard.addOnPress("t", () => this.updateBuildTurretState())
-    this.keyboard.addOnPress("x", () => this.explodeProbes())
-    this.keyboard.addOnPress("a", () => this.probesAttack())
+    this.keyboard.addOnPress("f", () => this.ui.buttons.factory.click())
+    this.keyboard.addOnPress("t", () => this.ui.buttons.turret.click())
+    this.keyboard.addOnPress("x", () => this.ui.buttons.explode.click())
+    this.keyboard.addOnPress("a", () => this.ui.buttons.attack.click())
     this.keyboard.addOnPress("s", () => this.selectAllProbes())
     this.keyboard.addOnPress(Keyboard.ESCAPE, () => this.backToIdle())
+
+    this.ui.buttons.factory.onClick = () => this.updateBuildFactoryState()
+    this.ui.buttons.turret.onClick = () => this.updateBuildTurretState()
+    this.ui.buttons.explode.onClick = () => this.explodeProbes()
+    this.ui.buttons.attack.onClick = () => this.probesAttack()
   }
 
   /**
@@ -270,8 +269,8 @@ class Interactions implements IGame.Sprite {
    * The given position should NOT be transformed to map (see toMap)
    */
   private selectProbes(pos: IGame.Position) {
-    const start = this.toMapPos(this.select.getStart())
-    const end = this.toMapPos(pos)
+    const start = this.select.getStart()
+    const end = pos
 
     const minX = Math.min(start.x, end.x)
     const minY = Math.min(start.y, end.y)
@@ -341,6 +340,7 @@ class Interactions implements IGame.Sprite {
   }
 
   private handleDown(pos: IGame.Position) {
+    if (!this.map.isInExtendedMap(this.context.coord(pos))) return
     this.select.setVisisble(true)
     this.select.setStart(pos)
     this.select.setEnd(pos)

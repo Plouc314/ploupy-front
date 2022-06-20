@@ -1,12 +1,11 @@
 // types
-import { Firebase, IGame, IModel } from "../../types"
+import { Firebase, IGame } from "../../types"
 
 // pixi.js
 import { Container, Graphics } from "pixi.js"
 
 // pixi
 import Pixi from "./pixi"
-import Color from "../utils/color"
 import Keyboard from "./keyboard"
 import Map from "./map"
 import Player from "./player"
@@ -38,13 +37,18 @@ class Game {
 
   private currentTime: number
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IModel.Game) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.Game) {
     this.pixi = pixi
     this.comm = comm
     this.user = user
     this.keyboard = new Keyboard()
     this.context = new Context(pixi, model.config)
     this.map = new Map(this.context, model.map)
+
+    this.pixi.app.renderer.on('resize', () => {
+      this.context.update()
+      this.onContextUpdate()
+    })
 
     this.currentTime = Date.now()
 
@@ -55,7 +59,7 @@ class Game {
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
 
     // format map model
-    const mapModel: IModel.Map<Player> = {
+    const mapModel: IGame.Map<Player> = {
       tiles: model.map.tiles.map(tm => ({
         ...tm,
         owner: this.players.find(p => p.username === tm.owner) ?? undefined
@@ -65,9 +69,6 @@ class Game {
     this.map.setModel(mapModel)
 
     this.animations = new Animations(this.context)
-    this.animations.child().position.x = Context.MARGIN
-    this.animations.child().position.y = UI.HEIGHT + Context.MARGIN
-
 
     this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
@@ -119,23 +120,12 @@ class Game {
     })
 
     this.ui = new UI(this, this.context)
-    this.ui.child().position.x = Context.MARGIN
-    this.ui.child().position.y = Context.MARGIN
 
     // create main layout
     this.layout = new Container()
-    const background = new Graphics()
-    background.beginFill(0xffffff)
-    background.drawRect(0, 0, this.pixi.app.view.width, this.pixi.app.view.height)
-    this.layout.addChild(background)
-
-    this.map.child().position.x = Context.MARGIN
-    this.map.child().position.y = UI.HEIGHT + Context.MARGIN
 
     this.layout.addChild(this.map.child())
     for (const player of this.players) {
-      player.child().position.x = Context.MARGIN
-      player.child().position.y = UI.HEIGHT + Context.MARGIN
       this.layout.addChild(player.child())
     }
     this.layout.addChild(this.animations.child())
@@ -146,7 +136,7 @@ class Game {
       this.ui.setGameActionError(msg)
     })
 
-    this.interactions = new Interactions(this.map, this.keyboard, this.pixi, this.ownPlayer)
+    this.interactions = new Interactions(this.ui, this.keyboard, this.pixi, this.ownPlayer)
 
     this.interactions.setLayout(this.layout)
 
@@ -163,7 +153,7 @@ class Game {
     this.interactions.onMoveProbes = (probes, target) => {
       this.comm.sendActionMoveProbes({
         ids: probes.map(p => p.getId()),
-        targets: probes.map(p => target),
+        target: target,
       })
     }
     this.interactions.onExplodeProbes = (probes) => {
@@ -182,6 +172,28 @@ class Game {
     this.pixi.app.ticker.add((dt) => this.run())
   }
 
+  /**
+   * Destroy the game
+   * Reset: comm (in-game part), keyboard, pixi
+   */
+  public destroy() {
+    this.comm.removeGameListeners()
+    this.keyboard.reset()
+    this.pixi.app.destroy()
+  }
+
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    this.ui.onContextUpdate()
+    this.map.onContextUpdate()
+    for (const player of this.players) {
+      player.onContextUpdate()
+    }
+  }
+
   private run() {
 
     const now = Date.now()
@@ -196,14 +208,14 @@ class Game {
   }
 
 
-  private setModel(model: IModel.GameState<string>) {
+  private setModel(model: IGame.GameState<string>) {
     for (const pm of model.players) {
       const player = this.players.find(p => p.username === pm.username)
       if (!player) continue
       player.setModel(pm)
     }
     if (model.map && model.map.tiles) {
-      const mm: IModel.MapState<Player> = {
+      const mm: IGame.MapState<Player> = {
         tiles: model.map.tiles.map(tm => ({
           ...tm,
           owner: this.players.find(p => p.username === tm.owner) ?? null

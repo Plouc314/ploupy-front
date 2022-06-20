@@ -1,12 +1,17 @@
 import type { AppProps } from 'next/app'
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Fade } from '@mui/material';
+
+// notistack
+import { SnackbarProvider } from 'notistack';
 
 // hooks
 import { CommProvider } from '../src/hooks/useComm'
 import { GameDataProvider } from '../src/hooks/useGameData'
 import { ToastProvider } from '../src/hooks/useToast'
 import { AuthProvider } from '../src/utils/Firebase'
+
 
 const theme = createTheme({
   typography: {
@@ -46,9 +51,11 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AuthProvider>
         <CommProvider>
           <GameDataProvider>
-            <ToastProvider>
-              <Component {...pageProps} />
-            </ToastProvider>
+            <SnackbarProvider TransitionComponent={Fade}>
+              <ToastProvider>
+                <Component {...pageProps} />
+              </ToastProvider>
+            </SnackbarProvider>
           </GameDataProvider>
         </CommProvider>
       </AuthProvider>

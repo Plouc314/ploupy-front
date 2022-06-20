@@ -1,5 +1,5 @@
 // types
-import { IComm, IModel } from "../../types"
+import { IComm, ICore } from "../../types"
 
 // comm
 import { URL_API } from './config'
@@ -52,17 +52,34 @@ class API {
 
   public static async getUserData(
     args: { uid?: string, username?: string }
-  ): Promise<IModel.User | null> {
+  ): Promise<ICore.User | null> {
     const response = await this.get<IComm.UserResponse>("user-data", args)
-    console.group("user-data")
-    console.log(response)
-    console.groupEnd()
     if (!response.success) return null
     return response.user
   }
 
+  public static async getGameModes(): Promise<ICore.GameMode[] | null> {
+    const response = await this.get<IComm.GameModeResponse>("game-mode", { all: true })
+    if (!response.success) return null
+    return response.game_modes
+  }
+
+  public static async getGameMode(
+    id: string
+  ): Promise<ICore.GameMode | null> {
+    const response = await this.get<IComm.GameModeResponse>("game-mode", { id: id })
+    if (!response.success) return null
+    return response.game_modes[0]
+  }
+
+  public static async getUserStats(uid: string): Promise<ICore.GeneralStats[] | null> {
+    const response = await this.get<IComm.UserStatsResponse>("user-stats", { uid })
+    if (!response.success) return null
+    return response.stats
+  }
+
   public static async createUser(
-    user: IModel.User
+    user: ICore.User
   ): Promise<IComm.Response> {
     return await this.post("create-user", user)
   }

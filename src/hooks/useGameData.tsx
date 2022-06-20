@@ -2,15 +2,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 // types
-import { FC, IModel } from "../../types";
+import { FC, IGame } from "../../types";
 
 export type IUseGameData = {
-  gameData: IModel.Game | null
-  setGameData: (data: IModel.Game | null) => void
+  gameData: IGame.Game | null
+  setGameData: (data: IGame.Game | null) => void
 }
 
 function useGameDataInternal(): IUseGameData {
-  const [gameData, setGameData] = useState<IModel.Game | null>(null)
+  const [gameData, setGameData] = useState<IGame.Game | null>(null)
 
   return { gameData, setGameData }
 }

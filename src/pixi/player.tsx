@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../types'
+import { IGame, ICore } from '../../types'
 
 // pixi.js
 import { Container } from 'pixi.js'
@@ -39,7 +39,7 @@ class Player implements IGame.Sprite {
   private layoutTurrets: Container
   private layoutProbes: Container
 
-  constructor(model: IModel.Player, color: Color, map: Map) {
+  constructor(model: IGame.Player, color: Color, map: Map) {
     this.username = model.username
     this.money = model.money
     this.score = model.score
@@ -70,7 +70,7 @@ class Player implements IGame.Sprite {
     model.probes.forEach(m => this.addProbe(new Probe(this, m)))
   }
 
-  public setModel(model: IModel.PlayerState) {
+  public setModel(model: IGame.PlayerState) {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
     this.alive = model.alive ?? this.alive
@@ -140,6 +140,22 @@ class Player implements IGame.Sprite {
     if (!this.probes.includes(probe)) return
     this.probes = this.probes.filter(p => p.getId() !== probe.getId())
     this.layoutProbes.removeChild(probe.child())
+  }
+
+  /**
+   * Executed when the context is updated,
+   * for example: on resize of the canvas
+   */
+  public onContextUpdate() {
+    for (const factory of this.factories) {
+      factory.onContextUpdate()
+    }
+    for (const turret of this.turrets) {
+      turret.onContextUpdate()
+    }
+    for (const probe of this.probes) {
+      probe.onContextUpdate()
+    }
   }
 
   public update(dt: number) {
