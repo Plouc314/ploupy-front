@@ -1,5 +1,5 @@
 // types
-import { Firebase, IGame, IModel } from "../../types"
+import { Firebase, IGame } from "../../types"
 
 // pixi.js
 import { Container, Graphics } from "pixi.js"
@@ -37,7 +37,7 @@ class Game {
 
   private currentTime: number
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IModel.Game) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.Game) {
     this.pixi = pixi
     this.comm = comm
     this.user = user
@@ -59,7 +59,7 @@ class Game {
     this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
 
     // format map model
-    const mapModel: IModel.Map<Player> = {
+    const mapModel: IGame.Map<Player> = {
       tiles: model.map.tiles.map(tm => ({
         ...tm,
         owner: this.players.find(p => p.username === tm.owner) ?? undefined
@@ -153,7 +153,7 @@ class Game {
     this.interactions.onMoveProbes = (probes, target) => {
       this.comm.sendActionMoveProbes({
         ids: probes.map(p => p.getId()),
-        targets: probes.map(p => target),
+        target: target,
       })
     }
     this.interactions.onExplodeProbes = (probes) => {
@@ -170,6 +170,16 @@ class Game {
     this.pixi.app.stage.addChild(this.layout)
 
     this.pixi.app.ticker.add((dt) => this.run())
+  }
+
+  /**
+   * Destroy the game
+   * Reset: comm (in-game part), keyboard, pixi
+   */
+  public destroy() {
+    this.comm.removeGameListeners()
+    this.keyboard.reset()
+    this.pixi.app.destroy()
   }
 
   /**
@@ -198,14 +208,14 @@ class Game {
   }
 
 
-  private setModel(model: IModel.GameState<string>) {
+  private setModel(model: IGame.GameState<string>) {
     for (const pm of model.players) {
       const player = this.players.find(p => p.username === pm.username)
       if (!player) continue
       player.setModel(pm)
     }
     if (model.map && model.map.tiles) {
-      const mm: IModel.MapState<Player> = {
+      const mm: IGame.MapState<Player> = {
         tiles: model.map.tiles.map(tm => ({
           ...tm,
           owner: this.players.find(p => p.username === tm.owner) ?? null

@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect, useRef } from 'react'
 
 // types
-import { FC, IComm, IModel } from '../types'
+import { FC, IComm, ICore } from '../types'
 
 // mui
 import {
@@ -95,6 +95,8 @@ const PageGame: FC<PageGameProps> = (props) => {
 
   const goHome = () => {
     isGame.current = false
+    setResizeObserver(null)
+    game?.destroy()
     router.replace("/")
   }
 
@@ -104,7 +106,7 @@ const PageGame: FC<PageGameProps> = (props) => {
       withComm
       title='Game'
     >
-      <MenuBar compact />
+      <MenuBar compact restricted />
       <Paper
         variant="outlined"
         sx={{ p: 1 }}

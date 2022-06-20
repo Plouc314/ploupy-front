@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../types'
+import { IGame } from '../../types'
 
 // pixi.js
 import { Container } from 'pixi.js'
@@ -24,7 +24,7 @@ class Map implements IGame.Sprite {
   private borders: Tile[]
   private container: Container
 
-  constructor(context: Context, model: IModel.Map<string>) {
+  constructor(context: Context, model: IGame.Map<string>) {
     this.context = context
     this.dimension = { ...context.config.dim }
     this.tiles2d = []
@@ -33,7 +33,7 @@ class Map implements IGame.Sprite {
     this.container = this.buildMap(model)
   }
 
-  private buildMap(model: IModel.Map<string>): Container {
+  private buildMap(model: IGame.Map<string>): Container {
 
     // create empty 2d array
     this.tiles2d = Array(this.dimension.x).fill(0).map(v => Array(this.dimension.y)) as Tile[][]
@@ -91,7 +91,7 @@ class Map implements IGame.Sprite {
   /**
    * Must be called after the constructor in case some tiles have owners
    */
-  public setModel(model: IModel.MapState<Player>) {
+  public setModel(model: IGame.MapState<Player>) {
     if (!model.tiles) return
     for (const tm of model.tiles) {
       const tile = this.tile(tm.id)

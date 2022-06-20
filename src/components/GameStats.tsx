@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 // types
-import { FC, IModel } from '../../types'
+import { FC, IGame } from '../../types'
 
 // mui
 import {
@@ -50,10 +50,10 @@ ChartJS.register(
   Legend
 );
 
-type StatsType = keyof Omit<IModel.GamePlayerStats, "username">
+type StatsType = keyof Omit<IGame.GamePlayerStats, "username">
 
 export interface GameStatsProps {
-  data: IModel.GamePlayerStats[]
+  data: IGame.GamePlayerStats[]
 }
 
 const GameStats: FC<GameStatsProps> = (props) => {
@@ -72,7 +72,7 @@ const GameStats: FC<GameStatsProps> = (props) => {
       >
         {categories.map(c => (
           <Tab
-            id={`tab-${c}`}
+            key={`tab-${c}`}
             label={c}
             value={c}
           />

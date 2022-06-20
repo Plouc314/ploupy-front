@@ -36,6 +36,9 @@ class Pixi {
 
   public resize() {
 
+    // make sure resize is disabled when the app is destroyed
+    if (!this.app.renderer) return
+
     const div = this.app.view.parentElement as HTMLElement
 
     // abort resize in case the dimensions didn't changed

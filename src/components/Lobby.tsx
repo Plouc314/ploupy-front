@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect, useRef } from 'react'
 
 // types
-import { FC, IComm, IModel } from '../../types'
+import { FC, IComm, ICore } from '../../types'
 
 // mui
 import {
@@ -13,6 +13,7 @@ import {
   Button,
   Divider,
   Grid,
+  MenuItem,
   Stack,
   TextField,
   Tooltip,
@@ -29,6 +30,7 @@ import { useAuth } from '../utils/Firebase'
 
 // pixi
 import Textures from '../pixi/textures'
+import API from '../comm/api'
 
 
 export interface LobbyProps {
@@ -41,16 +43,19 @@ const Lobby: FC<LobbyProps> = (props) => {
   const comm = useComm()
   const { user } = useAuth()
   const { gameData, setGameData } = useGameData()
-  const [nPlayer, setNPlayer] = useState(2)
+
+  const [gameModes, setGameModes] = useState<ICore.GameMode[]>([])
+
+  const [gameMode, setGameMode] = useState<ICore.GameMode | null>(null)
 
   // ref of list of queues -> cause of callback hell
-  const refQueues = useRef<IModel.Queue[]>([])
-  const [queues, setQueues] = useState<IModel.Queue[]>([])
+  const refQueues = useRef<ICore.ManQueue[]>([])
+  const [queues, setQueues] = useState<ICore.ManQueue[]>([])
 
   // list of all ids of queues where the user is currently in
   const [activeQueueIds, setActiveQueueIds] = useState<string[]>([])
 
-  const onQueueState = (data: IComm.QueueStateResponse) => {
+  const onQueueState = (data: IComm.QueueManagerState) => {
 
     for (const queue of data.queues) {
       // check if queue exists
@@ -74,6 +79,21 @@ const Lobby: FC<LobbyProps> = (props) => {
     setQueues([...refQueues.current])
   }
 
+  const getQueueGameMode = (queue: ICore.ManQueue) => {
+    return gameModes.find(gm => gm.id === queue.gmid)
+  }
+
+  useSingleEffect(() => {
+    API.getGameModes()
+      .then((data) => {
+        if (!data) {
+          throw new Error("No game modes received")
+        }
+        setGameModes(data)
+        setGameMode(data[0])
+      })
+  })
+
   useSingleEffect(() => {
     if (!comm) return
 
@@ -81,9 +101,9 @@ const Lobby: FC<LobbyProps> = (props) => {
       setGameData(gameState)
       router.push("/game")
     })
-    comm.setOnQueueState((data) => onQueueState(data))
+    comm.setOnQueueManagerState((data) => onQueueState(data))
 
-    comm.refreshQueueState()
+    comm.refreshQueueManager()
 
     // check for active game AFTER having defined onStartGame
     comm.checkActiveGame()
@@ -106,27 +126,37 @@ const Lobby: FC<LobbyProps> = (props) => {
           Lobby
         </Typography>
         <TextField
+          select
           id="n-player"
           variant="standard"
-          type="number"
           label="# players"
           margin="dense"
           size="small"
-          inputProps={{
-            min: 2,
-            max: 6,
-          }}
-          value={nPlayer}
+          helperText="Players in the game"
+          value={gameMode?.id ?? "null"}
           onChange={(e) => {
-            setNPlayer(Math.max(Math.min(Number(e.target.value), 6), 2))
+            const gm = gameModes.find(gm => gm.id === e.target.value)
+            if (!gm) return
+            setGameMode(gm)
           }}
-        />
+        >
+          {gameModes.length == 0 ?
+            <MenuItem key="nplayer-null" value="null">
+              {""}
+            </MenuItem>
+            : gameModes.map((gm) => (
+              <MenuItem key={gm.id} value={gm.id}>
+                {gm.config.n_player}
+              </MenuItem>
+            ))}
+        </TextField>
         <Button
           variant="contained"
           size="small"
           onClick={() => {
             if (!comm) return
-            comm.sendActionCreateQueue({ n_player: nPlayer })
+            if (!gameMode) return
+            comm.sendActionCreateQueue({ gmid: gameMode.id })
           }}
         >
           Create
@@ -154,7 +184,7 @@ const Lobby: FC<LobbyProps> = (props) => {
                 marginRight: 5,
               }}
             >
-              {`${queue.users.length} / ${queue.n_player}`}
+              {`${queue.users.length} / ${getQueueGameMode(queue)?.config.n_player ?? "??"}`}
             </Typography>
 
             {queue.users.map((user) => (

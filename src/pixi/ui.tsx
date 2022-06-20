@@ -89,6 +89,14 @@ class UI implements IGame.Sprite {
       const btn = new ActionButton(this, this.context, name, key)
       btn.child().position.x = this.sizes.xButtons
       btn.child().position.y = this.sizes.yButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
+
+      // check if previous version of button exists
+      const oldButton = this.buttons[name]
+      if (oldButton) {
+        // keep button's external logic
+        btn.onClick = oldButton.onClick
+      }
+
       this.buttons[name] = btn
       this.container.addChild(btn.child())
     })

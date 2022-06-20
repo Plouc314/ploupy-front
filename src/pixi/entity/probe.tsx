@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../../types'
+import { IGame } from '../../../types'
 
 // pixi.js
 import { Graphics, Container } from 'pixi.js'
@@ -34,7 +34,7 @@ class Probe extends Entity {
   /** Movement vector (unit: pos) */
   private vector: IGame.Position
 
-  constructor(player: Player, model: IModel.Probe) {
+  constructor(player: Player, model: IGame.Probe) {
     super(model.id, player.context)
     this.player = player
     this.alive = model.alive
@@ -50,7 +50,7 @@ class Probe extends Entity {
     this.vector = this.computeMoveVector()
   }
 
-  public setModel(model: IModel.ProbeState) {
+  public setModel(model: IGame.ProbeState) {
 
     if (model.pos) {
       // set the position - update the unit (coordinate -> pixel)

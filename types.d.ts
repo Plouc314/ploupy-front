@@ -39,47 +39,6 @@ export namespace IGame {
     child: () => Container
   }
 
-}
-
-export namespace IModel {
-
-  export type User = {
-    uid: string
-    username: string
-    email: string
-    avatar: string
-  }
-
-  export type Queue = {
-    qid: IGame.ID
-    active: boolean
-    n_player: number
-    users: User[]
-  }
-
-  export type GameConfig = {
-    dim: IGame.Coordinate
-    n_player: number
-    initial_money: number
-    initial_n_probes: number
-    base_income: number
-    building_occupation_min: number
-    factory_price: number
-    factory_max_probe: number
-    factory_build_probe_delay: number
-    max_occupation: number
-    probe_speed: number
-    probe_price: number
-    probe_claim_delay: number
-    probe_maintenance_costs: number
-    turret_price: number
-    turret_fire_delay: number
-    turret_scope: number
-    turret_maintenance_costs: number
-    income_rate: number
-    deprecate_rate: number
-  }
-
   /** Unit: pixel */
   export type ContextSizes = {
     /**Dimension of the map */
@@ -206,45 +165,127 @@ export namespace IModel {
     probes: number[]
   }
 
-  export type ActionResignGame = {
+}
+
+export namespace ICore {
+
+  export type User = {
+    uid: string
+    username: string
+    email: string
+    avatar: string
+  }
+
+  /**
+   * User as of UserManager in backend
+   * Represents user + metadata
+   */
+  export type ManUser = {
+    user: User
+    connected: boolean
+  }
+
+  /**
+   * User as of QueueManager in backend
+   * Represents queue state
+   */
+  export type ManQueue = {
+    qid: IGame.ID
+    active: boolean
+    gmid: str
+    users: User[]
+  }
+
+  /**
+   * User as of GameManager in backend
+   * Represents game metadata
+   */
+  export type ManGame = {
+    gid: string
+    active: boolean
+    gmid: string
+    users: User[]
+  }
+
+  export type GameMode = {
+    id: string
+    name: string
+    config: GameConfig
+  }
+
+  export type GeneralStats = {
+    mode: GameMode
+    mmr: number
+    scores: number[]
+  }
+
+  export type GameConfig = {
+    dim: IGame.Coordinate
+    n_player: number
+    initial_money: number
+    initial_n_probes: number
+    base_income: number
+    building_occupation_min: number
+    factory_price: number
+    factory_max_probe: number
+    factory_build_probe_delay: number
+    max_occupation: number
+    probe_speed: number
+    probe_price: number
+    probe_claim_delay: number
+    probe_maintenance_costs: number
+    turret_price: number
+    turret_fire_delay: number
+    turret_scope: number
+    turret_maintenance_costs: number
+    income_rate: number
+    deprecate_rate: number
+  }
+
+}
+
+export namespace IActions {
+
+  export type CreateQueue = {
+    gmid: string
+  }
+
+  export type JoinQueue = {
+    qid: IGame.ID
+  }
+
+  export type LeaveQueue = {
+    qid: IGame.ID
+  }
+
+  export type ResignGame = {
 
   }
 
-  export type ActionBuildFactory = {
+  export type BuildFactory = {
     coord: IGame.Coordinate
   }
 
-  export type ActionBuildTurret = {
+  export type BuildTurret = {
     coord: IGame.Coordinate
   }
 
-  export type ActionMoveProbes = {
+  export type MoveProbes = {
     ids: string[]
-    targets: IGame.Coordinate[]
+    target: IGame.Coordinate
   }
 
-  export type ActionExplodeProbes = {
+  export type ExplodeProbes = {
     ids: string[]
   }
 
-  export type ActionProbesAttack = {
+  export type ProbesAttack = {
     ids: string[]
   }
 }
 
 export namespace IComm {
 
-  export type ActionCreateQueue = {
-    n_player: number
-  }
-
-  export type ActionJoinQueue = {
-    qid: IGame.ID
-  }
-
-  export type ActionLeaveQueue = {
-    qid: IGame.ID
-  }
 
   export type Response<T extends {} = {}> = T & {
     success: boolean
@@ -252,44 +293,58 @@ export namespace IComm {
   }
 
   export type UserResponse = {
-    user: IModel.User
+    user: ICore.User
   }
 
-  export type GameConfigResponse = {
-    game_config: IModel.GameConfig
+  export type GameModeResponse = {
+    game_modes: ICore.GameMode[]
   }
 
-  export type QueueStateResponse = {
-    queues: IModel.Queue[]
+  export type UserStatsResponse = {
+    stats: ICore.GeneralStats[]
+  }
+
+  export type UserManagerState = {
+    users: ICore.ManUser[]
+  }
+
+  export type QueueManagerState = {
+    queues: ICore.ManQueue[]
+  }
+
+  export type GameManagerState = {
+    games: ICore.ManGame[]
   }
 
   export type GameResultResponse = {
-    ranking: IModel.User[]
-    stats: IModel.GamePlayerStats[]
+    ranking: ICore.User[]
+    stats: ICore.GamePlayerStats[]
+    mmrs: number[]
+    mmr_diffs: number[]
   }
 
   export type BuildFactoryResponse = {
     username: string
     money: number
-    factory: IModel.Factory
+    factory: ICore.Factory
   }
 
   export type BuildTurretResponse = {
     username: string
     money: number
-    turret: IModel.Turret
+    turret: ICore.Turret
   }
 
   export type BuildProbeResponse = {
     username: string
     money: number
-    probe: IModel.Probe
+    probe: ICore.Probe
   }
 
   export type TurretFireProbeResponse = {
     username: string
     turret_id: IGame.ID
-    probe: IModel.ProbeState
+    probe: ICore.ProbeState
   }
 }
 

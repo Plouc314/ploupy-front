@@ -1,5 +1,5 @@
 // types
-import { Firebase, IGame, IModel } from "../../types"
+import { Firebase, IGame, ICore } from "../../types"
 
 // pixi.js
 import { Container, Graphics, filters } from "pixi.js"

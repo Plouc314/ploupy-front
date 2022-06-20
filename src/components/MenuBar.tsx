@@ -2,10 +2,10 @@
 import { useRouter } from 'next/router'
 
 // react
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, ReactNode } from 'react'
 
 // types
-import { FC, IModel } from '../../types'
+import { FC, ICore } from '../../types'
 
 // mui
 import {
@@ -14,6 +14,8 @@ import {
   Box,
   Button,
   IconButton,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
   Paper,
@@ -21,6 +23,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 // firebase
 import {
@@ -33,9 +37,34 @@ import { auth, useAuth } from '../utils/Firebase'
 // pixi
 import Textures from '../pixi/textures'
 
+
+interface MenuOptionProps {
+  title: string
+  icon?: ReactNode
+  onClick: () => void
+}
+
+const MenuOption: FC<MenuOptionProps> = (props) => {
+  return (
+    <MenuItem
+      onClick={props.onClick}
+    >
+      <ListItemIcon>
+        {props.icon}
+      </ListItemIcon>
+      <ListItemText>
+        {props.title}
+      </ListItemText>
+    </MenuItem>
+  )
+}
+
+
 export interface MenuBarProps {
-  /** Use less margin / padding */
+  /** Use less margin - padding */
   compact?: boolean
+  /** Only option will be to logout */
+  restricted?: boolean
 }
 
 const MenuBar: FC<MenuBarProps> = (props) => {
@@ -85,11 +114,20 @@ const MenuBar: FC<MenuBarProps> = (props) => {
           open={!!menuAnchor}
           onClose={() => setMenuAnchor(null)}
         >
-          <MenuItem
+          {!props.restricted &&
+            <MenuOption
+              key="option-profile"
+              title="Profile"
+              icon={<PersonIcon />}
+              onClick={() => { router.push("/profile") }}
+            />
+          }
+          <MenuOption
+            key="option-logout"
+            title="Log out"
+            icon={<LogoutIcon />}
             onClick={logout}
-          >
-            <Typography textAlign="center">Logout</Typography>
-          </MenuItem>
+          />
         </Menu>
       </Toolbar>
     </AppBar>

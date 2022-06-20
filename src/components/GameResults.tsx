@@ -1,15 +1,11 @@
-// next
-import { useRouter } from 'next/router'
-
 // react
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 
 // types
-import { FC, IComm, IModel } from '../../types'
+import { FC, IComm } from '../../types'
 
 // mui
 import {
-  AppBar,
   Avatar,
   Box,
   Button,
@@ -17,62 +13,62 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  Grid,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Paper,
-  Stack,
-  TextField,
-  Toolbar,
   Typography,
 } from '@mui/material'
 
-// firebase
-import { signOut } from "firebase/auth"
-
-// components
-import Page from '../../src/components/Page'
-
-// hooks
-import { useComm } from '../../src/hooks/useComm'
-import { useGameData } from '../../src/hooks/useGameData'
-
-// utils
-import { auth, useAuth } from '../../src/utils/Firebase'
-
 // pixi
-import Game from '../../src/pixi/game'
 import Textures from '../../src/pixi/textures'
 import GameStats from '../../src/components/GameStats'
+import Color from '../utils/color'
 
 
 export interface GameResultsListProps {
-  ranking: IComm.GameResultResponse["ranking"]
+  results: IComm.GameResultResponse
 }
 
 const GameResultsList: FC<GameResultsListProps> = (props) => {
+  const colors = [
+    Color.fromRgb(175, 149, 0),
+    Color.fromRgb(180, 180, 180),
+    Color.fromRgb(106, 56, 5),
+  ]
   return (
     <List>
-      {props.ranking.map((user, i) => (
-        <ListItem key={`game-rank-${i}`}>
-          <ListItemAvatar>
-            <Avatar
-              src={Textures.getAvatarURL(user.avatar)}
-              sx={{
-                borderWidth: i < 3 ? 3 : 0,
-                borderStyle: "solid",
-                borderColor: i < 3 ? ["yellow", "gray", "brown"][i] : undefined,
-              }}
-            />
-          </ListItemAvatar>
-          <ListItemText>
-            {user.username}
-          </ListItemText>
-        </ListItem>
-      ))}
+      {props.results.ranking.map((user, i) => {
+        const mmr = props.results.mmrs[i]
+        const diff = props.results.mmr_diffs[i]
+        return (
+          <ListItem key={`game-rank-${i}`}>
+            <ListItemAvatar>
+              <Avatar
+                src={Textures.getAvatarURL(user.avatar)}
+                sx={{
+                  // borderWidth: i < 3 ? 5 : 0,
+                  // borderStyle: "solid",
+                  // borderColor: i < 3 ? colors[i].toString() : undefined,
+                }}
+              />
+            </ListItemAvatar>
+            <ListItemText sx={{ width: 300 }}>
+              {user.username}
+            </ListItemText>
+            <ListItemText>
+              {mmr}
+              <Typography
+                pl={1}
+                display="inline-block"
+                color={diff > 0 ? "success.dark" : diff < 0 ? "error.dark" : undefined}
+              >
+                {`(${diff > 0 ? "+" : ""}${diff})`}
+              </Typography>
+            </ListItemText>
+          </ListItem>
+        )
+      })}
     </List>
   )
 }
@@ -96,7 +92,7 @@ const GameResults: FC<GameResultsProps> = (props) => {
       </DialogTitle>
       <DialogContent>
         {props.result && state === "ranking" &&
-          <GameResultsList ranking={props.result.ranking} />
+          <GameResultsList results={props.result} />
         }
         {props.result && state === "stats" &&
           <Box sx={{ width: "800px" }}>

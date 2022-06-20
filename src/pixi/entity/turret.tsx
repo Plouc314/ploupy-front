@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../../types'
+import { IGame } from '../../../types'
 
 // pixi.js
 import { Graphics, Container } from 'pixi.js'
@@ -19,7 +19,7 @@ class Turret extends Entity {
   public alive: boolean
   private player: Player
 
-  constructor(player: Player, model: IModel.Turret) {
+  constructor(player: Player, model: IGame.Turret) {
     super(model.id, player.context)
     this.player = player
     this.buildContainer()
@@ -28,7 +28,7 @@ class Turret extends Entity {
     this.setCoord(model.coord)
   }
 
-  public setModel(model: IModel.TurretState) {
+  public setModel(model: IGame.TurretState) {
     if (model.coord) {
       this.setCoord(model.coord)
     }

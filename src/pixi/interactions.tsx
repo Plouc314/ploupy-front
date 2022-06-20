@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../types'
+import { IGame, ICore } from '../../types'
 
 // pixi.js
 import { Container, InteractionEvent } from 'pixi.js'

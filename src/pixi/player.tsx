@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from '../../types'
+import { IGame, ICore } from '../../types'
 
 // pixi.js
 import { Container } from 'pixi.js'
@@ -39,7 +39,7 @@ class Player implements IGame.Sprite {
   private layoutTurrets: Container
   private layoutProbes: Container
 
-  constructor(model: IModel.Player, color: Color, map: Map) {
+  constructor(model: IGame.Player, color: Color, map: Map) {
     this.username = model.username
     this.money = model.money
     this.score = model.score
@@ -70,7 +70,7 @@ class Player implements IGame.Sprite {
     model.probes.forEach(m => this.addProbe(new Probe(this, m)))
   }
 
-  public setModel(model: IModel.PlayerState) {
+  public setModel(model: IGame.PlayerState) {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
     this.alive = model.alive ?? this.alive

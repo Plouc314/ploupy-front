@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel } from "../../types"
+import { IGame, ICore } from "../../types"
 
 // pixi
 import Pixi from "./pixi"
@@ -20,20 +20,20 @@ import Interactions from "./interactions"
 class Context {
 
   public pixi: Pixi
-  public config: IModel.GameConfig
+  public config: ICore.GameConfig
 
-  public sizes: IModel.ContextSizes
+  public sizes: IGame.ContextSizes
 
   /**
    * Number of pixels equivalent to 1 coordinate
    */
   public unit: number
 
-  constructor(pixi: Pixi, config: IModel.GameConfig) {
+  constructor(pixi: Pixi, config: ICore.GameConfig) {
     this.pixi = pixi
     this.config = config
 
-    this.sizes = {} as IModel.ContextSizes
+    this.sizes = {} as IGame.ContextSizes
     this.unit = 0
 
     this.update()

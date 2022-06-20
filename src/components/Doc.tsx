@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 // types
-import { FC, IModel } from '../../types'
+import { FC, ICore } from '../../types'
 
 // mui
 import {
@@ -34,7 +34,7 @@ export interface DocProps { }
 
 const Doc: FC<DocProps> = (props) => {
 
-  const [gameConfig, setGameConfig] = useState<IModel.GameConfig | null>(null)
+  const [gameConfig, setGameConfig] = useState<ICore.GameConfig | null>(null)
 
   const [shows, setShows] = useState({
     entities: false,
@@ -42,12 +42,12 @@ const Doc: FC<DocProps> = (props) => {
   })
 
   useSingleEffect(() => {
-    API.getDefaultGameConfig()
-      .then((config) => {
-        if (!config) {
+    API.getGameMode("-N4SyXUFn-QCoXn9Uw3G")
+      .then((mode) => {
+        if (!mode) {
           throw new Error("No game config received.")
         }
-        setGameConfig(config)
+        setGameConfig(mode.config)
       })
   })
 

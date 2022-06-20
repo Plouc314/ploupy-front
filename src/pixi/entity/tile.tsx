@@ -1,5 +1,5 @@
 // types
-import { IGame, IModel, RGB } from '../../../types'
+import { IGame, RGB } from '../../../types'
 
 // pixi.js
 import { Graphics } from 'pixi.js';
@@ -33,7 +33,7 @@ class Tile extends Entity {
   /** highlighted indicates that a building can be built on tile */
   private highlighted: boolean
 
-  constructor(context: Context, model: IModel.Tile<Player>) {
+  constructor(context: Context, model: IGame.Tile<Player>) {
     super(model.id, context)
     this.buildContainer()
 
@@ -47,7 +47,7 @@ class Tile extends Entity {
     this.highlighted = false
   }
 
-  public setModel(model: IModel.TileState<Player>) {
+  public setModel(model: IGame.TileState<Player>) {
     if (model.owner !== null) {
       this.owner = model.owner
       if (this.owner?.isTileHighlightState) {
