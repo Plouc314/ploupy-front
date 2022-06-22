@@ -30,6 +30,7 @@ import MenuBar from '../src/components/MenuBar'
 import Loading from '../src/components/Loading';
 import API from '../src/comm/api';
 import Textures from '../src/pixi/textures';
+import ErrorMessage from '../src/components/ErrorMessage';
 
 
 
@@ -103,7 +104,7 @@ const PageUser: FC<PageUserProps> = (props) => {
         <Loading label="Fetching user..." />
       }
       {!loading && !user &&
-        <p>No user found.</p>
+        <ErrorMessage label="User not found." />
       }
       {!loading && user &&
         <>

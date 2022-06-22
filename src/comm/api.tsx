@@ -55,7 +55,7 @@ class API {
   ): Promise<ICore.User | null> {
     const response = await this.get<IComm.UserResponse>("user-data", args)
     if (!response.success) return null
-    return response.user
+    return { ...response.user, mmrs: response.mmrs }
   }
 
   public static async getGameModes(): Promise<ICore.GameMode[] | null> {

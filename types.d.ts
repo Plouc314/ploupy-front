@@ -174,6 +174,11 @@ export namespace ICore {
     username: string
     email: string
     avatar: string
+    /**
+     * Current MMRs of user in all game modes
+     * ID: game mode id
+     */
+    mmrs: Record<IGame.ID, number>
   }
 
   /**
@@ -294,6 +299,7 @@ export namespace IComm {
 
   export type UserResponse = {
     user: ICore.User
+    mmrs: Record<IGame.ID, number>
   }
 
   export type GameModeResponse = {
