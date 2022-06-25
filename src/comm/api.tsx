@@ -55,7 +55,7 @@ class API {
   ): Promise<ICore.User | null> {
     const response = await this.get<IComm.UserResponse>("user-data", args)
     if (!response.success) return null
-    return { ...response.user, mmrs: response.mmrs }
+    return { ...response.user, mmrs: response.mmrs.mmrs }
   }
 
   public static async getGameModes(): Promise<ICore.GameMode[] | null> {
@@ -72,14 +72,14 @@ class API {
     return response.game_modes[0]
   }
 
-  public static async getUserStats(uid: string): Promise<ICore.GeneralStats[] | null> {
+  public static async getUserStats(uid: string): Promise<ICore.GameModeStats[] | null> {
     const response = await this.get<IComm.UserStatsResponse>("user-stats", { uid })
     if (!response.success) return null
     return response.stats
   }
 
   public static async createUser(
-    user: ICore.User
+    user: Omit<ICore.User, "last_online" | "mmrs">
   ): Promise<IComm.Response> {
     return await this.post("create-user", user)
   }

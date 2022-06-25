@@ -22,7 +22,6 @@ import {
 
 // hooks
 import { useComm } from '../hooks/useComm'
-import { useGameData } from '../hooks/useGameData'
 import useSingleEffect from '../hooks/useSingleEffect'
 
 // utils
@@ -42,7 +41,6 @@ const Lobby: FC<LobbyProps> = (props) => {
   const router = useRouter()
   const comm = useComm()
   const { user } = useAuth()
-  const { gameData, setGameData } = useGameData()
 
   const [gameModes, setGameModes] = useState<ICore.GameMode[]>([])
 
@@ -97,9 +95,8 @@ const Lobby: FC<LobbyProps> = (props) => {
   useSingleEffect(() => {
     if (!comm) return
 
-    comm.setOnStartGame((gameState) => {
-      setGameData(gameState)
-      router.push("/game")
+    comm.setOnStartGame((data) => {
+      router.push(`/game?id=${data.gid}`)
     })
     comm.setOnQueueManagerState((data) => onQueueState(data))
 

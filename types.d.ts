@@ -4,14 +4,12 @@ export type FC<T> = React.FC<React.PropsWithChildren<T>>
 
 export type Loose<T, K extends keyof T> = Partial<T> & Pick<T, K>
 
+/**Store a date, but in a string */
+export type DateLike = string
 
 export namespace Firebase {
-  export type User = {
+  export type User = ICore.User & {
     connected: boolean
-    uid: string
-    username: string
-    email: string
-    avatar: string
   }
 
   export type Auth = {
@@ -174,6 +172,8 @@ export namespace ICore {
     username: string
     email: string
     avatar: string
+    joined_on: DateLike
+    last_online: DateLike
     /**
      * Current MMRs of user in all game modes
      * ID: game mode id
@@ -218,10 +218,11 @@ export namespace ICore {
     config: GameConfig
   }
 
-  export type GeneralStats = {
+  export type GameModeStats = {
     mode: GameMode
-    mmr: number
     scores: number[]
+    dates: string[]
+    mmr_hist: number[]
   }
 
   export type GameConfig = {
@@ -263,6 +264,10 @@ export namespace IActions {
     qid: IGame.ID
   }
 
+  export type GameState = {
+    gid: IGame.ID
+  }
+
   export type ResignGame = {
 
   }
@@ -299,7 +304,7 @@ export namespace IComm {
 
   export type UserResponse = {
     user: ICore.User
-    mmrs: Record<IGame.ID, number>
+    mmrs: { mmrs: Record<IGame.ID, number> }
   }
 
   export type GameModeResponse = {
@@ -307,7 +312,7 @@ export namespace IComm {
   }
 
   export type UserStatsResponse = {
-    stats: ICore.GeneralStats[]
+    stats: ICore.GameModeStats[]
   }
 
   export type UserManagerState = {
@@ -320,6 +325,10 @@ export namespace IComm {
 
   export type GameManagerState = {
     games: ICore.ManGame[]
+  }
+
+  export type StartGameResponse = {
+    gid: string
   }
 
   export type GameResultResponse = {

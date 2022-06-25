@@ -36,7 +36,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line, Scatter } from 'react-chartjs-2';
+import { Scatter } from 'react-chartjs-2';
 import { COLORS } from '../pixi/constants';
 
 

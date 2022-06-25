@@ -97,6 +97,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             username: username,
             email: email,
             avatar: getRandomAvatar(),
+            joined_on: new Date().toISOString(),
           }
           await API.createUser(user)
 

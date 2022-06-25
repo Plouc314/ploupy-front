@@ -11,25 +11,12 @@ import { FC, IComm, ICore } from '../../types'
 import {
   Avatar,
   Box,
-  Card,
-  CardContent,
-  CardHeader,
-  Dialog,
   Divider,
-  Grid,
   IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Paper,
   Stack,
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableRow,
   Tooltip,
   Typography,
@@ -44,15 +31,12 @@ import {
 } from 'firebase/auth'
 
 // hooks
-import useSingleEffect from '../hooks/useSingleEffect'
 import { useSnackbar } from 'notistack';
 
 // utils
 import { auth, useAuth } from '../utils/Firebase'
 
 // pixi
-import API from '../comm/api'
-import Color from '../utils/color';
 import Textures from '../pixi/textures';
 
 
@@ -260,7 +244,7 @@ const ProfileAccount: FC<ProfileAccountProps> = (props) => {
               title="Joined on"
             >
               <Typography>
-                {"Don't know actually"}
+                {new Date(user.joined_on).toLocaleDateString()}
               </Typography>
             </ProfileTableRow>
           </TableBody>

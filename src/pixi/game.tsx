@@ -28,12 +28,13 @@ class Game {
   public context: Context
   public keyboard: Keyboard
   public players: Player[] = []
-  public ownPlayer: Player
+  public ownPlayer?: Player
   public map: Map
-  public interactions: Interactions
+  public interactions?: Interactions
   public ui: UI
   public animations: Animations
   public layout: Container
+  public isSpectator: boolean
 
   private currentTime: number
 
@@ -56,7 +57,11 @@ class Game {
       new Player(pm, COLORS[i], this.map)
     )
 
-    this.ownPlayer = this.players.find((p) => p.username === this.user.username) as Player
+    // search for user's username in game's players
+    // if not found -> user is a spectator
+    this.ownPlayer = this.players.find((p) => p.username === this.user.username)
+
+    this.isSpectator = !this.ownPlayer
 
     // format map model
     const mapModel: IGame.Map<Player> = {
@@ -136,7 +141,22 @@ class Game {
       this.ui.setGameActionError(msg)
     })
 
-    this.interactions = new Interactions(this.ui, this.keyboard, this.pixi, this.ownPlayer)
+    if (!this.isSpectator) {
+      this.setupInteractions()
+    }
+
+    this.pixi.app.stage.addChild(this.layout)
+
+    this.pixi.app.ticker.add((dt) => this.run())
+  }
+
+  private setupInteractions() {
+    this.interactions = new Interactions(
+      this.ui,
+      this.keyboard,
+      this.pixi,
+      this.ownPlayer as Player,
+    )
 
     this.interactions.setLayout(this.layout)
 
@@ -166,10 +186,6 @@ class Game {
         ids: probes.map(p => p.getId()),
       })
     }
-
-    this.pixi.app.stage.addChild(this.layout)
-
-    this.pixi.app.ticker.add((dt) => this.run())
   }
 
   /**

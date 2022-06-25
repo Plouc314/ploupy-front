@@ -26,7 +26,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 
 // hooks
 import { useComm } from '../hooks/useComm'
-import { useGameData } from '../hooks/useGameData'
 import useSingleEffect from '../hooks/useSingleEffect'
 import { useSnackbar } from 'notistack';
 
@@ -47,14 +46,19 @@ interface GameRowProps {
 
 const GameRow: FC<GameRowProps> = (props) => {
 
+  const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
+
+  const viewGame = () => {
+    router.push(`/game?id=${props.game.gid}`)
+  }
 
   return (
     <ListItem
       secondaryAction={
         <Tooltip title="View game">
           <IconButton
-            onClick={() => enqueueSnackbar("Not implemented.", { variant: "error" })}
+            onClick={() => viewGame()}
           >
             <VisibilityIcon />
           </IconButton>

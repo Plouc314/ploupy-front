@@ -74,6 +74,9 @@ function useFirebaseAuth() {
     username: "",
     email: "",
     avatar: "",
+    joined_on: "",
+    last_online: "",
+    mmrs: {},
   })
   const [loading, setLoading] = useState(true)
 
@@ -103,11 +106,8 @@ function useFirebaseAuth() {
               }
 
               setUser({
+                ...data,
                 connected: true,
-                uid: data.uid,
-                email: data.email,
-                username: data.username,
-                avatar: data.avatar,
               })
 
               // stop loading state
@@ -137,6 +137,9 @@ const userContext = createContext<Firebase.Auth>({
     username: "",
     email: "",
     avatar: "",
+    joined_on: "",
+    last_online: "",
+    mmrs: {},
   },
   loading: true
 })

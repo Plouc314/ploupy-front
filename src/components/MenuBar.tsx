@@ -65,6 +65,8 @@ export interface MenuBarProps {
   compact?: boolean
   /** Only option will be to logout */
   restricted?: boolean
+  /** The user's avatar icon won't be displayed  */
+  noAvatar?: boolean
 }
 
 const MenuBar: FC<MenuBarProps> = (props) => {
@@ -95,20 +97,22 @@ const MenuBar: FC<MenuBarProps> = (props) => {
           </Typography>
         </a>
         <Box sx={{ flexGrow: 1 }} />
-        <Tooltip title="Account">
-          <IconButton
-            onClick={(e) => setMenuAnchor(e.currentTarget)}
-          >
-            <Avatar
-              alt="avatar"
-              src={Textures.getAvatarURL(user.avatar)}
-              sx={{
-                width: props.compact ? 35 : 40,
-                height: props.compact ? 35 : 40,
-              }}
-            />
-          </IconButton>
-        </Tooltip>
+        {!props.noAvatar &&
+          <Tooltip title="Account">
+            <IconButton
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+            >
+              <Avatar
+                alt="avatar"
+                src={Textures.getAvatarURL(user.avatar)}
+                sx={{
+                  width: props.compact ? 35 : 40,
+                  height: props.compact ? 35 : 40,
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        }
         <Menu
           anchorEl={menuAnchor}
           open={!!menuAnchor}
