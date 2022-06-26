@@ -1,3 +1,6 @@
+// react
+import { useRef } from 'react';
+
 // types
 import { FC, ICore } from '../types'
 
@@ -9,76 +12,91 @@ import {
   Box,
   Stack,
   Typography,
+  Tooltip,
 } from '@mui/material'
 
 // components
 import Page from '../src/components/Page'
 import MenuBar from '../src/components/MenuBar'
 import Footer from '../src/components/Footer';
-import Textures from '../src/pixi/textures';
 
+// pixi
+import Textures from '../src/pixi/textures';
+import { AVATARS, COLORS } from '../src/pixi/constants';
+
+
+const getIconColor = () => {
+  const idx = Math.floor(Math.random() * COLORS.length)
+  return COLORS[idx]
+}
 
 export interface PageCreditsProps { }
 
 const PageCredits: FC<PageCreditsProps> = (props) => {
 
-  const FlatIconAttrs = [
+  const FlatIconAttrs = useRef([
     {
       href: "https://www.flaticon.com/free-icons/laser",
       title: "laser icons",
       text: "Laser icons created by Freepik",
       icon: "turret",
+      color: getIconColor(),
     },
     {
       href: "https://www.flaticon.com/free-icons/dollar-sign",
       title: "dollar sign icons",
       text: "Dollar sign icons created by Freepik",
       icon: "money",
+      color: getIconColor(),
     },
     {
       href: "https://www.flaticon.com/free-icons/adjustable-wrench",
       title: "adjustable wrench icons",
       text: "Adjustable wrench icons created by Freepik",
       icon: "probe",
+      color: getIconColor(),
     },
     {
       href: "https://www.flaticon.com/free-icons/gear",
       title: "gear icons",
       text: "Gear icons created by Freepik",
       icon: "factory",
+      color: getIconColor(),
     },
     {
       href: "https://www.flaticon.com/free-icons/attack",
       title: "attack icons",
       text: "Attack icons created by Freepik",
       icon: "attack",
+      color: getIconColor(),
     },
     {
       href: "https://www.flaticon.com/free-icons/explosion",
       title: "explosion icons",
       text: "Explosion icons created by PIXARTIST",
       icon: "explode",
+      color: getIconColor(),
     },
-  ]
+  ])
 
   return (
     <Page
-      title='Profile'
+      title='Credits'
     >
-      <MenuBar noAvatar />
-      <Box sx={{ p: 3 }} />
+      <MenuBar />
+      <Box sx={{ p: 1 }} />
       <a
         href="https://www.flaticon.com"
         style={{ textDecoration: "none", color: "inherit" }}
       >
-        <Typography variant="h3" sx={{ pb: 1 }}>
+        <Typography variant="h3" sx={{ pt: 3, pb: 1 }}>
           FlatIcon
         </Typography>
       </a>
       <Divider />
       <Grid container>
-        {FlatIconAttrs.map(attr => (
-          <Grid item xs={4}>
+        {FlatIconAttrs.current.map(attr => (
+          <Grid item sm={6} lg={4} key={attr.href}>
             <Stack
               direction="row"
               alignItems="center"
@@ -86,7 +104,7 @@ const PageCredits: FC<PageCreditsProps> = (props) => {
             >
               <Avatar
                 variant="square"
-                src={Textures.getIconURL(attr.icon)}
+                src={Textures.getIconURL(attr.icon, attr.color)}
                 sx={{ width: 30, height: 30, pb: 0.5, pr: 1 }}
               />
               <a
@@ -99,6 +117,36 @@ const PageCredits: FC<PageCreditsProps> = (props) => {
                 </Typography>
               </a>
             </Stack>
+          </Grid>
+        ))}
+      </Grid>
+      <a
+        href="https://kenney.nl/"
+        style={{ textDecoration: "none", color: "inherit" }}
+      >
+        <Typography variant="h3" sx={{ pt: 3, pb: 1 }}>
+          Kenney
+        </Typography>
+      </a>
+      <Divider />
+
+      <a
+        href="https://kenney.nl/assets/animal-pack-redux"
+        style={{ color: "inherit" }}
+      >
+        <Typography sx={{ p: 2 }}>
+          The amazing animals that you can't change !
+        </Typography>
+      </a>
+      <Grid container>
+        {AVATARS.map(avatar => (
+          <Grid item key={avatar}>
+            <Tooltip title={`a damn ${avatar}`}>
+              <Avatar
+                src={Textures.getAvatarURL(avatar)}
+                sx={{ p: 0.5 }}
+              />
+            </Tooltip>
           </Grid>
         ))}
       </Grid>

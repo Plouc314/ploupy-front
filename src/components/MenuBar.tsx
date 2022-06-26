@@ -13,6 +13,7 @@ import {
   Avatar,
   Box,
   Button,
+  ButtonGroup,
   IconButton,
   ListItemIcon,
   ListItemText,
@@ -65,8 +66,6 @@ export interface MenuBarProps {
   compact?: boolean
   /** Only option will be to logout */
   restricted?: boolean
-  /** The user's avatar icon won't be displayed  */
-  noAvatar?: boolean
 }
 
 const MenuBar: FC<MenuBarProps> = (props) => {
@@ -82,7 +81,7 @@ const MenuBar: FC<MenuBarProps> = (props) => {
       })
     setMenuAnchor(null)
   }
-
+  console.log(user)
   return (
     <AppBar position="static">
       <Toolbar
@@ -97,7 +96,7 @@ const MenuBar: FC<MenuBarProps> = (props) => {
           </Typography>
         </a>
         <Box sx={{ flexGrow: 1 }} />
-        {!props.noAvatar &&
+        {user.connected &&
           <Tooltip title="Account">
             <IconButton
               onClick={(e) => setMenuAnchor(e.currentTarget)}
@@ -112,6 +111,16 @@ const MenuBar: FC<MenuBarProps> = (props) => {
               />
             </IconButton>
           </Tooltip>
+        }
+        {!user.connected &&
+          <Button
+            size="small"
+            variant="contained"
+            color="secondary"
+            onClick={() => router.push("/login")}
+          >
+            Log in
+          </Button>
         }
         <Menu
           anchorEl={menuAnchor}

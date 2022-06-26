@@ -10,6 +10,7 @@ export type DateLike = string
 export namespace Firebase {
   export type User = ICore.User & {
     connected: boolean
+    jwt: string
   }
 
   export type Auth = {

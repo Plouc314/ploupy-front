@@ -70,6 +70,7 @@ Return the user & the loading state
 function useFirebaseAuth() {
   const [user, setUser] = useState<Firebase.User>({
     connected: false,
+    jwt: "",
     uid: "",
     username: "",
     email: "",
@@ -98,6 +99,7 @@ function useFirebaseAuth() {
         if (lastSignIn - creation < 60000) {
           delay = 2000
         }
+
         setTimeout(() => {
           API.getUserData({ uid: _user.uid })
             .then((data) => {
@@ -105,10 +107,15 @@ function useFirebaseAuth() {
                 throw new Error(`No user found for uid: ${_user.uid}`)
               }
 
-              setUser({
-                ...data,
-                connected: true,
-              })
+              // set jwt token
+              _user.getIdToken()
+                .then(jwt => {
+                  setUser({
+                    ...data,
+                    connected: true,
+                    jwt: jwt,
+                  })
+                })
 
               // stop loading state
               setLoading(false)
@@ -122,7 +129,7 @@ function useFirebaseAuth() {
 
     })
   })
-
+  console.log(user)
   return { user: user, loading: loading } as Firebase.Auth
 }
 
@@ -133,6 +140,7 @@ Same data as UseFirebaseAuth (work together)
 const userContext = createContext<Firebase.Auth>({
   user: {
     connected: false,
+    jwt: "",
     uid: "",
     username: "",
     email: "",

@@ -1,3 +1,6 @@
+// react
+import { useState } from 'react';
+
 // types
 import { FC, ICore } from '../../types'
 
@@ -13,8 +16,10 @@ import {
 } from '@mui/material';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import EmailIcon from '@mui/icons-material/Email';
-import { useState } from 'react';
-import Link from 'next/link';
+
+// comm
+import { VERSION } from '../comm/config';
+
 
 export interface FooterProps { }
 
@@ -46,17 +51,24 @@ const Footer: FC<FooterProps> = (props) => {
       <Grid
         container
         direction="row"
-        justifyContent="space-evenly"
+        justifyContent="space-between"
         alignItems="center"
       >
-        <Grid item >
+        <Grid item>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+          >
+            {"V" + VERSION}
+          </Typography>
 
+        </Grid>
+        <Grid item >
           <a href='https://github.com/Plouc314' style={{ color: "inherit" }}>
             <Tooltip arrow title="Github">
               <GitHubIcon fontSize="large" />
             </Tooltip>
           </a>
-
         </Grid>
         <Grid item >
           <Stack direction="row" alignItems="center">

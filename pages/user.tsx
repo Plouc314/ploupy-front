@@ -127,7 +127,7 @@ const PageUser: FC<PageUserProps> = (props) => {
     <Page
       withAuth
       withComm
-      title='Profile'
+      title='User'
     >
       {loading &&
         <Loading label="Fetching user..." />

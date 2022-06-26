@@ -24,7 +24,7 @@ function useSio() {
         transportOptions: {
           polling: {
             extraHeaders: {
-              'uid': user.uid
+              'jwt': user.jwt
             }
           }
         }
