@@ -118,7 +118,6 @@ const PageGame: FC<PageGameProps> = (props) => {
 
   return (
     <Page
-      withAuth
       withComm
       title='Game'
     >

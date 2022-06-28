@@ -129,7 +129,7 @@ function useFirebaseAuth() {
 
     })
   })
-  console.log(user)
+
   return { user: user, loading: loading } as Firebase.Auth
 }
 

@@ -125,8 +125,6 @@ const PageUser: FC<PageUserProps> = (props) => {
 
   return (
     <Page
-      withAuth
-      withComm
       title='User'
     >
       {loading &&

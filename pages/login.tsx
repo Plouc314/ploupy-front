@@ -42,6 +42,7 @@ import API from '../src/comm/api'
 // pixi
 import { AVATARS } from '../src/pixi/constants'
 import Textures from '../src/pixi/textures'
+import useSio from '../src/comm/sio'
 
 const theme = createTheme()
 
@@ -73,12 +74,19 @@ const PageLogin: FC<PageLoginProps> = (props) => {
     setErrorMessage('')
   }
 
+  /**
+   * Called after successful sign up / sign in
+   */
+  const afterLoggedIn = () => {
+    reset()
+    router.push("/")
+  }
+
   const submit = async () => {
     if (state === "signin") {
       signInWithEmailAndPassword(auth, email, password)
         .then((response) => {
-          reset()
-          router.push("/")
+          afterLoggedIn()
         })
         .catch((error: any) => {
           setErrorMessage(getErrorMessage(error))
@@ -101,8 +109,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
           }
           await API.createUser(user)
 
-          reset()
-          router.push("/")
+          afterLoggedIn()
         })
         .catch((error: any) => {
           setErrorMessage(getErrorMessage(error))
