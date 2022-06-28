@@ -21,6 +21,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useTheme,
 } from '@mui/material'
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
@@ -29,12 +30,16 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  TimeScale,
   BarElement,
+  PointElement,
+  LineElement,
   Title,
   Tooltip as TooltipCJS,
   Legend,
 } from 'chart.js';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
+import 'chartjs-adapter-date-fns'
 
 // hooks
 import useSingleEffect from '../hooks/useSingleEffect'
@@ -47,10 +52,14 @@ import API from '../comm/api'
 import Color from '../utils/color';
 
 
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  TimeScale,
   BarElement,
+  PointElement,
+  LineElement,
   Title,
   TooltipCJS,
   Legend
@@ -58,27 +67,69 @@ ChartJS.register(
 
 
 interface GraphMMRProps {
-  stats: ICore.GeneralStats
+  user: ICore.User
+  stats: ICore.GameModeStats
 }
 
 const GraphMMR: FC<GraphMMRProps> = (props) => {
+
+  const theme = useTheme()
+
   return (
     <Card sx={{ m: 2 }}>
       <CardHeader
-        title="MMR"
+        title={(
+          <>
+            MMR
+            <Typography
+              variant="h6"
+              color="text.sedondary"
+              component="span"
+              sx={{ pl: 3 }}
+            >
+              {props.user.mmrs[props.stats.mode.id]}
+            </Typography>
+          </>
+        )
+        }
       />
-      <CardContent>
-        <Typography variant="h6" textAlign="center">
-          {props.stats.mmr}
-        </Typography>
-      </CardContent>
-    </Card>
+      < CardContent >
+        <Line
+          options={{
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top' as const,
+              },
+            },
+            scales: {
+              yAxis: {
+                suggestedMin: 0,
+              },
+              xAxis: {
+                type: "time",
+              }
+            }
+          }}
+          data={{
+            datasets: [{
+              label: "MMR",
+              data: props.stats.dates.map((d, i) => ({ x: d, y: props.stats.mmr_hist[i] })),
+              backgroundColor: theme.palette.primary.dark,
+              borderColor: theme.palette.primary.dark,
+              showLine: true,
+              pointRadius: 3,
+            }]
+          }}
+        />
+      </CardContent >
+    </Card >
   )
 }
 
 
 interface GraphRankingProps {
-  stats: ICore.GeneralStats
+  stats: ICore.GameModeStats
 }
 
 const GraphRanking: FC<GraphRankingProps> = (props) => {
@@ -107,13 +158,22 @@ const GraphRanking: FC<GraphRankingProps> = (props) => {
   }
 
   const getBorderRadius = (i: number) => {
-    if (i == 0) {
-      return { bottomLeft: 50, topLeft: 50 }
+
+    const idxStart = props.stats.scores.findIndex(v => v > 0)
+    const idxStop = props.stats.scores.length - 1 - props.stats.scores
+      .slice()
+      .reverse()
+      .findIndex(v => v > 0)
+
+    let radius = undefined
+
+    if (i == idxStart) {
+      radius = { bottomLeft: 50, topLeft: 50 }
     }
-    if (i == props.stats.scores.length - 1) {
-      return { bottomRight: 50, topRight: 50 }
+    if (i == idxStop) {
+      radius = { ...(radius ?? {}), bottomRight: 50, topRight: 50 }
     }
-    return undefined
+    return radius
   }
 
   const colors = colorsSet[props.stats.mode.config.n_player]
@@ -163,17 +223,17 @@ const GraphRanking: FC<GraphRankingProps> = (props) => {
 
 
 export interface ProfileStatsProps {
-  uid: string
+  user: ICore.User
 }
 
 const ProfileStats: FC<ProfileStatsProps> = (props) => {
 
-  const [stats, setStats] = useState<ICore.GeneralStats[] | null>(null)
-  const [currentStats, setCurrentStats] = useState<ICore.GeneralStats | null>(null)
+  const [stats, setStats] = useState<ICore.GameModeStats[] | null>(null)
+  const [currentStats, setCurrentStats] = useState<ICore.GameModeStats | null>(null)
   const [modeDialogAnchor, setModeDialogAnchor] = useState<HTMLElement | null>(null)
 
   useSingleEffect(() => {
-    API.getUserStats(props.uid)
+    API.getUserStats(props.user.uid)
       .then((data) => {
         if (!data) {
           throw new Error("No stats received.")
@@ -205,7 +265,7 @@ const ProfileStats: FC<ProfileStatsProps> = (props) => {
       <Divider sx={{ mb: 4 }} />
       {currentStats &&
         <>
-          <GraphMMR stats={currentStats} />
+          <GraphMMR user={props.user} stats={currentStats} />
           <GraphRanking stats={currentStats} />
         </>
       }

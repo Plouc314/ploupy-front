@@ -98,7 +98,11 @@ class UI implements IGame.Sprite {
       }
 
       this.buttons[name] = btn
-      this.container.addChild(btn.child())
+
+      // only display buttons in non-specator mode
+      if (!this.game.isSpectator) {
+        this.container.addChild(btn.child())
+      }
     })
 
     this.errorText = new TextUI(this.context)
@@ -109,7 +113,11 @@ class UI implements IGame.Sprite {
     this.errorText.color = Color.WHITE
     this.errorText.fontSize = 16
     this.errorText.compile()
-    this.container.addChild(this.errorText.child())
+
+    // only display error text in non-specator mode
+    if (!this.game.isSpectator) {
+      this.container.addChild(this.errorText.child())
+    }
   }
 
   public update(dt: number) {

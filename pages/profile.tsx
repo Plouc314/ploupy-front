@@ -115,7 +115,7 @@ const PageProfile: FC<PageProfileProps> = (props) => {
         >
           <Collapse in={tab === "stats"}>
             <ProfileStats
-              uid={user.uid}
+              user={user}
             />
           </Collapse>
           <Collapse in={tab === "account"}>

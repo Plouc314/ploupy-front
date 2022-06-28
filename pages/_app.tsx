@@ -8,7 +8,6 @@ import { SnackbarProvider } from 'notistack';
 
 // hooks
 import { CommProvider } from '../src/hooks/useComm'
-import { GameDataProvider } from '../src/hooks/useGameData'
 import { ToastProvider } from '../src/hooks/useToast'
 import { AuthProvider } from '../src/utils/Firebase'
 
@@ -50,13 +49,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={theme}>
       <AuthProvider>
         <CommProvider>
-          <GameDataProvider>
-            <SnackbarProvider TransitionComponent={Fade}>
-              <ToastProvider>
-                <Component {...pageProps} />
-              </ToastProvider>
-            </SnackbarProvider>
-          </GameDataProvider>
+          <SnackbarProvider TransitionComponent={Fade}>
+            <ToastProvider>
+              <Component {...pageProps} />
+            </ToastProvider>
+          </SnackbarProvider>
         </CommProvider>
       </AuthProvider>
     </ThemeProvider>

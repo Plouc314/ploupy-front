@@ -40,7 +40,7 @@ class Keyboard {
     if (!this.active) return
 
     if (!(e.key in this.states)) return
-    console.log("key " + e.key)
+
     const state = this.states[e.key]
 
     if (state.down) return

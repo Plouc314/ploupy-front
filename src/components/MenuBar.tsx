@@ -13,6 +13,7 @@ import {
   Avatar,
   Box,
   Button,
+  ButtonGroup,
   IconButton,
   ListItemIcon,
   ListItemText,
@@ -80,7 +81,7 @@ const MenuBar: FC<MenuBarProps> = (props) => {
       })
     setMenuAnchor(null)
   }
-
+  console.log(user)
   return (
     <AppBar position="static">
       <Toolbar
@@ -95,20 +96,32 @@ const MenuBar: FC<MenuBarProps> = (props) => {
           </Typography>
         </a>
         <Box sx={{ flexGrow: 1 }} />
-        <Tooltip title="Account">
-          <IconButton
-            onClick={(e) => setMenuAnchor(e.currentTarget)}
+        {user.connected &&
+          <Tooltip title="Account">
+            <IconButton
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+            >
+              <Avatar
+                alt="avatar"
+                src={Textures.getAvatarURL(user.avatar)}
+                sx={{
+                  width: props.compact ? 35 : 40,
+                  height: props.compact ? 35 : 40,
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        }
+        {!user.connected &&
+          <Button
+            size="small"
+            variant="contained"
+            color="secondary"
+            onClick={() => router.push("/login")}
           >
-            <Avatar
-              alt="avatar"
-              src={Textures.getAvatarURL(user.avatar)}
-              sx={{
-                width: props.compact ? 35 : 40,
-                height: props.compact ? 35 : 40,
-              }}
-            />
-          </IconButton>
-        </Tooltip>
+            Log in
+          </Button>
+        }
         <Menu
           anchorEl={menuAnchor}
           open={!!menuAnchor}

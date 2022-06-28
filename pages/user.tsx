@@ -30,6 +30,7 @@ import MenuBar from '../src/components/MenuBar'
 import Loading from '../src/components/Loading';
 import API from '../src/comm/api';
 import Textures from '../src/pixi/textures';
+import ErrorMessage from '../src/components/ErrorMessage';
 
 
 
@@ -38,6 +39,24 @@ interface UserInfoBarProps {
 }
 
 const UserInfoBar: FC<UserInfoBarProps> = (props) => {
+
+  const getLastOnline = () => {
+    const diff = new Date().valueOf() - new Date(props.user.last_online).valueOf()
+
+    const min = diff / (1000 * 60)
+    if (min < 60) {
+      return `${min.toFixed(0)} minutes ago`
+    }
+    const hours = min / 60
+    if (hours < 24) {
+      return `${hours.toFixed()} hours ago`
+    }
+    const days = hours / 24
+    if (days < 31) {
+      return `${days.toFixed()} days ago`
+    }
+    return "more than a month ago"
+  }
 
   return (
     <Paper sx={{ m: 2 }}>
@@ -56,12 +75,23 @@ const UserInfoBar: FC<UserInfoBarProps> = (props) => {
         <ListItem
           secondaryAction={
             <Typography color="text.secondary">
-              No clue...
+              {new Date(props.user.joined_on).toLocaleDateString()}
             </Typography>
           }
         >
           <ListItemText
             primary="Joined on"
+          />
+        </ListItem>
+        <ListItem
+          secondaryAction={
+            <Typography color="text.secondary">
+              {getLastOnline()}
+            </Typography>
+          }
+        >
+          <ListItemText
+            primary="Last online"
           />
         </ListItem>
       </List>
@@ -95,15 +125,13 @@ const PageUser: FC<PageUserProps> = (props) => {
 
   return (
     <Page
-      withAuth
-      withComm
-      title='Profile'
+      title='User'
     >
       {loading &&
         <Loading label="Fetching user..." />
       }
       {!loading && !user &&
-        <p>No user found.</p>
+        <ErrorMessage label="User not found." />
       }
       {!loading && user &&
         <>
@@ -122,7 +150,7 @@ const PageUser: FC<PageUserProps> = (props) => {
               item
               xs={9}
             >
-              <ProfileStats uid={user.uid} />
+              <ProfileStats user={user} />
             </Grid>
           </Grid>
         </>

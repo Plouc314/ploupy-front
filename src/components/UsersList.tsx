@@ -25,7 +25,6 @@ import PetsIcon from '@mui/icons-material/Pets';
 
 // hooks
 import { useComm } from '../hooks/useComm'
-import { useGameData } from '../hooks/useGameData'
 import useSingleEffect from '../hooks/useSingleEffect'
 
 // utils
@@ -33,7 +32,6 @@ import { useAuth } from '../utils/Firebase'
 
 // pixi
 import Textures from '../pixi/textures'
-import API from '../comm/api'
 
 
 export interface UsersListProps {

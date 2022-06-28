@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect, useRef } from 'react'
 
 // types
-import { FC, IComm, ICore } from '../types'
+import { FC, IComm, IGame } from '../types'
 
 // mui
 import {
@@ -19,7 +19,6 @@ import Page from '../src/components/Page'
 
 // hooks
 import { useComm } from '../src/hooks/useComm'
-import { useGameData } from '../src/hooks/useGameData'
 
 // utils
 import { useAuth } from '../src/utils/Firebase'
@@ -39,12 +38,13 @@ const PageGame: FC<PageGameProps> = (props) => {
   const router = useRouter()
   const comm = useComm()
   const { user } = useAuth()
-  const { gameData, setGameData } = useGameData()
+
 
   const isGame = useRef(false)
   const [game, setGame] = useState<Game | null>(null)
   const refGame = useRef<Game | null>(null)
 
+  const [isSpectator, setIsSpectator] = useState(true)
   const [hasResigned, setHasResigned] = useState(false)
   const [result, setResult] = useState<IComm.GameResultResponse | null>(null)
 
@@ -53,29 +53,45 @@ const PageGame: FC<PageGameProps> = (props) => {
 
   useEffect(() => {
     if (!comm) return
+    if (!router.isReady) return
     if (isGame.current) return
-    if (!gameData) {
-      // no game -> back to main
+
+    if (!router.query.id || typeof router.query.id !== "string") {
       router.replace("/")
       return
     }
 
-    isGame.current = true
-    setHasResigned(false)
+    comm.setOnGameState((data) => {
+      if (isGame.current) return
+      isGame.current = true
+      setHasResigned(false)
+      setIsSpectator(!data.players.find(p => p.username === user.username))
 
-    const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
-    const pixi = new Pixi(canvas)
+      const canvas = document.getElementById("PixiCanvas") as HTMLCanvasElement
+      const pixi = new Pixi(canvas)
 
-    pixi.textures.load(() => {
-      refGame.current = new Game(pixi, comm, user, gameData)
-      setGame(refGame.current)
+      pixi.textures.load(() => {
+        console.group("create game")
+        console.log(data)
+        console.groupEnd()
+        refGame.current = new Game(pixi, comm, user, data as IGame.Game)
+        setGame(refGame.current)
+      })
     })
-  }, [comm, gameData])
+
+    comm.getGameState(
+      { gid: router.query.id },
+      (response) => {
+        if (!response.success) {
+          router.replace("/")
+        }
+      })
+
+  }, [comm, router.isReady])
 
   useEffect(() => {
     if (!comm) return
     comm.setOnGameResult((data) => {
-      setGameData(null)
       setResult(data)
     })
   }, [comm])
@@ -102,7 +118,6 @@ const PageGame: FC<PageGameProps> = (props) => {
 
   return (
     <Page
-      withAuth
       withComm
       title='Game'
     >
@@ -115,18 +130,20 @@ const PageGame: FC<PageGameProps> = (props) => {
           direction="row"
           justifyContent="center"
         >
-          <Button
-            variant="contained"
-            size="small"
-            color="error"
-            disabled={hasResigned}
-            onClick={() => {
-              setHasResigned(true)
-              comm?.sendActionResignGame({})
-            }}
-          >
-            Resign
-          </Button>
+          {!isSpectator &&
+            <Button
+              variant="contained"
+              size="small"
+              color="error"
+              disabled={hasResigned}
+              onClick={() => {
+                setHasResigned(true)
+                comm?.sendActionResignGame({})
+              }}
+            >
+              Resign
+            </Button>
+          }
         </Stack>
       </Paper>
       <div
