@@ -19,6 +19,7 @@ import EmailIcon from '@mui/icons-material/Email';
 
 // comm
 import { VERSION } from '../comm/config';
+import Link from 'next/link';
 
 
 export interface FooterProps { }
@@ -88,15 +89,15 @@ const Footer: FC<FooterProps> = (props) => {
         </Grid>
 
         <Grid item>
-          <a href="/credits">
+          <Link href="/credits">
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ textDecoration: "underline" }}
+              sx={{ textDecoration: "underline", cursor: "pointer" }}
             >
               Credits
             </Typography>
-          </a>
+          </Link>
         </Grid>
       </Grid>
     </Container>

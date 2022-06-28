@@ -135,7 +135,7 @@ const PageCredits: FC<PageCreditsProps> = (props) => {
         style={{ color: "inherit" }}
       >
         <Typography sx={{ p: 2 }}>
-          The amazing animals that you can't change !
+          {"The amazing animals that you can't change !"}
         </Typography>
       </a>
       <Grid container>
