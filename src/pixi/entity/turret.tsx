@@ -9,6 +9,7 @@ import Player from '../player'
 import Entity from './entity'
 import Tile from './tile'
 import Color from '../../utils/color'
+import Probe from './probe'
 
 
 class Turret extends Entity {
@@ -24,7 +25,7 @@ class Turret extends Entity {
     this.player = player
     this.buildContainer()
 
-    this.alive = model.alive
+    this.alive = !model.death
     this.setCoord(model.coord)
   }
 
@@ -32,8 +33,11 @@ class Turret extends Entity {
     if (model.coord) {
       this.setCoord(model.coord)
     }
-    if (model.alive !== null) {
-      this.alive = model.alive
+    this.alive = !model.death ?? this.alive
+
+    if (model.shot_id !== null) {
+      console.log("shot id" + model.shot_id)
+      this.player.animations.addTurretFire(this, model.shot_id)
     }
   }
 

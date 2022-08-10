@@ -22,7 +22,7 @@ class Factory extends Entity {
     this.player = player
     this.buildContainer()
 
-    this.alive = model.alive
+    this.alive = !model.death
     this.setCoord(model.coord)
   }
 
@@ -30,9 +30,7 @@ class Factory extends Entity {
     if (model.coord) {
       this.setCoord(model.coord)
     }
-    if (model.alive !== null) {
-      this.alive = model.alive
-    }
+    this.alive = !model.death ?? this.alive
   }
 
   protected buildContainer() {

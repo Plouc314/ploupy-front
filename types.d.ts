@@ -64,7 +64,7 @@ export namespace IGame {
     username: string
     money: number
     score: number
-    alive: boolean
+    death: string
     income: number
     factories: Factory[]
     turrets: Turret[]
@@ -75,7 +75,7 @@ export namespace IGame {
     username: string
     money: number | null
     score: number | null
-    alive: boolean | null
+    death: string | null
     income: number | null
     factories: FactoryState[]
     turrets: TurretState[]
@@ -85,38 +85,39 @@ export namespace IGame {
   export type Factory = {
     id: string
     coord: IGame.Coordinate
-    alive: boolean
+    death: string
   }
 
   export type FactoryState = {
     id: string
     coord: IGame.Coordinate | null
-    alive: boolean | null
+    death: string | null
   }
 
   export type Turret = {
     id: string
     coord: IGame.Coordinate
-    alive: boolean
+    death: string
   }
 
   export type TurretState = {
     id: string
     coord: IGame.Coordinate | null
-    alive: boolean | null
+    death: string | null
+    shot_id: string | null
   }
 
   export type Probe = {
     id: string
     pos: IGame.Position
-    alive: boolean
+    death: string
     target: IGame.Coordinate
   }
 
   export type ProbeState = {
     id: string
     pos: IGame.Position | null
-    alive: boolean | null
+    death: string | null
     target: IGame.Coordinate | null
   }
 

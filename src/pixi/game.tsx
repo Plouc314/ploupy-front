@@ -45,6 +45,7 @@ class Game {
     this.keyboard = new Keyboard()
     this.context = new Context(pixi, model.config)
     this.map = new Map(this.context, model.map)
+    this.animations = new Animations(this.context, this)
 
     this.pixi.app.renderer.on('resize', () => {
       this.context.update()
@@ -54,7 +55,7 @@ class Game {
     this.currentTime = Date.now()
 
     this.players = model.players.map((pm, i) =>
-      new Player(pm, COLORS[i], this.map)
+      new Player(pm, COLORS[i], this.map, this.animations)
     )
 
     // search for user's username in game's players
@@ -72,8 +73,6 @@ class Game {
     }
 
     this.map.setModel(mapModel)
-
-    this.animations = new Animations(this.context)
 
     this.comm.setOnBuildFactory((data) => {
       const player = this.players.find(p => p.username === data.username)
