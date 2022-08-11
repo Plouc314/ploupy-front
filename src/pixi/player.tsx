@@ -21,7 +21,6 @@ class Player implements IGame.Sprite {
 
   public username: string
   public money: number
-  public score: number
   public alive: boolean
   public income: number
   public color: Color
@@ -41,10 +40,14 @@ class Player implements IGame.Sprite {
   private layoutTurrets: Container
   private layoutProbes: Container
 
-  constructor(model: IGame.Player, color: Color, map: Map, animations: Animations) {
+  constructor(model: IGame.PlayerState, color: Color, map: Map, animations: Animations) {
+
+    if (!this.assertCompleteModel(model)) {
+      throw new Error("Incomplete model: " + model)
+    }
+
     this.username = model.username
     this.money = model.money
-    this.score = model.score
     this.alive = !model.death
     this.income = model.income
     this.color = color
@@ -73,9 +76,14 @@ class Player implements IGame.Sprite {
     model.probes.forEach(m => this.addProbe(new Probe(this, m)))
   }
 
+  private assertCompleteModel(model: IGame.PlayerState): model is IGame.Player {
+    if (model.money === null) return false
+    if (model.income === null) return false
+    return true
+  }
+
   public setModel(model: IGame.PlayerState) {
     this.money = model.money ?? this.money
-    this.score = model.score ?? this.score
     this.alive = !model.death ?? this.alive
     this.income = model.income ?? this.income
 
@@ -86,7 +94,7 @@ class Player implements IGame.Sprite {
         factory.setModel(fm)
       } else {
         // create new factory
-        const factory = new Factory(this, fm as IGame.Factory)
+        const factory = new Factory(this, fm)
         this.addFactory(factory)
       }
     }

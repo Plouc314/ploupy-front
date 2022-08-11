@@ -19,10 +19,6 @@ class Comm {
    */
   public removeGameListeners() {
     this.sio.removeAllListeners("game_state")
-    this.sio.removeAllListeners("build_factory")
-    this.sio.removeAllListeners("build_turret")
-    this.sio.removeAllListeners("build_probe")
-    this.sio.removeAllListeners("turret_fire_probe")
   }
 
   /**
@@ -197,43 +193,6 @@ class Comm {
       console.group("game_result")
       console.log(data)
       console.groupEnd()
-      cb(JSON.parse(data))
-    })
-  }
-
-  public setOnBuildFactory(cb: (data: IComm.BuildFactoryResponse) => void) {
-    this.sio.removeAllListeners("build_factory")
-    this.sio.on("build_factory", (data) => {
-      console.group("build_factory")
-      console.log(data)
-      console.groupEnd()
-      cb(JSON.parse(data))
-    })
-  }
-
-  public setOnBuildTurret(cb: (data: IComm.BuildTurretResponse) => void) {
-    this.sio.removeAllListeners("build_turret")
-    this.sio.on("build_turret", (data) => {
-      console.group("build_turret")
-      console.log(data)
-      console.groupEnd()
-      cb(JSON.parse(data))
-    })
-  }
-
-  public setOnBuildProbe(cb: (data: IComm.BuildProbeResponse) => void) {
-    this.sio.removeAllListeners("build_probe")
-    this.sio.on("build_probe", (data) => {
-      console.group("build_probe")
-      console.log(data)
-      console.groupEnd()
-      cb(JSON.parse(data))
-    })
-  }
-
-  public setOnTurretFireProbe(cb: (data: IComm.TurretFireProbeResponse) => void) {
-    this.sio.removeAllListeners("turret_fire_probe")
-    this.sio.on("turret_fire_probe", (data) => {
       cb(JSON.parse(data))
     })
   }

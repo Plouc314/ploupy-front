@@ -38,7 +38,12 @@ class Game {
 
   private currentTime: number
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.Game) {
+  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.GameState) {
+
+    if (!this.assertCompleteState(model)) {
+      throw Error("Incomplete GameState" + model)
+    }
+
     this.pixi = pixi
     this.comm = comm
     this.user = user
@@ -65,7 +70,7 @@ class Game {
     this.isSpectator = !this.ownPlayer
 
     // format map model
-    const mapModel: IGame.Map<Player> = {
+    const mapModel: IGame.MapState<Player> = {
       tiles: model.map.tiles.map(tm => ({
         ...tm,
         owner: this.players.find(p => p.username === tm.owner) ?? undefined
@@ -74,53 +79,8 @@ class Game {
 
     this.map.setModel(mapModel)
 
-    this.comm.setOnBuildFactory((data) => {
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-      player.money = data.money
-      const factory = new Factory(player, data.factory)
-      player.addFactory(factory)
-    })
-
-    this.comm.setOnBuildTurret((data) => {
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-      player.money = data.money
-      const turret = new Turret(player, data.turret)
-      player.addTurret(turret)
-    })
-
-    this.comm.setOnBuildProbe((data) => {
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-      player.money = data.money
-      const probe = new Probe(player, data.probe)
-      player.addProbe(probe)
-    })
-
     this.comm.setOnGameState((data) => {
       this.setModel(data)
-    })
-
-    this.comm.setOnTurretFireProbe((data) => {
-
-      // get firing player
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-
-      // get fired probe
-      let probe: Probe | undefined
-      for (const opponent of this.players) {
-        if (opponent === player) continue
-        probe = opponent.probes.find(p => p.getId() === data.probe.id)
-        if (!probe) continue
-        opponent.removeProbe(probe)
-        const turret = player.turrets.find(t => t.getId() === data.turret_id)
-        if (turret) {
-          this.animations.addTurretFire(turret, probe)
-        }
-        break
-      }
     })
 
     this.ui = new UI(this, this.context)
@@ -185,6 +145,11 @@ class Game {
         ids: probes.map(p => p.getId()),
       })
     }
+  }
+
+  private assertCompleteState(state: IGame.GameState): state is IGame.Game {
+    if (!state.map?.tiles) return false
+    return true
   }
 
   /**

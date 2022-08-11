@@ -34,8 +34,13 @@ class Probe extends Entity {
   /** Movement vector (unit: pos) */
   private vector: IGame.Position
 
-  constructor(player: Player, model: IGame.Probe) {
+  constructor(player: Player, model: IGame.ProbeState) {
     super(model.id, player.context)
+
+    if (!this.assertCompleteModel(model)) {
+      throw new Error("Incomplete model: " + model)
+    }
+
     this.player = player
     this.alive = !model.death
     this.state = ProbeState.FARMING
@@ -48,6 +53,12 @@ class Probe extends Entity {
 
     this.target = model.target
     this.vector = this.computeMoveVector()
+  }
+
+  private assertCompleteModel(model: IGame.ProbeState): model is IGame.Probe {
+    if (model.pos === null) return false
+    if (model.target === null) return false
+    return true
   }
 
   public setModel(model: IGame.ProbeState) {

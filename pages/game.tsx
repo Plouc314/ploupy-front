@@ -63,6 +63,11 @@ const PageGame: FC<PageGameProps> = (props) => {
 
     comm.setOnGameState((data) => {
       if (isGame.current) return
+
+      // the config is null when the global game state
+      // isn't the first state to be received
+      if (data.config === null) return
+
       isGame.current = true
       setHasResigned(false)
       setIsSpectator(!data.players.find(p => p.username === user.username))
@@ -74,7 +79,7 @@ const PageGame: FC<PageGameProps> = (props) => {
         console.group("create game")
         console.log(data)
         console.groupEnd()
-        refGame.current = new Game(pixi, comm, user, data as IGame.Game)
+        refGame.current = new Game(pixi, comm, user, data)
         setGame(refGame.current)
       })
     })

@@ -17,13 +17,23 @@ class Factory extends Entity {
   public alive: boolean
   private player: Player
 
-  constructor(player: Player, model: IGame.Factory) {
+  constructor(player: Player, model: IGame.FactoryState) {
     super(model.id, player.context)
+
+    if (!this.assertCompleteModel(model)) {
+      throw new Error("Incomplete model: " + model)
+    }
+
     this.player = player
     this.buildContainer()
 
     this.alive = !model.death
     this.setCoord(model.coord)
+  }
+
+  private assertCompleteModel(model: IGame.FactoryState): model is IGame.Factory {
+    if (model.coord === null) return false
+    return true
   }
 
   public setModel(model: IGame.FactoryState) {

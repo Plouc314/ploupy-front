@@ -63,8 +63,7 @@ export namespace IGame {
   export type Player = {
     username: string
     money: number
-    score: number
-    death: string
+    death: string | null
     income: number
     factories: Factory[]
     turrets: Turret[]
@@ -74,7 +73,6 @@ export namespace IGame {
   export type PlayerState = {
     username: string
     money: number | null
-    score: number | null
     death: string | null
     income: number | null
     factories: FactoryState[]
@@ -85,7 +83,7 @@ export namespace IGame {
   export type Factory = {
     id: string
     coord: IGame.Coordinate
-    death: string
+    death: string | null
   }
 
   export type FactoryState = {
@@ -97,7 +95,8 @@ export namespace IGame {
   export type Turret = {
     id: string
     coord: IGame.Coordinate
-    death: string
+    death: string | null
+    shot_id: string | null
   }
 
   export type TurretState = {
@@ -110,7 +109,7 @@ export namespace IGame {
   export type Probe = {
     id: string
     pos: IGame.Position
-    death: string
+    death: string | null
     target: IGame.Coordinate
   }
 
@@ -151,7 +150,7 @@ export namespace IGame {
   }
 
   export type GameState<K = string> = {
-    config: GameConfig
+    config: GameConfig | null
     map: MapState<K> | null
     players: PlayerState[]
   }
@@ -338,30 +337,6 @@ export namespace IComm {
     stats: ICore.GamePlayerStats[]
     mmrs: number[]
     mmr_diffs: number[]
-  }
-
-  export type BuildFactoryResponse = {
-    username: string
-    money: number
-    factory: ICore.Factory
-  }
-
-  export type BuildTurretResponse = {
-    username: string
-    money: number
-    turret: ICore.Turret
-  }
-
-  export type BuildProbeResponse = {
-    username: string
-    money: number
-    probe: ICore.Probe
-  }
-
-  export type TurretFireProbeResponse = {
-    username: string
-    turret_id: IGame.ID
-    probe: ICore.ProbeState
   }
 }
 
