@@ -9,6 +9,7 @@ import Context from "./context"
 import Color from "../utils/color"
 import Turret from "./entity/turret"
 import Probe from "./entity/probe"
+import Game from "./game"
 
 class Animations implements IGame.Sprite {
 
@@ -17,10 +18,12 @@ class Animations implements IGame.Sprite {
   public static readonly TURRET_FIRE_DURATION = 0.1
 
   public context: Context
+  private game: Game
   private container: Container
 
-  constructor(context: Context) {
+  constructor(context: Context, game: Game) {
     this.context = context
+    this.game = game
     this.container = new Container()
   }
 
@@ -38,9 +41,25 @@ class Animations implements IGame.Sprite {
   /**
    * Display the fire of a turret on a probe
    */
-  public addTurretFire(turret: Turret, probe: Probe) {
+  public addTurretFire(turret: Turret, probe: Probe | IGame.ID) {
+
+    let _probe: Probe = {} as Probe
+    if (typeof probe === "string") {
+      console.log("players")
+      console.log(this.game.players)
+      for (const player of this.game.players) {
+        const p = player.probes.find(p => p.getId() === probe)
+        if (p) {
+          _probe = p
+          break
+        }
+      }
+    } else {
+      _probe = probe
+    }
+
     const start = turret.getCenter()
-    const end = probe.getCenter()
+    const end = _probe.getCenter()
 
     const surf = new Graphics()
     surf.lineStyle(

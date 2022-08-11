@@ -11,10 +11,12 @@ import Factory from './entity/factory'
 import Probe from './entity/probe'
 import Context from './context'
 import Turret from './entity/turret'
+import Animations from './animations'
 
 class Player implements IGame.Sprite {
 
   public map: Map
+  public animations: Animations
   public context: Context
 
   public username: string
@@ -39,15 +41,16 @@ class Player implements IGame.Sprite {
   private layoutTurrets: Container
   private layoutProbes: Container
 
-  constructor(model: IGame.Player, color: Color, map: Map) {
+  constructor(model: IGame.Player, color: Color, map: Map, animations: Animations) {
     this.username = model.username
     this.money = model.money
     this.score = model.score
-    this.alive = model.alive
+    this.alive = !model.death
     this.income = model.income
     this.color = color
 
     this.map = map
+    this.animations = animations
     this.context = map.context
 
     this.factories = []
@@ -73,14 +76,19 @@ class Player implements IGame.Sprite {
   public setModel(model: IGame.PlayerState) {
     this.money = model.money ?? this.money
     this.score = model.score ?? this.score
-    this.alive = model.alive ?? this.alive
+    this.alive = !model.death ?? this.alive
     this.income = model.income ?? this.income
 
     // update factories
     for (const fm of model.factories) {
       const factory = this.factories.find(f => f.getId() === fm.id)
-      if (!factory) continue
-      factory.setModel(fm)
+      if (factory) {
+        factory.setModel(fm)
+      } else {
+        // create new factory
+        const factory = new Factory(this, fm as IGame.Factory)
+        this.addFactory(factory)
+      }
     }
     // remove dead factories
     this.factories
@@ -93,8 +101,13 @@ class Player implements IGame.Sprite {
     // update turrets
     for (const tm of model.turrets) {
       const turret = this.turrets.find(f => f.getId() === tm.id)
-      if (!turret) continue
-      turret.setModel(tm)
+      if (turret) {
+        turret.setModel(tm)
+      } else {
+        // create new turret
+        const turret = new Turret(this, tm as IGame.Turret)
+        this.addTurret(turret)
+      }
     }
     // remove dead turrets
     this.turrets
@@ -107,8 +120,14 @@ class Player implements IGame.Sprite {
     // update probes
     for (const pm of model.probes) {
       const probe = this.probes.find(p => p.getId() === pm.id)
-      if (!probe) continue
-      probe.setModel(pm)
+      if (probe) {
+        probe.setModel(pm)
+      } else {
+        // create new probe
+        const probe = new Probe(this, pm as IGame.Probe)
+        this.addProbe(probe)
+      }
+
     }
     // remove dead probes
     this.probes

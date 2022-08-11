@@ -21,6 +21,7 @@ import API from '../comm/api'
 
 // utils
 import { Firebase } from '../../types'
+import { FLAG_DEPLOY } from '../comm/config'
 
 /*
 Firebase config keys and Ids
@@ -30,8 +31,7 @@ Activate firebase auth:
 Console -> Authentication -> Sign-In method
 link: https://console.firebase.google.com/u/1/project/mauro-a9ce3/authentication/providers
 */
-
-const firebaseConfig = {
+const FIREBASE_CONFIG_DEV = {
   apiKey: "AIzaSyAEBrQ0nFuzwyaC-CU73vxN3_lCudqqNkY",
   authDomain: "ploupy-6550c.firebaseapp.com",
   projectId: "ploupy-6550c",
@@ -40,14 +40,25 @@ const firebaseConfig = {
   appId: "1:951688323362:web:866d85d38c6b49536bc57b"
 }
 
+const FIREBASE_CONFIG_PROD = {
+  apiKey: "AIzaSyDgtH0-kSc9njc-L23zFjVubfwIF1DmkPY",
+  authDomain: "ploupy-prod.firebaseapp.com",
+  databaseURL: "https://ploupy-prod-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ploupy-prod",
+  storageBucket: "ploupy-prod.appspot.com",
+  messagingSenderId: "623835077998",
+  appId: "1:623835077998:web:4dc2c61ca499bb9442757f"
+}
+
 /*
 Initialize the firebase app, has to be done only once.
 Check if any app already exists to prevent repetition
 */
 if (!getApps().length) {
   // Initialize Firebase
-  initializeApp(firebaseConfig)
+  initializeApp(FLAG_DEPLOY ? FIREBASE_CONFIG_PROD : FIREBASE_CONFIG_DEV)
 }
+
 
 /*
 Firebase authentification reference

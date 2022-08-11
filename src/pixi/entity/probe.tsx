@@ -37,7 +37,7 @@ class Probe extends Entity {
   constructor(player: Player, model: IGame.Probe) {
     super(model.id, player.context)
     this.player = player
-    this.alive = model.alive
+    this.alive = !model.death
     this.state = ProbeState.FARMING
     this.outlineColor = Probe.FARM_COLOR
 
@@ -56,12 +56,8 @@ class Probe extends Entity {
       // set the position - update the unit (coordinate -> pixel)
       this.setPos(this.context.pos(model.pos))
     }
-    if (model.alive !== null) {
-      this.alive = model.alive
-    }
-    if (model.target) {
-      this.target = model.target
-    }
+    this.alive = !model.death ?? this.alive
+    this.target = model.target ?? this.target
     this.vector = this.computeMoveVector()
   }
 
