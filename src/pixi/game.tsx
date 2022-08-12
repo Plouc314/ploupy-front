@@ -40,8 +40,8 @@ class Game {
 
   constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.GameState) {
 
-    if (!this.assertCompleteState(model)) {
-      throw Error("Incomplete GameState" + model)
+    if (!this.assertCompleteModel(model)) {
+      throw Error("Incomplete model" + model)
     }
 
     this.pixi = pixi
@@ -147,8 +147,8 @@ class Game {
     }
   }
 
-  private assertCompleteState(state: IGame.GameState): state is IGame.Game {
-    if (!state.map?.tiles) return false
+  private assertCompleteModel(model: IGame.GameState): model is IGame.Game {
+    if (!model.map?.tiles) return false
     return true
   }
 

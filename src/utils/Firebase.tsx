@@ -11,6 +11,7 @@ import {
   onAuthStateChanged,
   browserLocalPersistence,
   browserSessionPersistence,
+  GoogleAuthProvider,
 } from 'firebase/auth'
 
 // hooks
@@ -65,6 +66,8 @@ Firebase authentification reference
 Importing it avoids importing firebase (app & auth) everywhere
 */
 export const auth = getAuth()
+
+export const providerGoogle = new GoogleAuthProvider()
 
 export const SessionPersistence = browserLocalPersistence
 export const LocalPersistence = browserSessionPersistence

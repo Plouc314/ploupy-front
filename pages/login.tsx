@@ -22,19 +22,22 @@ import {
   Typography,
   Container,
 } from '@mui/material'
+import GoogleIcon from '@mui/icons-material/Google';
 
 // firebase
 import {
   setPersistence,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
 } from 'firebase/auth'
 
 // utils
-import { auth, SessionPersistence, LocalPersistence, getErrorMessage } from '../src/utils/Firebase'
+import { auth, SessionPersistence, LocalPersistence, getErrorMessage, providerGoogle } from '../src/utils/Firebase'
 
 // hooks
-import { useToast } from '../src/hooks/useToast'
+import useSingleEffect from '../src/hooks/useSingleEffect'
+import { useSnackbar } from 'notistack'
 
 // comm
 import API from '../src/comm/api'
@@ -56,7 +59,7 @@ export interface PageLoginProps { }
 const PageLogin: FC<PageLoginProps> = (props) => {
 
   const router = useRouter()
-  const { generateToast } = useToast()
+  const { enqueueSnackbar } = useSnackbar()
 
   const [state, setState] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
@@ -116,6 +119,44 @@ const PageLogin: FC<PageLoginProps> = (props) => {
         })
     }
   }
+
+  const signInGoogle = () => {
+    signInWithPopup(auth, providerGoogle)
+      .then(async (result) => {
+        if (!result.user.email) {
+          enqueueSnackbar("No email provided.", { variant: "error" })
+          return
+        }
+
+        const username = result.user.displayName ?? result.user.email?.split("@")[0]
+
+        // check if user already exists
+        const data = await API.getUserData({ username: username })
+        if (data) {
+          if (data.email != result.user.email) {
+            enqueueSnackbar(`Username ${username} is already taken.`, { variant: "error" })
+            enqueueSnackbar("Please contact site administrator", { variant: "error" })
+            return
+          }
+        } else {
+          // user don't exists -> create it first
+          const user = {
+            uid: result.user.uid,
+            username: username,
+            email: result.user.email as string,
+            avatar: getRandomAvatar(),
+            joined_on: new Date().toISOString(),
+          }
+          await API.createUser(user)
+        }
+
+        afterLoggedIn()
+
+      }).catch((error) => {
+        enqueueSnackbar(`${error.message} (${error.code})`, { variant: "error" })
+      })
+  }
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -188,6 +229,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
               />}
               label="Remember me"
               value={remember}
+              sx={{ mb: 1 }}
             />
             <Typography
               variant="body2"
@@ -200,8 +242,17 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             </Typography>
             <Button
               fullWidth
+              variant="outlined"
+              sx={{ mt: 1, mb: 1 }}
+              onClick={signInGoogle}
+              startIcon={<GoogleIcon />}
+            >
+              Sign in with Google
+            </Button>
+            <Button
+              fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ mt: 1, mb: 2 }}
               onClick={submit}
             >
               {state === "signin" ? "Sign In" : "Sign Up"}
@@ -211,7 +262,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
                 <Link
                   href="#"
                   variant="body2"
-                  onClick={() => { generateToast("Too bad for you !", "info") }}
+                  onClick={() => { enqueueSnackbar("Too bad for you !", { variant: "info" }) }}
                 >
                   Forgot password?
                 </Link>
