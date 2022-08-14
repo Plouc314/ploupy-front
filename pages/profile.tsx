@@ -17,6 +17,7 @@ import {
 } from '@mui/material'
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import MemoryIcon from '@mui/icons-material/Memory';
 
 // utils
 import { useAuth } from '../src/utils/Firebase';
@@ -29,9 +30,10 @@ import Page from '../src/components/Page'
 import ProfileStats from '../src/components/ProfileStats'
 import MenuBar from '../src/components/MenuBar'
 import ProfileAccount from '../src/components/ProfileAccount';
+import ProfileBot from '../src/components/ProfileBot';
 
 
-type Tab = "stats" | "account"
+type Tab = "stats" | "account" | "bot"
 
 
 interface ProfileSideBarProps {
@@ -44,14 +46,17 @@ const ProfileSideBar: FC<ProfileSideBarProps> = (props) => {
   const values: Tab[] = [
     "stats",
     "account",
+    "bot",
   ]
   const names = [
     "Statistics",
     "Account",
+    "Bot",
   ]
   const icons = [
     BarChartIcon,
     ManageAccountsIcon,
+    MemoryIcon,
   ]
 
   return (
@@ -120,6 +125,11 @@ const PageProfile: FC<PageProfileProps> = (props) => {
           </Collapse>
           <Collapse in={tab === "account"}>
             <ProfileAccount />
+          </Collapse>
+          <Collapse in={tab === "bot"}>
+            <ProfileBot
+              user={user}
+            />
           </Collapse>
         </Grid>
       </Grid>

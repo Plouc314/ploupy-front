@@ -1,5 +1,5 @@
 // types
-import { IComm, ICore } from "../../types"
+import { IActions, IComm, ICore } from "../../types"
 
 // comm
 import { URL_API } from './config'
@@ -82,6 +82,12 @@ class API {
     user: Omit<ICore.User, "last_online" | "mmrs">
   ): Promise<IComm.Response> {
     return await this.post("create-user", user)
+  }
+
+  public static async createBot(
+    data: IActions.CreateBot
+  ): Promise<IComm.Response<IComm.CreateBotResponse>> {
+    return await this.post("create-bot", data)
   }
 
 }

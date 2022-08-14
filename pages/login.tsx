@@ -108,6 +108,9 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             username: username,
             email: email,
             avatar: getRandomAvatar(),
+            is_bot: false,
+            owner: null,
+            bots: [],
             joined_on: new Date().toISOString(),
           }
           await API.createUser(user)
@@ -145,6 +148,9 @@ const PageLogin: FC<PageLoginProps> = (props) => {
             username: username,
             email: result.user.email as string,
             avatar: getRandomAvatar(),
+            is_bot: false,
+            owner: null,
+            bots: [],
             joined_on: new Date().toISOString(),
           }
           await API.createUser(user)

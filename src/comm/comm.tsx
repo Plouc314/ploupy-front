@@ -103,6 +103,13 @@ class Comm {
     })
   }
 
+  public sendActionSendQueueInvitation(data: IActions.SendQueueInvitation) {
+    this.sio.emit("send_queue_invitation", data, (raw: string) => {
+      const response = JSON.parse(raw) as IComm.Response
+      console.log(response)
+    })
+  }
+
   public sendActionResignGame(data: IActions.ResignGame) {
     this.sio.emit("action_resign_game", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response

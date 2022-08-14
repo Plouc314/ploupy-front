@@ -61,6 +61,7 @@ export namespace IGame {
   }
 
   export type Player = {
+    uid: string
     username: string
     money: number
     death: string | null
@@ -71,6 +72,7 @@ export namespace IGame {
   }
 
   export type PlayerState = {
+    uid: string
     username: string
     money: number | null
     death: string | null
@@ -150,6 +152,7 @@ export namespace IGame {
   }
 
   export type GameState<K = string> = {
+    gid: string
     config: GameConfig | null
     map: MapState<K> | null
     players: PlayerState[]
@@ -173,6 +176,9 @@ export namespace ICore {
     username: string
     email: string
     avatar: string
+    is_bot: boolean
+    owner: string | null
+    bots: string[]
     joined_on: DateLike
     last_online: DateLike
     /**
@@ -253,6 +259,11 @@ export namespace ICore {
 
 export namespace IActions {
 
+  export type CreateBot = {
+    creator_uid: string
+    username: string
+  }
+
   export type CreateQueue = {
     gmid: string
   }
@@ -267,6 +278,11 @@ export namespace IActions {
 
   export type GameState = {
     gid: IGame.ID
+  }
+
+  export type SendQueueInvitation = {
+    qid: string
+    uid: string
   }
 
   export type ResignGame = {
@@ -306,6 +322,11 @@ export namespace IComm {
   export type UserResponse = {
     user: ICore.User
     mmrs: { mmrs: Record<IGame.ID, number> }
+  }
+
+  export type CreateBotResponse = {
+    bot: ICore.User
+    bot_jwt: string
   }
 
   export type GameModeResponse = {

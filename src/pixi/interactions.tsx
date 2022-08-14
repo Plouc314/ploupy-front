@@ -263,6 +263,7 @@ class Interactions implements IGame.Sprite {
 
   private backToIdle() {
     this.setState(InteractionState.IDLE)
+    this.select.setVisisble(false)
   }
 
   /**
