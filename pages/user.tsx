@@ -22,6 +22,7 @@ import {
 
 // hooks
 import useSingleEffect from '../src/hooks/useSingleEffect'
+import { useUsers } from '../src/hooks/useComm';
 
 // components
 import Page from '../src/components/Page'
@@ -40,7 +41,14 @@ interface UserInfoBarProps {
 
 const UserInfoBar: FC<UserInfoBarProps> = (props) => {
 
+  const users = useUsers()
+
   const getLastOnline = () => {
+
+    if (users.find(u => u.uid === props.user.uid)) {
+      return "Now"
+    }
+
     const diff = new Date().valueOf() - new Date(props.user.last_online).valueOf()
 
     const min = diff / (1000 * 60)

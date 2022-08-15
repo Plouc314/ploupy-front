@@ -14,6 +14,10 @@ import {
   Button,
   Divider,
   IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -24,9 +28,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import LogoutIcon from '@mui/icons-material/Logout';
-import EditIcon from '@mui/icons-material/Edit';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import ClearIcon from '@mui/icons-material/Clear';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import CloudOffIcon from '@mui/icons-material/CloudOff';
 import CloudIcon from '@mui/icons-material/Cloud';
 import KeyIcon from '@mui/icons-material/Key';
@@ -40,6 +44,7 @@ import {
 
 // hooks
 import { useSnackbar } from 'notistack';
+import { useComm, useUsers } from '../hooks/useComm';
 
 // utils
 import { auth, useAuth } from '../utils/Firebase'
@@ -47,64 +52,102 @@ import { auth, useAuth } from '../utils/Firebase'
 // pixi
 import Textures from '../pixi/textures';
 import API from '../comm/api';
+import useSingleEffect from '../hooks/useSingleEffect';
+
 
 interface BotRowProps {
   bot: ICore.User
+  online: boolean
+  onDisconnect: () => void
+  onDelete: () => void
 }
 
 const BotRow: FC<BotRowProps> = (props) => {
 
   const router = useRouter()
-  const { enqueueSnackbar } = useSnackbar()
+
+  const [menuActions, setMenuActions] = useState<HTMLElement | null>(null)
 
   const stats = () => {
     router.push(`/user?id=${props.bot.uid}`)
   }
 
   return (
-    <TableRow>
-      <TableCell>
-        {props.bot.username}
-      </TableCell>
-      <TableCell align="center">
-        {false &&
-          <Tooltip title="offline">
-            <CloudOffIcon color="disabled" />
-          </Tooltip>
-        }
-        {true &&
-          <Tooltip title="online">
-            <CloudIcon color="info" />
-          </Tooltip>
-        }
+    <>
+      <TableRow>
+        <TableCell>
+          {props.bot.username}
+        </TableCell>
+        <TableCell align="center">
+          {!props.online &&
+            <Tooltip title="offline">
+              <CloudOffIcon color="disabled" />
+            </Tooltip>
+          }
+          {props.online &&
+            <Tooltip title="online">
+              <CloudIcon color="info" />
+            </Tooltip>
+          }
 
-      </TableCell>
-      <TableCell align="center">
-        <Tooltip title="Copy bot key">
-          <IconButton>
-            <KeyIcon color="secondary" />
-          </IconButton>
-        </Tooltip>
-      </TableCell>
-      <TableCell align="center">
-        <Tooltip title="See bot statistics">
-          <IconButton onClick={stats}>
-            <BarChartIcon color="secondary" />
-          </IconButton>
-        </Tooltip>
-      </TableCell>
-      <TableCell align="right">
-        <Tooltip title="Delete bot">
-          <IconButton
+        </TableCell>
+        <TableCell align="center">
+          <Tooltip title="Copy bot key">
+            <IconButton>
+              <KeyIcon color="secondary" />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+        <TableCell align="center">
+          <Tooltip title="See bot statistics">
+            <IconButton onClick={stats}>
+              <BarChartIcon color="secondary" />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+        <TableCell align="right">
+          <Tooltip title="Actions">
+            <IconButton
+              onClick={(e) => {
+                setMenuActions(e.currentTarget)
+              }}
+            >
+              <MoreHorizIcon />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+      </TableRow>
+      <Menu
+        anchorEl={menuActions}
+        open={!!menuActions}
+        onClose={() => setMenuActions(null)}
+      >
+        {props.online &&
+          <MenuItem
             onClick={() => {
-              enqueueSnackbar("Not implemented.", { variant: "error" })
+              setMenuActions(null)
+              props.onDisconnect()
             }}
           >
-            <ClearIcon color={"error"} />
-          </IconButton>
-        </Tooltip>
-      </TableCell>
-    </TableRow>
+            <ListItemIcon>
+              <PowerSettingsNewIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Disconnect</ListItemText>
+          </MenuItem>
+        }
+        <MenuItem
+          onClick={() => {
+            setMenuActions(null)
+            props.onDelete()
+          }}
+        >
+          <ListItemIcon>
+            <ClearIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText>Delete</ListItemText>
+        </MenuItem>
+      </Menu>
+    </>
   )
 }
 
@@ -200,7 +243,28 @@ export interface ProfileBotProps {
 
 const ProfileBot: FC<ProfileBotProps> = (props) => {
 
+  const comm = useComm()
+  const users = useUsers()
   const { enqueueSnackbar } = useSnackbar()
+
+  const [bots, setBots] = useState<ICore.User[]>([])
+
+  useSingleEffect(async () => {
+    for (const bot_uid of props.user.bots) {
+      const bot = await API.getUserData({ uid: bot_uid })
+      if (bot) {
+        setBots([...bots, bot])
+      }
+    }
+  })
+
+  const onDisconnect = (bot: ICore.User) => {
+    comm?.sendActionDisconnectBot({ bot_uid: bot.uid })
+  }
+
+  const onDelete = (bot: ICore.User) => {
+    enqueueSnackbar("Not implemented.", { variant: "error" })
+  }
 
   return (
     <>
@@ -229,10 +293,14 @@ const ProfileBot: FC<ProfileBotProps> = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            <BotRow bot={props.user} />
-            <BotRow bot={props.user} />
-            <BotRow bot={props.user} />
-            <BotRow bot={props.user} />
+            {bots.map(bot => (
+              <BotRow
+                bot={bot}
+                online={!!users.find(u => u.uid === bot.uid)}
+                onDisconnect={() => onDisconnect(bot)}
+                onDelete={() => onDelete(bot)}
+              />
+            ))}
           </TableBody>
         </Table>
       </Box>

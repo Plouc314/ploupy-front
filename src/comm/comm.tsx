@@ -110,6 +110,13 @@ class Comm {
     })
   }
 
+  public sendActionDisconnectBot(data: IActions.DisconnectBot) {
+    this.sio.emit("disconnect_bot", data, (raw: string) => {
+      const response = JSON.parse(raw) as IComm.Response
+      console.log(response)
+    })
+  }
+
   public sendActionResignGame(data: IActions.ResignGame) {
     this.sio.emit("action_resign_game", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response

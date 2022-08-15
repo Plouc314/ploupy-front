@@ -281,8 +281,12 @@ export namespace IActions {
   }
 
   export type SendQueueInvitation = {
-    qid: string
-    uid: string
+    qid: IGame.ID
+    uid: IGame.ID
+  }
+
+  export type DisconnectBot = {
+    bot_uid: IGame.ID
   }
 
   export type ResignGame = {
