@@ -22,6 +22,7 @@ import Animations from "./animations"
 
 
 class Game {
+  public gid: string
   public pixi: Pixi
   public comm: Comm
   public user: Firebase.User
@@ -38,12 +39,13 @@ class Game {
 
   private currentTime: number
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.GameState) {
+  constructor(gid: string, pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.GameState) {
 
     if (!this.assertCompleteModel(model)) {
       throw Error("Incomplete model" + model)
     }
 
+    this.gid = gid
     this.pixi = pixi
     this.comm = comm
     this.user = user
@@ -121,27 +123,32 @@ class Game {
 
     this.interactions.onBuildFactory = (coord) => {
       this.comm.sendActionBuildFactory({
+        gid: this.gid,
         coord: coord
       })
     }
     this.interactions.onBuildTurret = (coord) => {
       this.comm.sendActionBuildTurret({
+        gid: this.gid,
         coord: coord
       })
     }
     this.interactions.onMoveProbes = (probes, target) => {
       this.comm.sendActionMoveProbes({
+        gid: this.gid,
         ids: probes.map(p => p.getId()),
         target: target,
       })
     }
     this.interactions.onExplodeProbes = (probes) => {
       this.comm.sendActionExplodeProbes({
+        gid: this.gid,
         ids: probes.map(p => p.getId()),
       })
     }
     this.interactions.onProbesAttack = (probes) => {
       this.comm.sendActionProbesAttack({
+        gid: this.gid,
         ids: probes.map(p => p.getId()),
       })
     }

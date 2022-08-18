@@ -11,6 +11,7 @@ import { FC, IComm, ICore } from '../../types'
 import {
   Avatar,
   Button,
+  ButtonGroup,
   Dialog,
   DialogTitle,
   Divider,
@@ -72,6 +73,7 @@ const DialogBots: FC<DialogBotsProps> = (props) => {
           .filter(u => u.is_bot)
           .map(u => (
             <UserItem
+              key={u.uid}
               user={u}
               userType="bot"
               onInviteUser={() => onInviteUser(u)}
@@ -249,31 +251,35 @@ const Lobby: FC<LobbyProps> = (props) => {
               ))}
             </Stack>
 
-            <Button
+            <ButtonGroup
               variant="contained"
               size="small"
-              color="primary"
-              onClick={() => {
-                setCurrentQid(queue.qid)
-              }}
             >
-              Add bot
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              color={activeQueueIds.includes(queue.qid) ? "secondary" : "primary"}
-              onClick={() => {
-                if (!comm) return
-                if (activeQueueIds.includes(queue.qid)) {
-                  comm.sendActionLeaveQueue({ qid: queue.qid })
-                } else {
-                  comm.sendActionJoinQueue({ qid: queue.qid })
-                }
-              }}
-            >
-              {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
-            </Button>
+              <Button
+                color="primary"
+                onClick={() => {
+                  setCurrentQid(queue.qid)
+                }}
+              >
+                Add bot
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                color={activeQueueIds.includes(queue.qid) ? "secondary" : "primary"}
+                onClick={() => {
+                  if (!comm) return
+                  if (activeQueueIds.includes(queue.qid)) {
+                    comm.sendActionLeaveQueue({ qid: queue.qid })
+                  } else {
+                    comm.sendActionJoinQueue({ qid: queue.qid })
+                  }
+                }}
+              >
+                {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
+              </Button>
+            </ButtonGroup>
+
           </Stack>
         ))}
         <div /> {/* footer -> to display a divider at the bottom*/}

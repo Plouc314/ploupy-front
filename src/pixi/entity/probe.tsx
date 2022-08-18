@@ -58,6 +58,7 @@ class Probe extends Entity {
   private assertCompleteModel(model: IGame.ProbeState): model is IGame.Probe {
     if (model.pos === null) return false
     if (model.target === null) return false
+    if (model.policy === null) return false
     return true
   }
 

@@ -98,6 +98,7 @@ const UsersList: FC<UsersListProps> = (props) => {
           .filter(user => !user.is_bot)
           .map(user => (
             <UserItem
+              key={user.uid}
               user={user}
               userType="user"
               onViewUser={() => onViewUser(user)}
@@ -112,8 +113,10 @@ const UsersList: FC<UsersListProps> = (props) => {
           .filter(user => user.is_bot)
           .map(user => (
             <UserItem
+              key={user.uid}
               user={user}
               userType="bot"
+              onViewUser={() => onViewUser(user)}
             />
           ))}
       </List>

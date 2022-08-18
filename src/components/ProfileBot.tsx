@@ -12,7 +12,9 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   Divider,
+  Grid,
   IconButton,
   ListItemIcon,
   ListItemText,
@@ -37,22 +39,18 @@ import KeyIcon from '@mui/icons-material/Key';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
-// firebase
-import {
-  signOut
-} from 'firebase/auth'
-
 // hooks
 import { useSnackbar } from 'notistack';
 import { useComm, useUsers } from '../hooks/useComm';
 
 // utils
-import { auth, useAuth } from '../utils/Firebase'
+import Markdown from '../utils/markdown';
 
 // pixi
 import Textures from '../pixi/textures';
 import API from '../comm/api';
 import useSingleEffect from '../hooks/useSingleEffect';
+import { FLAG_DEPLOY } from '../comm/config';
 
 
 interface BotRowProps {
@@ -237,6 +235,52 @@ const BotCreation: FC<BotCreationProps> = (props) => {
   )
 }
 
+interface BotDocsProps {
+
+}
+
+const BotDocs: FC<BotDocsProps> = (props) => {
+
+  const [markdownSdk, setMarkdownSdk] = useState<string | null>(null)
+
+  const branch = FLAG_DEPLOY ? "master" : "dev"
+  const url = `https://raw.githubusercontent.com/Plouc314/ploupy-python-sdk/${branch}/README.md`
+
+  useEffect(() => {
+    if (markdownSdk) return
+    const cb = async () => {
+      const response = await fetch(url)
+      const md = await response.text()
+      setMarkdownSdk(md)
+    }
+    cb()
+
+  }, [])
+
+  return (
+    <>
+      {!markdownSdk &&
+        <Grid
+          container
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <CircularProgress
+            color="secondary"
+            sx={{ margin: 2 }}
+          />
+        </Grid>
+      }
+      {markdownSdk &&
+        <Markdown
+          content={markdownSdk}
+        />
+      }
+    </>
+  )
+}
+
 export interface ProfileBotProps {
   user: ICore.User
 }
@@ -295,6 +339,7 @@ const ProfileBot: FC<ProfileBotProps> = (props) => {
           <TableBody>
             {bots.map(bot => (
               <BotRow
+                key={bot.uid}
                 bot={bot}
                 online={!!users.find(u => u.uid === bot.uid)}
                 onDisconnect={() => onDisconnect(bot)}
@@ -307,6 +352,10 @@ const ProfileBot: FC<ProfileBotProps> = (props) => {
       <Divider sx={{ mt: 4, mb: 2 }} />
       <Box sx={{ ml: 4, mr: 4 }}>
         <BotCreation user={props.user} />
+      </Box>
+      <Divider sx={{ mt: 4, mb: 2 }} />
+      <Box sx={{ ml: 4, mr: 4 }}>
+        <BotDocs />
       </Box>
     </>
   )

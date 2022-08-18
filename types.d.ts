@@ -113,6 +113,7 @@ export namespace IGame {
     pos: IGame.Position
     death: string | null
     target: IGame.Coordinate
+    policy: string
   }
 
   export type ProbeState = {
@@ -120,6 +121,7 @@ export namespace IGame {
     pos: IGame.Position | null
     death: string | null
     target: IGame.Coordinate | null
+    policy: string | null
   }
 
   export type Tile<K = string> = {
@@ -146,6 +148,7 @@ export namespace IGame {
   }
 
   export type Game<K = string> = {
+    gid: string
     config: GameConfig
     map: Map<K>
     players: Player[]
@@ -290,27 +293,33 @@ export namespace IActions {
   }
 
   export type ResignGame = {
+    gid: IGame.ID
 
   }
 
   export type BuildFactory = {
+    gid: IGame.ID
     coord: IGame.Coordinate
   }
 
   export type BuildTurret = {
+    gid: IGame.ID
     coord: IGame.Coordinate
   }
 
   export type MoveProbes = {
+    gid: IGame.ID
     ids: string[]
     target: IGame.Coordinate
   }
 
   export type ExplodeProbes = {
+    gid: IGame.ID
     ids: string[]
   }
 
   export type ProbesAttack = {
+    gid: IGame.ID
     ids: string[]
   }
 }
@@ -358,6 +367,7 @@ export namespace IComm {
   }
 
   export type GameResultResponse = {
+    gid: string
     ranking: ICore.User[]
     stats: ICore.GamePlayerStats[]
     mmrs: number[]
