@@ -61,10 +61,10 @@ export namespace IGame {
   }
 
   export type Player = {
+    uid: string
     username: string
     money: number
-    score: number
-    death: string
+    death: string | null
     income: number
     factories: Factory[]
     turrets: Turret[]
@@ -72,9 +72,9 @@ export namespace IGame {
   }
 
   export type PlayerState = {
+    uid: string
     username: string
     money: number | null
-    score: number | null
     death: string | null
     income: number | null
     factories: FactoryState[]
@@ -85,7 +85,7 @@ export namespace IGame {
   export type Factory = {
     id: string
     coord: IGame.Coordinate
-    death: string
+    death: string | null
   }
 
   export type FactoryState = {
@@ -97,7 +97,8 @@ export namespace IGame {
   export type Turret = {
     id: string
     coord: IGame.Coordinate
-    death: string
+    death: string | null
+    shot_id: string | null
   }
 
   export type TurretState = {
@@ -110,8 +111,9 @@ export namespace IGame {
   export type Probe = {
     id: string
     pos: IGame.Position
-    death: string
+    death: string | null
     target: IGame.Coordinate
+    policy: string
   }
 
   export type ProbeState = {
@@ -119,6 +121,7 @@ export namespace IGame {
     pos: IGame.Position | null
     death: string | null
     target: IGame.Coordinate | null
+    policy: string | null
   }
 
   export type Tile<K = string> = {
@@ -145,13 +148,15 @@ export namespace IGame {
   }
 
   export type Game<K = string> = {
+    gid: string
     config: GameConfig
     map: Map<K>
     players: Player[]
   }
 
   export type GameState<K = string> = {
-    config: GameConfig
+    gid: string
+    config: GameConfig | null
     map: MapState<K> | null
     players: PlayerState[]
   }
@@ -174,6 +179,9 @@ export namespace ICore {
     username: string
     email: string
     avatar: string
+    is_bot: boolean
+    owner: string | null
+    bots: string[]
     joined_on: DateLike
     last_online: DateLike
     /**
@@ -254,6 +262,11 @@ export namespace ICore {
 
 export namespace IActions {
 
+  export type CreateBot = {
+    creator_uid: string
+    username: string
+  }
+
   export type CreateQueue = {
     gmid: string
   }
@@ -270,28 +283,43 @@ export namespace IActions {
     gid: IGame.ID
   }
 
+  export type SendQueueInvitation = {
+    qid: IGame.ID
+    uid: IGame.ID
+  }
+
+  export type DisconnectBot = {
+    bot_uid: IGame.ID
+  }
+
   export type ResignGame = {
+    gid: IGame.ID
 
   }
 
   export type BuildFactory = {
+    gid: IGame.ID
     coord: IGame.Coordinate
   }
 
   export type BuildTurret = {
+    gid: IGame.ID
     coord: IGame.Coordinate
   }
 
   export type MoveProbes = {
+    gid: IGame.ID
     ids: string[]
     target: IGame.Coordinate
   }
 
   export type ExplodeProbes = {
+    gid: IGame.ID
     ids: string[]
   }
 
   export type ProbesAttack = {
+    gid: IGame.ID
     ids: string[]
   }
 }
@@ -307,6 +335,11 @@ export namespace IComm {
   export type UserResponse = {
     user: ICore.User
     mmrs: { mmrs: Record<IGame.ID, number> }
+  }
+
+  export type CreateBotResponse = {
+    bot: ICore.User
+    bot_jwt: string
   }
 
   export type GameModeResponse = {
@@ -334,34 +367,11 @@ export namespace IComm {
   }
 
   export type GameResultResponse = {
+    gid: string
     ranking: ICore.User[]
     stats: ICore.GamePlayerStats[]
     mmrs: number[]
     mmr_diffs: number[]
-  }
-
-  export type BuildFactoryResponse = {
-    username: string
-    money: number
-    factory: ICore.Factory
-  }
-
-  export type BuildTurretResponse = {
-    username: string
-    money: number
-    turret: ICore.Turret
-  }
-
-  export type BuildProbeResponse = {
-    username: string
-    money: number
-    probe: ICore.Probe
-  }
-
-  export type TurretFireProbeResponse = {
-    username: string
-    turret_id: IGame.ID
-    probe: ICore.ProbeState
   }
 }
 

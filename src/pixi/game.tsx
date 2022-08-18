@@ -22,6 +22,7 @@ import Animations from "./animations"
 
 
 class Game {
+  public gid: string
   public pixi: Pixi
   public comm: Comm
   public user: Firebase.User
@@ -38,7 +39,13 @@ class Game {
 
   private currentTime: number
 
-  constructor(pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.Game) {
+  constructor(gid: string, pixi: Pixi, comm: Comm, user: Firebase.User, model: IGame.GameState) {
+
+    if (!this.assertCompleteModel(model)) {
+      throw Error("Incomplete model" + model)
+    }
+
+    this.gid = gid
     this.pixi = pixi
     this.comm = comm
     this.user = user
@@ -65,7 +72,7 @@ class Game {
     this.isSpectator = !this.ownPlayer
 
     // format map model
-    const mapModel: IGame.Map<Player> = {
+    const mapModel: IGame.MapState<Player> = {
       tiles: model.map.tiles.map(tm => ({
         ...tm,
         owner: this.players.find(p => p.username === tm.owner) ?? undefined
@@ -74,53 +81,8 @@ class Game {
 
     this.map.setModel(mapModel)
 
-    this.comm.setOnBuildFactory((data) => {
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-      player.money = data.money
-      const factory = new Factory(player, data.factory)
-      player.addFactory(factory)
-    })
-
-    this.comm.setOnBuildTurret((data) => {
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-      player.money = data.money
-      const turret = new Turret(player, data.turret)
-      player.addTurret(turret)
-    })
-
-    this.comm.setOnBuildProbe((data) => {
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-      player.money = data.money
-      const probe = new Probe(player, data.probe)
-      player.addProbe(probe)
-    })
-
     this.comm.setOnGameState((data) => {
       this.setModel(data)
-    })
-
-    this.comm.setOnTurretFireProbe((data) => {
-
-      // get firing player
-      const player = this.players.find(p => p.username === data.username)
-      if (!player) return
-
-      // get fired probe
-      let probe: Probe | undefined
-      for (const opponent of this.players) {
-        if (opponent === player) continue
-        probe = opponent.probes.find(p => p.getId() === data.probe.id)
-        if (!probe) continue
-        opponent.removeProbe(probe)
-        const turret = player.turrets.find(t => t.getId() === data.turret_id)
-        if (turret) {
-          this.animations.addTurretFire(turret, probe)
-        }
-        break
-      }
     })
 
     this.ui = new UI(this, this.context)
@@ -161,30 +123,40 @@ class Game {
 
     this.interactions.onBuildFactory = (coord) => {
       this.comm.sendActionBuildFactory({
+        gid: this.gid,
         coord: coord
       })
     }
     this.interactions.onBuildTurret = (coord) => {
       this.comm.sendActionBuildTurret({
+        gid: this.gid,
         coord: coord
       })
     }
     this.interactions.onMoveProbes = (probes, target) => {
       this.comm.sendActionMoveProbes({
+        gid: this.gid,
         ids: probes.map(p => p.getId()),
         target: target,
       })
     }
     this.interactions.onExplodeProbes = (probes) => {
       this.comm.sendActionExplodeProbes({
+        gid: this.gid,
         ids: probes.map(p => p.getId()),
       })
     }
     this.interactions.onProbesAttack = (probes) => {
       this.comm.sendActionProbesAttack({
+        gid: this.gid,
         ids: probes.map(p => p.getId()),
       })
     }
+  }
+
+  private assertCompleteModel(model: IGame.GameState): model is IGame.Game {
+    if (!model.map?.tiles) return false
+    return true
   }
 
   /**

@@ -11,6 +11,7 @@ import {
   onAuthStateChanged,
   browserLocalPersistence,
   browserSessionPersistence,
+  GoogleAuthProvider,
 } from 'firebase/auth'
 
 // hooks
@@ -66,6 +67,8 @@ Importing it avoids importing firebase (app & auth) everywhere
 */
 export const auth = getAuth()
 
+export const providerGoogle = new GoogleAuthProvider()
+
 export const SessionPersistence = browserLocalPersistence
 export const LocalPersistence = browserSessionPersistence
 
@@ -86,6 +89,9 @@ function useFirebaseAuth() {
     username: "",
     email: "",
     avatar: "",
+    is_bot: false,
+    owner: null,
+    bots: [],
     joined_on: "",
     last_online: "",
     mmrs: {},
@@ -156,6 +162,9 @@ const userContext = createContext<Firebase.Auth>({
     username: "",
     email: "",
     avatar: "",
+    is_bot: false,
+    owner: null,
+    bots: [],
     joined_on: "",
     last_online: "",
     mmrs: {},

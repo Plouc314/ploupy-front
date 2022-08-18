@@ -1,11 +1,8 @@
 // next
 import { useRouter } from 'next/router'
 
-// react
-import { useState, useEffect, useRef } from 'react'
-
 // types
-import { FC, IComm, ICore } from '../../types'
+import { FC, ICore } from '../../types'
 
 // mui
 import {
@@ -14,25 +11,69 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemButton,
-  ListItemIcon,
   ListItemText,
   Paper,
   Tooltip,
   Typography
 } from '@mui/material'
 import PetsIcon from '@mui/icons-material/Pets';
-
-// hooks
-import { useComm } from '../hooks/useComm'
-import useSingleEffect from '../hooks/useSingleEffect'
-
-// utils
-import { useAuth } from '../utils/Firebase'
+import MemoryIcon from '@mui/icons-material/Memory';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 // pixi
 import Textures from '../pixi/textures'
+import { useUsers } from '../hooks/useComm';
 
+export interface UserItemProps {
+  user: ICore.User
+  userType: "user" | "bot"
+  onViewUser?: () => void
+  onInviteUser?: () => void
+}
+
+export const UserItem: FC<UserItemProps> = (props) => {
+
+  return (
+    <ListItem
+      key={props.user.uid}
+      secondaryAction={
+        <>
+          {props.onInviteUser &&
+            <Tooltip title={`Invite ${props.userType}`}>
+              <IconButton
+                onClick={props.onInviteUser}
+              >
+                <PlayArrowIcon />
+              </IconButton>
+            </Tooltip>
+          }
+          {props.onViewUser &&
+            <Tooltip title={`View ${props.userType}`}>
+              <IconButton
+                onClick={props.onViewUser}
+              >
+                {props.userType == "bot" ?
+                  <MemoryIcon /> : <PetsIcon />
+                }
+              </IconButton>
+            </Tooltip>
+          }
+        </>
+      }
+      sx={{ pt: 0.5, pb: 0.5 }}
+    >
+      <ListItemAvatar>
+        <Avatar
+          src={Textures.getAvatarURL(props.user.avatar)}
+          sx={{ width: 30, height: 30 }}
+        />
+      </ListItemAvatar>
+      <ListItemText
+        primary={props.user.username}
+      />
+    </ListItem>
+  )
+}
 
 export interface UsersListProps {
 
@@ -41,37 +82,7 @@ export interface UsersListProps {
 const UsersList: FC<UsersListProps> = (props) => {
 
   const router = useRouter()
-  const comm = useComm()
-
-  // ref of list of users -> cause of callback hell
-  const refUsers = useRef<ICore.ManUser[]>([])
-  const [users, setUsers] = useState<ICore.ManUser[]>([])
-
-  const onUserManagerState = (data: IComm.UserManagerState) => {
-
-    for (const user of data.users) {
-      // check if user exists
-      const idx = refUsers.current.findIndex(u => u.user.uid === user.user.uid)
-      if (idx == -1) {
-        // add it
-        refUsers.current.push(user)
-      } else {
-        // update players in user
-        refUsers.current[idx] = user
-      }
-      refUsers.current = refUsers.current.filter(u => u.connected)
-    }
-
-    setUsers([...refUsers.current])
-  }
-
-  useSingleEffect(() => {
-    if (!comm) return
-
-    comm.setOnUserManagerState((data) => onUserManagerState(data))
-
-    comm.refreshUserManager()
-  })
+  const users = useUsers()
 
   const onViewUser = (user: ICore.User) => {
     router.push(`/user?id=${user.uid}`)
@@ -83,31 +94,31 @@ const UsersList: FC<UsersListProps> = (props) => {
         Online users
       </Typography>
       <List>
-        {users.map(u => (
-          <ListItem
-            key={u.user.uid}
-            secondaryAction={
-              <Tooltip title="View user">
-                <IconButton
-                  onClick={() => onViewUser(u.user)}
-                >
-                  <PetsIcon />
-                </IconButton>
-              </Tooltip>
-            }
-            sx={{ pt: 0.5, pb: 0.5 }}
-          >
-            <ListItemAvatar>
-              <Avatar
-                src={Textures.getAvatarURL(u.user.avatar)}
-                sx={{ width: 30, height: 30 }}
-              />
-            </ListItemAvatar>
-            <ListItemText
-              primary={u.user.username}
+        {users
+          .filter(user => !user.is_bot)
+          .map(user => (
+            <UserItem
+              key={user.uid}
+              user={user}
+              userType="user"
+              onViewUser={() => onViewUser(user)}
             />
-          </ListItem>
-        ))}
+          ))}
+      </List>
+      <Typography sx={{ p: 1 }} fontWeight="bold">
+        Online bots
+      </Typography>
+      <List>
+        {users
+          .filter(user => user.is_bot)
+          .map(user => (
+            <UserItem
+              key={user.uid}
+              user={user}
+              userType="bot"
+              onViewUser={() => onViewUser(user)}
+            />
+          ))}
       </List>
     </Paper>
   )

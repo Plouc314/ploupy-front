@@ -44,6 +44,8 @@ const PageGame: FC<PageGameProps> = (props) => {
   const [game, setGame] = useState<Game | null>(null)
   const refGame = useRef<Game | null>(null)
 
+  const [gid, setGid] = useState<string | null>(null)
+
   const [isSpectator, setIsSpectator] = useState(true)
   const [hasResigned, setHasResigned] = useState(false)
   const [result, setResult] = useState<IComm.GameResultResponse | null>(null)
@@ -60,9 +62,16 @@ const PageGame: FC<PageGameProps> = (props) => {
       router.replace("/")
       return
     }
+    const gid = router.query.id // don't wait for state update -> shadow state
+    setGid(router.query.id)
 
     comm.setOnGameState((data) => {
       if (isGame.current) return
+
+      // the config is null when the global game state
+      // isn't the first state to be received
+      if (data.config === null) return
+
       isGame.current = true
       setHasResigned(false)
       setIsSpectator(!data.players.find(p => p.username === user.username))
@@ -74,13 +83,13 @@ const PageGame: FC<PageGameProps> = (props) => {
         console.group("create game")
         console.log(data)
         console.groupEnd()
-        refGame.current = new Game(pixi, comm, user, data as IGame.Game)
+        refGame.current = new Game(gid, pixi, comm, user, data)
         setGame(refGame.current)
       })
     })
 
     comm.getGameState(
-      { gid: router.query.id },
+      { gid: gid },
       (response) => {
         if (!response.success) {
           router.replace("/")
@@ -137,8 +146,11 @@ const PageGame: FC<PageGameProps> = (props) => {
               color="error"
               disabled={hasResigned}
               onClick={() => {
+                if (!gid) return
                 setHasResigned(true)
-                comm?.sendActionResignGame({})
+                comm?.sendActionResignGame({
+                  gid: gid
+                })
               }}
             >
               Resign

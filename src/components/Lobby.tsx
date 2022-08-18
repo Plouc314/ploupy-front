@@ -11,8 +11,14 @@ import { FC, IComm, ICore } from '../../types'
 import {
   Avatar,
   Button,
+  ButtonGroup,
+  Dialog,
+  DialogTitle,
   Divider,
   Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
   MenuItem,
   Stack,
   TextField,
@@ -23,6 +29,7 @@ import {
 // hooks
 import { useComm } from '../hooks/useComm'
 import useSingleEffect from '../hooks/useSingleEffect'
+import { useUsers } from '../hooks/useComm';
 
 // utils
 import { useAuth } from '../utils/Firebase'
@@ -31,6 +38,51 @@ import { useAuth } from '../utils/Firebase'
 import Textures from '../pixi/textures'
 import API from '../comm/api'
 
+// components
+import { UserItem } from './UsersList'
+
+interface DialogBotsProps {
+  qid: string
+  open: boolean
+  onClose: () => void
+}
+
+const DialogBots: FC<DialogBotsProps> = (props) => {
+
+  const comm = useComm()
+  const users = useUsers()
+
+  const onInviteUser = (user: ICore.User) => {
+    if (!comm) return
+    comm.sendActionSendQueueInvitation({
+      qid: props.qid,
+      uid: user.uid,
+    })
+  }
+
+  return (
+    <Dialog
+      open={props.open}
+      onClose={props.onClose}
+    >
+      <DialogTitle>
+        Bots
+      </DialogTitle>
+      <List>
+        {users
+          .filter(u => u.is_bot)
+          .map(u => (
+            <UserItem
+              key={u.uid}
+              user={u}
+              userType="bot"
+              onInviteUser={() => onInviteUser(u)}
+            />
+          ))}
+      </List>
+    </Dialog>
+  )
+}
 
 export interface LobbyProps {
 
@@ -41,6 +93,8 @@ const Lobby: FC<LobbyProps> = (props) => {
   const router = useRouter()
   const comm = useComm()
   const { user } = useAuth()
+
+  const [currentQid, setCurrentQid] = useState("")
 
   const [gameModes, setGameModes] = useState<ICore.GameMode[]>([])
 
@@ -107,61 +161,11 @@ const Lobby: FC<LobbyProps> = (props) => {
   })
 
   return (
-    <Stack
-      divider={<Divider />}
-    >
+    <>
       <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{
-          width: "auto",
-          padding: 1,
-        }}
+        divider={<Divider />}
       >
-        <Typography variant="h3">
-          Lobby
-        </Typography>
-        <TextField
-          select
-          id="n-player"
-          variant="standard"
-          label="# players"
-          margin="dense"
-          size="small"
-          helperText="Players in the game"
-          value={gameMode?.id ?? "null"}
-          onChange={(e) => {
-            const gm = gameModes.find(gm => gm.id === e.target.value)
-            if (!gm) return
-            setGameMode(gm)
-          }}
-        >
-          {gameModes.length == 0 ?
-            <MenuItem key="nplayer-null" value="null">
-              {""}
-            </MenuItem>
-            : gameModes.map((gm) => (
-              <MenuItem key={gm.id} value={gm.id}>
-                {gm.config.n_player}
-              </MenuItem>
-            ))}
-        </TextField>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => {
-            if (!comm) return
-            if (!gameMode) return
-            comm.sendActionCreateQueue({ gmid: gameMode.id })
-          }}
-        >
-          Create
-        </Button>
-      </Stack>
-      {queues.map(queue => (
         <Stack
-          key={queue.qid}
           direction="row"
           justifyContent="space-between"
           alignItems="center"
@@ -170,51 +174,122 @@ const Lobby: FC<LobbyProps> = (props) => {
             padding: 1,
           }}
         >
-          <Stack
-            direction="row"
-            alignItems="center"
+          <Typography variant="h3">
+            Lobby
+          </Typography>
+          <TextField
+            select
+            id="n-player"
+            variant="standard"
+            label="# players"
+            margin="dense"
+            size="small"
+            helperText="Players in the game"
+            value={gameMode?.id ?? "null"}
+            onChange={(e) => {
+              const gm = gameModes.find(gm => gm.id === e.target.value)
+              if (!gm) return
+              setGameMode(gm)
+            }}
           >
-            <Typography
-              sx={{
-                display: "inline",
-                fontWeight: "bold",
-                marginRight: 5,
-              }}
-            >
-              {`${queue.users.length} / ${getQueueGameMode(queue)?.config.n_player ?? "??"}`}
-            </Typography>
-
-            {queue.users.map((user) => (
-              <Tooltip
-                key={`${queue.qid}-${user.uid}`}
-                title={user.username}
-              >
-                <Avatar
-                  src={Textures.getAvatarURL(user.avatar)}
-                />
-              </Tooltip>
-            ))}
-          </Stack>
-
+            {gameModes.length == 0 ?
+              <MenuItem key="nplayer-null" value="null">
+                {""}
+              </MenuItem>
+              : gameModes.map((gm) => (
+                <MenuItem key={gm.id} value={gm.id}>
+                  {gm.config.n_player}
+                </MenuItem>
+              ))}
+          </TextField>
           <Button
             variant="contained"
             size="small"
-            color={activeQueueIds.includes(queue.qid) ? "secondary" : "primary"}
             onClick={() => {
               if (!comm) return
-              if (activeQueueIds.includes(queue.qid)) {
-                comm.sendActionLeaveQueue({ qid: queue.qid })
-              } else {
-                comm.sendActionJoinQueue({ qid: queue.qid })
-              }
+              if (!gameMode) return
+              comm.sendActionCreateQueue({ gmid: gameMode.id })
             }}
           >
-            {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
+            Create
           </Button>
         </Stack>
-      ))}
-      <div /> {/* footer -> to display a divider at the bottom*/}
-    </Stack>
+        {queues.map(queue => (
+          <Stack
+            key={queue.qid}
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{
+              width: "auto",
+              padding: 1,
+            }}
+          >
+            <Stack
+              direction="row"
+              alignItems="center"
+            >
+              <Typography
+                sx={{
+                  display: "inline",
+                  fontWeight: "bold",
+                  marginRight: 5,
+                }}
+              >
+                {`${queue.users.length} / ${getQueueGameMode(queue)?.config.n_player ?? "??"}`}
+              </Typography>
+
+              {queue.users.map((user) => (
+                <Tooltip
+                  key={`${queue.qid}-${user.uid}`}
+                  title={user.username}
+                >
+                  <Avatar
+                    src={Textures.getAvatarURL(user.avatar)}
+                  />
+                </Tooltip>
+              ))}
+            </Stack>
+
+            <ButtonGroup
+              variant="contained"
+              size="small"
+            >
+              <Button
+                color="primary"
+                onClick={() => {
+                  setCurrentQid(queue.qid)
+                }}
+              >
+                Add bot
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                color={activeQueueIds.includes(queue.qid) ? "secondary" : "primary"}
+                onClick={() => {
+                  if (!comm) return
+                  if (activeQueueIds.includes(queue.qid)) {
+                    comm.sendActionLeaveQueue({ qid: queue.qid })
+                  } else {
+                    comm.sendActionJoinQueue({ qid: queue.qid })
+                  }
+                }}
+              >
+                {activeQueueIds.includes(queue.qid) ? "Leave" : "Join"}
+              </Button>
+            </ButtonGroup>
+
+          </Stack>
+        ))}
+        <div /> {/* footer -> to display a divider at the bottom*/}
+      </Stack>
+      <DialogBots
+        qid={currentQid}
+        open={!!currentQid}
+        onClose={() => setCurrentQid("")}
+      />
+    </>
   )
 }
 

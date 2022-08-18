@@ -34,7 +34,7 @@ function useSio() {
     let headers: Record<string, string> = {}
     if (user.connected) {
       setIsVisitor(false)
-      headers = { jwt: user.jwt }
+      headers = { "firebase-jwt": user.jwt }
     } else {
       setIsVisitor(true)
       headers = {}
