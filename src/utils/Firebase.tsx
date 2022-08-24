@@ -81,7 +81,7 @@ Store the user & if something is loading (firebase is fetching data) as react st
 Setup an observer to change the user/loading states once the auth state change.
 Return the user & the loading state
 */
-function useFirebaseAuth() {
+function useFirebaseAuth(): Firebase.Auth {
   const [user, setUser] = useState<Firebase.User>({
     connected: false,
     jwt: "",
@@ -147,7 +147,29 @@ function useFirebaseAuth() {
     })
   })
 
-  return { user: user, loading: loading } as Firebase.Auth
+  /** Refresh user data */
+  const refresh = () => {
+    if (loading || !user.connected) return
+    setLoading(true)
+    API.getUserData({ uid: user.uid })
+      .then((data) => {
+        if (!data) {
+          throw new Error(`No user found for uid: ${user.uid}`)
+        }
+        setUser({
+          ...data,
+          connected: true,
+          jwt: user.jwt,
+        })
+        setLoading(false)
+      })
+  }
+
+  return {
+    user: user,
+    loading: loading,
+    refresh: refresh,
+  }
 }
 
 /*
@@ -169,7 +191,8 @@ const userContext = createContext<Firebase.Auth>({
     last_online: "",
     mmrs: {},
   },
-  loading: true
+  loading: true,
+  refresh: () => { },
 })
 
 export interface AuthProviderProps {

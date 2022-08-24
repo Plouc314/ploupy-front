@@ -51,6 +51,7 @@ import Textures from '../pixi/textures';
 import API from '../comm/api';
 import useSingleEffect from '../hooks/useSingleEffect';
 import { FLAG_DEPLOY } from '../comm/config';
+import { useAuth } from '../utils/Firebase';
 
 
 interface BotRowProps {
@@ -151,6 +152,7 @@ const BotRow: FC<BotRowProps> = (props) => {
 
 interface BotCreationProps {
   user: ICore.User
+  onCreate?: () => void
 }
 
 const BotCreation: FC<BotCreationProps> = (props) => {
@@ -158,18 +160,25 @@ const BotCreation: FC<BotCreationProps> = (props) => {
   const { enqueueSnackbar } = useSnackbar()
   const [username, setUsername] = useState("")
   const [botKey, setBotKey] = useState("")
+  const [loading, setLoading] = useState(false)
   const [copyMsg, setCopyMsg] = useState("Copy")
 
   const createBot = async () => {
+    setLoading(true)
     const response = await API.createBot({
       creator_uid: props.user.uid,
       username: username
     })
+    setLoading(false)
 
     if (!response.success) {
       enqueueSnackbar(response.msg, { variant: "error" })
     } else {
+      setUsername("")
       setBotKey(response.bot_jwt)
+      if (props.onCreate) {
+        props.onCreate()
+      }
     }
   }
 
@@ -231,6 +240,19 @@ const BotCreation: FC<BotCreationProps> = (props) => {
           </Typography>
         </>
       }
+      {loading &&
+        <Grid
+          container
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <CircularProgress
+            color="secondary"
+            sx={{ margin: 2 }}
+          />
+        </Grid>
+      }
     </>
   )
 }
@@ -282,28 +304,42 @@ const BotDocs: FC<BotDocsProps> = (props) => {
 }
 
 export interface ProfileBotProps {
-  user: ICore.User
 }
 
 const ProfileBot: FC<ProfileBotProps> = (props) => {
 
   const comm = useComm()
+  const { user, loading, refresh } = useAuth()
   const users = useUsers()
   const { enqueueSnackbar } = useSnackbar()
 
   const [bots, setBots] = useState<ICore.User[]>([])
+  const callCount = useRef<number>(0)
 
-  useSingleEffect(async () => {
-    for (const bot_uid of props.user.bots) {
-      const bot = await API.getUserData({ uid: bot_uid })
-      if (bot) {
-        setBots([...bots, bot])
+  useEffect(() => {
+    callCount.current += 1
+    if (callCount.current == 2) return
+    if (loading) return
+
+    const cb = async () => {
+      const _bots = []
+      for (const bot_uid of user.bots) {
+        const bot = await API.getUserData({ uid: bot_uid })
+        if (bot) {
+          _bots.push(bot)
+        }
       }
+      setBots(_bots)
     }
-  })
+    cb()
+  }, [user, loading])
 
   const onDisconnect = (bot: ICore.User) => {
     comm?.sendActionDisconnectBot({ bot_uid: bot.uid })
+  }
+
+  const onCreate = () => {
+    refresh()
   }
 
   const onDelete = (bot: ICore.User) => {
@@ -351,7 +387,10 @@ const ProfileBot: FC<ProfileBotProps> = (props) => {
       </Box>
       <Divider sx={{ mt: 4, mb: 2 }} />
       <Box sx={{ ml: 4, mr: 4 }}>
-        <BotCreation user={props.user} />
+        <BotCreation
+          user={user}
+          onCreate={onCreate}
+        />
       </Box>
       <Divider sx={{ mt: 4, mb: 2 }} />
       <Box sx={{ ml: 4, mr: 4 }}>

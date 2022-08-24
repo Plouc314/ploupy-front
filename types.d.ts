@@ -16,6 +16,7 @@ export namespace Firebase {
   export type Auth = {
     user: User
     loading: boolean
+    refresh: () => void
   }
 }
 
