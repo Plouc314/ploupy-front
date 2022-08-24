@@ -13,6 +13,8 @@ import {
   Button,
   ButtonGroup,
   Dialog,
+  DialogActions,
+  DialogContent,
   DialogTitle,
   Divider,
   Grid,
@@ -65,21 +67,39 @@ const DialogBots: FC<DialogBotsProps> = (props) => {
       open={props.open}
       onClose={props.onClose}
     >
-      <DialogTitle>
+      <DialogTitle
+        sx={{
+          minWidth: "400px"
+        }}
+      >
         Bots
       </DialogTitle>
-      <List>
-        {users
-          .filter(u => u.is_bot)
-          .map(u => (
-            <UserItem
-              key={u.uid}
-              user={u}
-              userType="bot"
-              onInviteUser={() => onInviteUser(u)}
-            />
-          ))}
-      </List>
+      <DialogContent>
+        <List>
+          {users
+            .filter(u => u.is_bot)
+            .map(u => (
+              <UserItem
+                key={u.uid}
+                user={u}
+                userType="bot"
+                onInviteUser={() => onInviteUser(u)}
+              />
+            ))}
+        </List>
+        {users.filter(u => u.is_bot).length == 0 &&
+          <Typography color="text.secondary">
+            There is currently no connected bots...
+          </Typography>
+        }
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={props.onClose}
+        >
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   )
 }

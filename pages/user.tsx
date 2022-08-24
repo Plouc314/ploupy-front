@@ -10,15 +10,18 @@ import { FC, ICore } from '../types'
 // mui
 import {
   Avatar,
-  Collapse,
+  Button,
   Grid,
+  IconButton,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
   Paper,
+  Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 // hooks
 import useSingleEffect from '../src/hooks/useSingleEffect'
@@ -32,6 +35,7 @@ import Loading from '../src/components/Loading';
 import API from '../src/comm/api';
 import Textures from '../src/pixi/textures';
 import ErrorMessage from '../src/components/ErrorMessage';
+import Link from 'next/link';
 
 
 
@@ -41,7 +45,17 @@ interface UserInfoBarProps {
 
 const UserInfoBar: FC<UserInfoBarProps> = (props) => {
 
+  const router = useRouter()
   const users = useUsers()
+  const [owner, setOwner] = useState<ICore.User | null>(null)
+
+  useEffect(() => {
+    if (!props.user.owner || owner) return
+    API.getUserData({ uid: props.user.owner })
+      .then((data) => {
+        setOwner(data)
+      })
+  }, [props.user])
 
   const getLastOnline = () => {
 
@@ -66,20 +80,51 @@ const UserInfoBar: FC<UserInfoBarProps> = (props) => {
     return "more than a month ago"
   }
 
+  const viewOwner = () => {
+    router.push(`/user?id=${props.user.owner}`)
+  }
+
   return (
     <Paper sx={{ m: 2 }}>
       <List>
         <ListItem
           divider
-          secondaryAction={<Avatar
-            src={Textures.getAvatarURL(props.user.avatar)}
-          />}
+          secondaryAction={
+            <Avatar
+              src={Textures.getAvatarURL(props.user.avatar)}
+            />
+          }
           sx={{ pb: 2 }}
         >
           <Typography variant="h4">
             {props.user.username}
           </Typography>
         </ListItem>
+        {props.user.is_bot && owner &&
+          <ListItem
+            secondaryAction={
+              <Stack
+                direction="row"
+                alignItems="center"
+              >
+                <Typography color="text.secondary">
+                  {owner.username}
+                </Typography>
+                <Tooltip title="View Owner">
+                  <IconButton
+                    onClick={viewOwner}
+                  >
+                    <VisibilityIcon fontSize='small' />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            }
+          >
+            <ListItemText
+              primary="Owner"
+            />
+          </ListItem>
+        }
         <ListItem
           secondaryAction={
             <Typography color="text.secondary">
@@ -129,7 +174,7 @@ const PageUser: FC<PageUserProps> = (props) => {
         }
         setLoading(false)
       })
-  }, [router.isReady])
+  }, [router.isReady, router.query])
 
   return (
     <Page

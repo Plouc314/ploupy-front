@@ -127,9 +127,7 @@ const PageProfile: FC<PageProfileProps> = (props) => {
             <ProfileAccount />
           </Collapse>
           <Collapse in={tab === "bot"}>
-            <ProfileBot
-              user={user}
-            />
+            <ProfileBot />
           </Collapse>
         </Grid>
       </Grid>

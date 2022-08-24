@@ -159,6 +159,7 @@ const PageLogin: FC<PageLoginProps> = (props) => {
         afterLoggedIn()
 
       }).catch((error) => {
+        console.log(error)
         enqueueSnackbar(`${error.message} (${error.code})`, { variant: "error" })
       })
   }
