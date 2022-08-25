@@ -34,6 +34,15 @@ export namespace IGame {
 
   export type ID = string
 
+  export type Tech = "PROBE_EXPLOSION_INTENSITY"
+    | "PROBE_CLAIM_INTENSITY"
+    | "FACTORY_BUILD_DELAY"
+    | "FACTORY_PROBE_PRICE"
+    | "FACTORY_MAX_PROBE"
+    | "TURRET_SCOPE"
+    | "TURRET_FIRE_DELAY"
+    | "TURRET_MAINTENANCE_COSTS"
+
   export interface Sprite {
     update: (dt: number) => void
     child: () => Container
@@ -67,6 +76,7 @@ export namespace IGame {
     money: number
     death: string | null
     income: number
+    techs: Tech[]
     factories: Factory[]
     turrets: Turret[]
     probes: Probe[]
@@ -78,6 +88,7 @@ export namespace IGame {
     money: number | null
     death: string | null
     income: number | null
+    techs: Tech[]
     factories: FactoryState[]
     turrets: TurretState[]
     probes: ProbeState[]
@@ -250,6 +261,8 @@ export namespace ICore {
     probe_speed: number
     probe_price: number
     probe_claim_delay: number
+    probe_claim_intensity: number
+    probe_explosion_intensity: number
     probe_maintenance_costs: number
     turret_price: number
     turret_fire_delay: number
@@ -257,6 +270,22 @@ export namespace ICore {
     turret_maintenance_costs: number
     income_rate: number
     deprecate_rate: number
+    tech_probe_explosion_intensity_increase: number
+    tech_probe_explosion_intensity_price: number
+    tech_probe_claim_intensity_increase: number
+    tech_probe_claim_intensity_price: number
+    tech_factory_build_delay_decrease: number
+    tech_factory_build_delay_price: number
+    tech_factory_probe_price_decrease: number
+    tech_factory_probe_price_price: number
+    tech_factory_max_probe_increase: int
+    tech_factory_max_probe_price: number
+    tech_turret_scope_increase: number
+    tech_turret_scope_price: number
+    tech_turret_fire_delay_decrease: number
+    tech_turret_fire_delay_price: number
+    tech_turret_maintenance_costs_decrease: number
+    tech_turret_maintenance_costs_price: number
   }
 
 }
@@ -322,6 +351,11 @@ export namespace IActions {
   export type ProbesAttack = {
     gid: IGame.ID
     ids: string[]
+  }
+
+  export type AcquireTech = {
+    gid: IGame.ID
+    tech: IGame.Tech
   }
 }
 
