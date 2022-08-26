@@ -34,14 +34,27 @@ export namespace IGame {
 
   export type ID = string
 
+  export type TechType = "turret" | "factory" | "probe"
+
   export type Tech = "PROBE_EXPLOSION_INTENSITY"
     | "PROBE_CLAIM_INTENSITY"
+    | "PROBE_HP"
     | "FACTORY_BUILD_DELAY"
     | "FACTORY_PROBE_PRICE"
     | "FACTORY_MAX_PROBE"
     | "TURRET_SCOPE"
     | "TURRET_FIRE_DELAY"
     | "TURRET_MAINTENANCE_COSTS"
+
+  export type TechIconName = "tech_probe_explosion_intensity"
+    | "tech_probe_claim_intensity"
+    | "tech_probe_hp"
+    | "tech_factory_build_delay"
+    | "tech_factory_probe_price"
+    | "tech_factory_max_probe"
+    | "tech_turret_scope"
+    | "tech_turret_fire_delay"
+    | "tech_turret_maintenance_costs"
 
   export interface Sprite {
     update: (dt: number) => void
@@ -259,12 +272,14 @@ export namespace ICore {
     factory_build_probe_delay: number
     max_occupation: number
     probe_speed: number
+    probe_hp: number
     probe_price: number
     probe_claim_delay: number
     probe_claim_intensity: number
     probe_explosion_intensity: number
     probe_maintenance_costs: number
     turret_price: number
+    turret_damage: number
     turret_fire_delay: number
     turret_scope: number
     turret_maintenance_costs: number
@@ -274,6 +289,8 @@ export namespace ICore {
     tech_probe_explosion_intensity_price: number
     tech_probe_claim_intensity_increase: number
     tech_probe_claim_intensity_price: number
+    tech_probe_hp_increase: number
+    tech_probe_hp_price: number
     tech_factory_build_delay_decrease: number
     tech_factory_build_delay_price: number
     tech_factory_probe_price_decrease: number

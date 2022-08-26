@@ -2,10 +2,11 @@
 import { Container, Text, Graphics } from 'pixi.js'
 
 // types
-import { IGame } from '../../types'
+import { ICore, IGame } from '../../types'
 
 // pixi
 import Color from '../utils/color'
+import { getTechIconName, getTechType, TECHS } from './constants'
 import Context from './context'
 import Game from './game'
 import ActionButton from './ui/actionbutton'
@@ -14,19 +15,32 @@ import PlayerBar from './ui/playerbar'
 
 interface UISizes {
   heightPlayerBar: number
+  marginYPlayerBar: number
   xButtons: number
-  yButtons: number
+  yActionButtons: number
+  yTechButtons: number
   marginButton: number
 }
 
-type UIButtons = "factory" | "turret" | "attack" | "explode"
+type UIButtons = "factory"
+  | "turret"
+  | "attack"
+  | "explode"
+  | IGame.TechIconName
 
-const buttonsData: { name: UIButtons, key: string }[] = [
+const actionButtonsData: { name: UIButtons, key: string }[] = [
   { name: "turret", key: "T" },
   { name: "factory", key: "F" },
   { name: "explode", key: "X" },
   { name: "attack", key: "A" },
 ]
+
+const techButtonsData: { name: UIButtons, x: number, y: number }[] = TECHS
+  .map((name, i) => ({
+    name: getTechIconName(name),
+    x: i % 3,
+    y: (i - i % 3) / 3,
+  }))
 
 class UI implements IGame.Sprite {
 
@@ -61,9 +75,11 @@ class UI implements IGame.Sprite {
 
   private build() {
     this.sizes = this.context.scaleUI({
-      heightPlayerBar: 30,
+      heightPlayerBar: 60,
+      marginYPlayerBar: 5,
       xButtons: 20,
-      yButtons: this.context.sizes.dimMap.y - 100,
+      yActionButtons: this.context.sizes.dimMap.y - 100,
+      yTechButtons: this.context.sizes.dimMap.y - 500,
       marginButton: 20,
     })
 
@@ -80,15 +96,45 @@ class UI implements IGame.Sprite {
     for (let i = 0; i < this.game.players.length; i++) {
       const player = this.game.players[i]
       const bar = new PlayerBar(this, player, this.context)
-      bar.child().position.y = i * this.sizes.heightPlayerBar
+      bar.child().position.y = i * (this.sizes.heightPlayerBar + this.sizes.marginYPlayerBar)
       this.playerBars.push(bar)
       this.container.addChild(bar.child())
     }
 
-    buttonsData.forEach(({ name, key }, i) => {
-      const btn = new ActionButton(this, this.context, name, key)
+    actionButtonsData.forEach(({ name, key }, i) => {
+      const btn = new ActionButton(
+        this,
+        this.context,
+        name,
+        { key, price: this.getActionPrice(name) }
+      )
       btn.child().position.x = this.sizes.xButtons
-      btn.child().position.y = this.sizes.yButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
+      btn.child().position.y = this.sizes.yActionButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
+
+      // check if previous version of button exists
+      const oldButton = this.buttons[name]
+      if (oldButton) {
+        // keep button's external logic
+        btn.onClick = oldButton.onClick
+      }
+
+      this.buttons[name] = btn
+
+      // only display buttons in non-specator mode
+      if (!this.game.isSpectator) {
+        this.container.addChild(btn.child())
+      }
+    })
+
+    techButtonsData.forEach(({ name, x, y }) => {
+      const btn = new ActionButton(
+        this,
+        this.context,
+        name,
+        { price: this.getActionPrice(name) + 200 }
+      )
+      btn.child().position.x = this.sizes.xButtons + x * (btn.sizes.dimX + this.sizes.marginButton)
+      btn.child().position.y = this.sizes.yTechButtons - y * (btn.sizes.dimY + this.sizes.marginButton)
 
       // check if previous version of button exists
       const oldButton = this.buttons[name]
@@ -124,6 +170,19 @@ class UI implements IGame.Sprite {
     for (const playerBar of this.playerBars) {
       playerBar.update(dt)
     }
+
+    const ownPlayer = this.game.ownPlayer
+    if (!ownPlayer) return
+    ownPlayer.techs.forEach(tech => {
+      const techType = getTechType(tech)
+      TECHS
+        .filter(t => getTechType(t) === techType)
+        .map(t => this.buttons[getTechIconName(t)])
+        .forEach(btn => {
+          btn.child().visible = false
+        })
+    })
+
   }
 
   /**
@@ -132,6 +191,23 @@ class UI implements IGame.Sprite {
    */
   public onContextUpdate() {
     this.build()
+  }
+
+  /**
+   * Return the price of an action (0 if no price)
+   */
+  private getActionPrice(action: UIButtons) {
+    if (action === "attack" || action === "explode") {
+      return "-"
+    }
+    if (action === "factory") {
+      return this.context.config.factory_price + ""
+    }
+    if (action === "turret") {
+      return this.context.config.turret_price + ""
+    }
+    const key = action + "_price" as keyof ICore.GameConfig
+    return this.context.config[key] as number + ""
   }
 
   public setGameActionError(msg: string) {

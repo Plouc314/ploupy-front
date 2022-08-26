@@ -1,6 +1,20 @@
+// types
+import { IGame } from "../../types";
+
 // utils
 import Color from "../utils/color";
 
+/**  Return the name of the png image that match the tech */
+export const getTechIconName = (tech: IGame.Tech) => {
+  return `tech_${tech.toLowerCase()}` as IGame.TechIconName
+}
+
+export const getTechType = (tech: IGame.Tech | IGame.TechIconName) => {
+  const parts = tech.split("_")
+  return tech.startsWith("tech") ?
+    parts[1]
+    : parts[0].toLowerCase() as IGame.TechType
+}
 
 export const COLORS = [
   Color.fromRgb(250, 100, 100),
@@ -12,6 +26,18 @@ export const COLORS = [
 ]
 
 export const ICON_COLORS = [...COLORS, Color.WHITE, Color.BLACK]
+
+export const TECHS: IGame.Tech[] = [
+  "PROBE_EXPLOSION_INTENSITY",
+  "PROBE_CLAIM_INTENSITY",
+  "PROBE_HP",
+  "FACTORY_BUILD_DELAY",
+  "FACTORY_PROBE_PRICE",
+  "FACTORY_MAX_PROBE",
+  "TURRET_SCOPE",
+  "TURRET_FIRE_DELAY",
+  "TURRET_MAINTENANCE_COSTS",
+]
 
 export const AVATARS = [
   "snake",
@@ -47,10 +73,13 @@ export const AVATARS = [
 ]
 
 export const ICONS = [
-  "factory",
-  "probe",
+  "attack",
   "money",
+  "factory",
   "turret",
   "explode",
-  "attack",
-]
+  "probe",
+  "tech",
+].concat(
+  TECHS.map(getTechIconName)
+)

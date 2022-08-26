@@ -18,9 +18,11 @@ interface ActionButtonSizes {
   dimX: number
   dimY: number
   sizeIcon: number
-  yIcon: number
+  xIcon: number
   xKey: number
   yKey: number
+  xPrice: number
+  yPrice: number
   marginWidth: number
 }
 
@@ -38,13 +40,14 @@ class ActionButton implements IGame.Sprite {
   private container: Container
   private background: UniformUI
   private icon: ImageUI
-  private key: TextUI
+  private price?: TextUI
+  private key?: TextUI
 
   public onClick: () => void
 
   private isHover: boolean
 
-  constructor(ui: UI, context: Context, icon: string, key: string) {
+  constructor(ui: UI, context: Context, icon: string, options?: { key?: string, price?: string }) {
     this.ui = ui
     this.textures = ui.game.pixi.textures
     this.context = context
@@ -52,10 +55,12 @@ class ActionButton implements IGame.Sprite {
     this.sizes = context.scaleUI({
       dimX: 70,
       dimY: 70,
-      sizeIcon: 40,
-      yIcon: 15,
+      sizeIcon: 35,
+      xIcon: 20,
       xKey: 5,
       yKey: 5,
+      xPrice: 5,
+      yPrice: 68,
       marginWidth: 3,
     })
 
@@ -77,25 +82,39 @@ class ActionButton implements IGame.Sprite {
 
     this.icon = new ImageUI(context)
     this.icon.texture = this.textures.getIcon(icon, Color.WHITE)
-    this.icon.parent.width = this.sizes.dimX
-    this.icon.centeredX = true
+    this.icon.parent.height = this.sizes.dimY
+    this.icon.centeredY = true
     this.icon.dim.width = this.sizes.sizeIcon
     this.icon.dim.height = this.sizes.sizeIcon
-    this.icon.pos.y = this.sizes.yIcon
+    this.icon.pos.x = this.sizes.xIcon
     this.icon.compile()
-
-    this.key = new TextUI(context)
-    this.key.pos.x = this.sizes.xKey
-    this.key.pos.y = this.sizes.yKey
-    this.key.color = Color.WHITE
-    this.key.fontSize = 18
-    this.key.fontWeight = "bold"
-    this.key.text = key
-    this.key.compile()
 
     this.container.addChild(this.background.child())
     this.container.addChild(this.icon.child())
-    this.container.addChild(this.key.child())
+
+    if (options?.key !== undefined) {
+      this.key = new TextUI(context)
+      this.key.pos.x = this.sizes.xKey
+      this.key.pos.y = this.sizes.yKey
+      this.key.color = Color.WHITE
+      this.key.fontSize = 18
+      this.key.fontWeight = "bold"
+      this.key.text = options.key
+      this.key.compile()
+      this.container.addChild(this.key.child())
+    }
+
+    if (options?.price !== undefined) {
+      this.price = new TextUI(context)
+      this.price.pos.x = this.sizes.xPrice
+      this.price.pos.y = this.sizes.yPrice
+      this.price.anchorY = "bottom"
+      this.price.color = Color.WHITE
+      this.price.fontSize = 14
+      this.price.text = options.price
+      this.price.compile()
+      this.container.addChild(this.price.child())
+    }
   }
 
   private setupInteractions() {
