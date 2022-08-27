@@ -171,6 +171,15 @@ class Comm {
     })
   }
 
+  public sendActionAcquireTech(data: IActions.AcquireTech) {
+    this.sio.emit("action_acquire_tech", data, (raw: string) => {
+      const response = JSON.parse(raw) as IComm.Response
+      if (!response.success) {
+        this.onGameActionError(response.msg)
+      }
+    })
+  }
+
   public setOnUserManagerState(cb: (data: IComm.UserManagerState) => void) {
     this.sio.removeAllListeners("man_user_state")
     this.sio.on("man_user_state", (data) => { cb(JSON.parse(data)) })

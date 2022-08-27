@@ -34,6 +34,30 @@ export namespace IGame {
 
   export type ID = string
 
+  export type MapSize = "small" | "medium" | "large"
+
+  export type TechType = "turret" | "factory" | "probe"
+
+  export type Tech = "PROBE_EXPLOSION_INTENSITY"
+    | "PROBE_CLAIM_INTENSITY"
+    | "PROBE_HP"
+    | "FACTORY_BUILD_DELAY"
+    | "FACTORY_PROBE_PRICE"
+    | "FACTORY_MAX_PROBE"
+    | "TURRET_SCOPE"
+    | "TURRET_FIRE_DELAY"
+    | "TURRET_MAINTENANCE_COSTS"
+
+  export type TechIconName = "tech_probe_explosion_intensity"
+    | "tech_probe_claim_intensity"
+    | "tech_probe_hp"
+    | "tech_factory_build_delay"
+    | "tech_factory_probe_price"
+    | "tech_factory_max_probe"
+    | "tech_turret_scope"
+    | "tech_turret_fire_delay"
+    | "tech_turret_maintenance_costs"
+
   export interface Sprite {
     update: (dt: number) => void
     child: () => Container
@@ -67,6 +91,7 @@ export namespace IGame {
     money: number
     death: string | null
     income: number
+    techs: Tech[]
     factories: Factory[]
     turrets: Turret[]
     probes: Probe[]
@@ -78,6 +103,7 @@ export namespace IGame {
     money: number | null
     death: string | null
     income: number | null
+    techs: Tech[]
     factories: FactoryState[]
     turrets: TurretState[]
     probes: ProbeState[]
@@ -150,14 +176,16 @@ export namespace IGame {
 
   export type Game<K = string> = {
     gid: string
-    config: GameConfig
+    config: ICore.GameConfig
+    metadata: ICore.GameMetadata
     map: Map<K>
     players: Player[]
   }
 
   export type GameState<K = string> = {
     gid: string
-    config: GameConfig | null
+    config: ICore.GameConfig | null
+    metadata: ICore.GameMetadata | null
     map: MapState<K> | null
     players: PlayerState[]
   }
@@ -209,6 +237,7 @@ export namespace ICore {
     qid: IGame.ID
     active: boolean
     gmid: str
+    metadata: GameMetadata
     users: User[]
   }
 
@@ -220,6 +249,7 @@ export namespace ICore {
     gid: string
     active: boolean
     gmid: string
+    metadata: GameMetadata
     users: User[]
   }
 
@@ -236,9 +266,12 @@ export namespace ICore {
     mmr_hist: number[]
   }
 
-  export type GameConfig = {
+  export type GameMetadata = {
     dim: IGame.Coordinate
     n_player: number
+  }
+
+  export type GameConfig = {
     initial_money: number
     initial_n_probes: number
     base_income: number
@@ -248,15 +281,37 @@ export namespace ICore {
     factory_build_probe_delay: number
     max_occupation: number
     probe_speed: number
+    probe_hp: number
     probe_price: number
     probe_claim_delay: number
+    probe_claim_intensity: number
+    probe_explosion_intensity: number
     probe_maintenance_costs: number
     turret_price: number
+    turret_damage: number
     turret_fire_delay: number
     turret_scope: number
     turret_maintenance_costs: number
     income_rate: number
     deprecate_rate: number
+    tech_probe_explosion_intensity_increase: number
+    tech_probe_explosion_intensity_price: number
+    tech_probe_claim_intensity_increase: number
+    tech_probe_claim_intensity_price: number
+    tech_probe_hp_increase: number
+    tech_probe_hp_price: number
+    tech_factory_build_delay_decrease: number
+    tech_factory_build_delay_price: number
+    tech_factory_probe_price_decrease: number
+    tech_factory_probe_price_price: number
+    tech_factory_max_probe_increase: int
+    tech_factory_max_probe_price: number
+    tech_turret_scope_increase: number
+    tech_turret_scope_price: number
+    tech_turret_fire_delay_decrease: number
+    tech_turret_fire_delay_price: number
+    tech_turret_maintenance_costs_decrease: number
+    tech_turret_maintenance_costs_price: number
   }
 
 }
@@ -270,6 +325,7 @@ export namespace IActions {
 
   export type CreateQueue = {
     gmid: string
+    metadata: ICore.GameMetadata
   }
 
   export type JoinQueue = {
@@ -322,6 +378,11 @@ export namespace IActions {
   export type ProbesAttack = {
     gid: IGame.ID
     ids: string[]
+  }
+
+  export type AcquireTech = {
+    gid: IGame.ID
+    tech: IGame.Tech
   }
 }
 

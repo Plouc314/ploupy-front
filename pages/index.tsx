@@ -33,6 +33,7 @@ const PageHome: FC<PageHomeProps> = (props) => {
       <Grid
         container
         spacing={1}
+        sx={{ pb: 10 }}
       >
         <Grid item xs={9}>
           <Doc />

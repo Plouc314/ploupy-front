@@ -11,11 +11,8 @@ import Map from "./map"
 import Player from "./player"
 import UI from "./ui"
 import Comm from "../comm/comm"
-import Factory from "./entity/factory"
-import Probe from "./entity/probe"
 import Interactions from "./interactions"
 import Context from "./context"
-import Turret from "./entity/turret"
 import { COLORS } from "./constants"
 import Animations from "./animations"
 
@@ -50,7 +47,7 @@ class Game {
     this.comm = comm
     this.user = user
     this.keyboard = new Keyboard()
-    this.context = new Context(pixi, model.config)
+    this.context = new Context(pixi, model.config, model.metadata)
     this.map = new Map(this.context, model.map)
     this.animations = new Animations(this.context, this)
 
@@ -152,10 +149,17 @@ class Game {
         ids: probes.map(p => p.getId()),
       })
     }
+    this.interactions.onAcquireTech = (tech) => {
+      this.comm.sendActionAcquireTech({
+        gid: this.gid,
+        tech: tech,
+      })
+    }
   }
 
   private assertCompleteModel(model: IGame.GameState): model is IGame.Game {
     if (!model.map?.tiles) return false
+    if (!model.config || !model.metadata) return false
     return true
   }
 
@@ -193,7 +197,6 @@ class Game {
 
     this.ui.update(dt)
   }
-
 
   private setModel(model: IGame.GameState<string>) {
     for (const pm of model.players) {

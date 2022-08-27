@@ -16,6 +16,7 @@ import Context from './context'
 import Pixi from './pixi'
 import Color from '../utils/color'
 import ImageUI from './ui/node/image'
+import { getTechIconName, TECHS } from './constants'
 
 export enum InteractionState {
   IDLE = "IDLE",
@@ -40,6 +41,7 @@ class Interactions implements IGame.Sprite {
   public onMoveProbes?: (probes: Probe[], target: IGame.Coordinate) => void
   public onExplodeProbes?: (probes: Probe[]) => void
   public onProbesAttack?: (probes: Probe[]) => void
+  public onAcquireTech?: (tech: IGame.Tech) => void
 
   private state: InteractionState
 
@@ -206,6 +208,10 @@ class Interactions implements IGame.Sprite {
     this.ui.buttons.turret.onClick = () => this.updateBuildTurretState()
     this.ui.buttons.explode.onClick = () => this.explodeProbes()
     this.ui.buttons.attack.onClick = () => this.probesAttack()
+    TECHS.forEach(tech => {
+      const btn = this.ui.buttons[getTechIconName(tech)]
+      btn.onClick = () => this.acquireTech(tech)
+    })
   }
 
   /**
@@ -246,6 +252,12 @@ class Interactions implements IGame.Sprite {
       this.onProbesAttack(this.selectedProbes)
     }
     this.setState(InteractionState.IDLE)
+  }
+
+  private acquireTech(tech: IGame.Tech) {
+    if (this.onAcquireTech) {
+      this.onAcquireTech(tech)
+    }
   }
 
   private selectAllProbes() {

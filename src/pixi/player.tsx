@@ -25,6 +25,7 @@ class Player implements IGame.Sprite {
   public income: number
   public color: Color
 
+  public techs: IGame.Tech[]
   public factories: Factory[]
   public turrets: Turret[]
   public probes: Probe[]
@@ -56,6 +57,7 @@ class Player implements IGame.Sprite {
     this.animations = animations
     this.context = map.context
 
+    this.techs = model.techs
     this.factories = []
     this.turrets = []
     this.probes = []
@@ -86,6 +88,8 @@ class Player implements IGame.Sprite {
     this.money = model.money ?? this.money
     this.alive = !model.death ?? this.alive
     this.income = model.income ?? this.income
+
+    this.techs = this.techs.concat(model.techs)
 
     // update factories
     for (const fm of model.factories) {
