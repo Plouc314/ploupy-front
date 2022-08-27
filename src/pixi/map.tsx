@@ -26,7 +26,7 @@ class Map implements IGame.Sprite {
 
   constructor(context: Context, model: IGame.Map<string>) {
     this.context = context
-    this.dimension = { ...context.config.dim }
+    this.dimension = { ...context.metadata.dim }
     this.tiles2d = []
     this.tilesMap = {}
     this.borders = []

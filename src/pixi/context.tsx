@@ -21,6 +21,7 @@ class Context {
 
   public pixi: Pixi
   public config: ICore.GameConfig
+  public metadata: ICore.GameMetadata
 
   public sizes: IGame.ContextSizes
 
@@ -29,9 +30,10 @@ class Context {
    */
   public unit: number
 
-  constructor(pixi: Pixi, config: ICore.GameConfig) {
+  constructor(pixi: Pixi, config: ICore.GameConfig, metadata: ICore.GameMetadata) {
     this.pixi = pixi
     this.config = config
+    this.metadata = metadata
 
     this.sizes = {} as IGame.ContextSizes
     this.unit = 0
@@ -44,13 +46,13 @@ class Context {
    */
   public update() {
     this.unit = Math.min(
-      this.pixi.app.view.width / (this.config.dim.x + 2 * Map.MARGIN),
-      this.pixi.app.view.height / (this.config.dim.y + 2 * Map.MARGIN),
+      this.pixi.app.view.width / (this.metadata.dim.x + 2 * Map.MARGIN),
+      this.pixi.app.view.height / (this.metadata.dim.y + 2 * Map.MARGIN),
     )
 
     const dimMap = {
-      x: (this.config.dim.x + 2 * Map.MARGIN) * this.unit,
-      y: (this.config.dim.y + 2 * Map.MARGIN) * this.unit,
+      x: (this.metadata.dim.x + 2 * Map.MARGIN) * this.unit,
+      y: (this.metadata.dim.y + 2 * Map.MARGIN) * this.unit,
     }
 
     this.sizes = {

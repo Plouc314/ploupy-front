@@ -10,6 +10,7 @@ import { FC, IComm, ICore } from '../../types'
 // mui
 import {
   Avatar,
+  capitalize,
   IconButton,
   List,
   ListItem,
@@ -31,7 +32,6 @@ import { useSnackbar } from 'notistack';
 
 // utils
 import { useAuth } from '../utils/Firebase'
-import { getModeName } from '../utils/prettyprint';
 
 // pixi
 import Textures from '../pixi/textures'
@@ -67,7 +67,7 @@ const GameRow: FC<GameRowProps> = (props) => {
       sx={{ pt: 0.5, pb: 0.5 }}
     >
       <ListItemText
-        primary={getModeName(props.mode, { skipNPlayers: true })}
+        primary={capitalize(props.mode.name)}
         sx={{ flexGrow: 0, pr: 2 }}
       />
       <Stack direction="row">

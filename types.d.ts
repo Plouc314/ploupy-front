@@ -34,6 +34,8 @@ export namespace IGame {
 
   export type ID = string
 
+  export type MapSize = "small" | "medium" | "large"
+
   export type TechType = "turret" | "factory" | "probe"
 
   export type Tech = "PROBE_EXPLOSION_INTENSITY"
@@ -174,14 +176,16 @@ export namespace IGame {
 
   export type Game<K = string> = {
     gid: string
-    config: GameConfig
+    config: ICore.GameConfig
+    metadata: ICore.GameMetadata
     map: Map<K>
     players: Player[]
   }
 
   export type GameState<K = string> = {
     gid: string
-    config: GameConfig | null
+    config: ICore.GameConfig | null
+    metadata: ICore.GameMetadata | null
     map: MapState<K> | null
     players: PlayerState[]
   }
@@ -233,6 +237,7 @@ export namespace ICore {
     qid: IGame.ID
     active: boolean
     gmid: str
+    metadata: GameMetadata
     users: User[]
   }
 
@@ -244,6 +249,7 @@ export namespace ICore {
     gid: string
     active: boolean
     gmid: string
+    metadata: GameMetadata
     users: User[]
   }
 
@@ -260,9 +266,12 @@ export namespace ICore {
     mmr_hist: number[]
   }
 
-  export type GameConfig = {
+  export type GameMetadata = {
     dim: IGame.Coordinate
     n_player: number
+  }
+
+  export type GameConfig = {
     initial_money: number
     initial_n_probes: number
     base_income: number
@@ -316,6 +325,7 @@ export namespace IActions {
 
   export type CreateQueue = {
     gmid: string
+    metadata: ICore.GameMetadata
   }
 
   export type JoinQueue = {

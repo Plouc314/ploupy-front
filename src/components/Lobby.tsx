@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect, useRef } from 'react'
 
 // types
-import { FC, IComm, ICore } from '../../types'
+import { FC, IComm, ICore, IGame } from '../../types'
 
 // mui
 import {
@@ -29,7 +29,7 @@ import {
 } from '@mui/material'
 
 // hooks
-import { useComm } from '../hooks/useComm'
+import { useComm, useQueues } from '../hooks/useComm'
 import useSingleEffect from '../hooks/useSingleEffect'
 import { useUsers } from '../hooks/useComm';
 
@@ -39,6 +39,7 @@ import { useAuth } from '../utils/Firebase'
 // pixi
 import Textures from '../pixi/textures'
 import API from '../comm/api'
+import { MAP_DIMS } from '../pixi/constants'
 
 // components
 import { UserItem } from './UsersList'
@@ -113,47 +114,26 @@ const Lobby: FC<LobbyProps> = (props) => {
   const router = useRouter()
   const comm = useComm()
   const { user } = useAuth()
+  const queues = useQueues()
 
   const [currentQid, setCurrentQid] = useState("")
 
   const [gameModes, setGameModes] = useState<ICore.GameMode[]>([])
-
   const [gameMode, setGameMode] = useState<ICore.GameMode | null>(null)
-
-  // ref of list of queues -> cause of callback hell
-  const refQueues = useRef<ICore.ManQueue[]>([])
-  const [queues, setQueues] = useState<ICore.ManQueue[]>([])
 
   // list of all ids of queues where the user is currently in
   const [activeQueueIds, setActiveQueueIds] = useState<string[]>([])
 
-  const onQueueState = (data: IComm.QueueManagerState) => {
+  const [nPlayer, setNPlayer] = useState<number>(2)
+  const [dim, setDim] = useState<IGame.MapSize>("medium")
 
-    for (const queue of data.queues) {
-      // check if queue exists
-      const idx = refQueues.current.findIndex(q => q.qid === queue.qid)
-      if (idx == -1) {
-        // add it
-        refQueues.current.push(queue)
-      } else {
-        // update players in queue
-        refQueues.current[idx] = queue
-      }
-      refQueues.current = refQueues.current.filter(q => q.active && q.users.length > 0)
-    }
-
+  useEffect(() => {
     // update active queue ids
-    setActiveQueueIds(refQueues.current
+    setActiveQueueIds(queues
       .filter(q => q.users.find(u => u.username === user.username))
       .map(q => q.qid)
     )
-
-    setQueues([...refQueues.current])
-  }
-
-  const getQueueGameMode = (queue: ICore.ManQueue) => {
-    return gameModes.find(gm => gm.id === queue.gmid)
-  }
+  }, [queues])
 
   useSingleEffect(() => {
     API.getGameModes()
@@ -172,10 +152,6 @@ const Lobby: FC<LobbyProps> = (props) => {
     comm.setOnStartGame((data) => {
       router.push(`/game?id=${data.gid}`)
     })
-    comm.setOnQueueManagerState((data) => onQueueState(data))
-
-    comm.refreshQueueManager()
-
     // check for active game AFTER having defined onStartGame
     comm.checkActiveGame()
   })
@@ -197,38 +173,86 @@ const Lobby: FC<LobbyProps> = (props) => {
           <Typography variant="h3">
             Lobby
           </Typography>
-          <TextField
-            select
-            id="n-player"
-            variant="standard"
-            label="# players"
-            margin="dense"
-            size="small"
-            helperText="Players in the game"
-            value={gameMode?.id ?? "null"}
-            onChange={(e) => {
-              const gm = gameModes.find(gm => gm.id === e.target.value)
-              if (!gm) return
-              setGameMode(gm)
-            }}
-          >
-            {gameModes.length == 0 ?
-              <MenuItem key="nplayer-null" value="null">
-                {""}
-              </MenuItem>
-              : gameModes.map((gm) => (
-                <MenuItem key={gm.id} value={gm.id}>
-                  {gm.config.n_player}
-                </MenuItem>
-              ))}
-          </TextField>
+          {gameMode &&
+            <Stack
+              direction="row"
+              alignItems="center"
+            >
+              <TextField
+                select
+                id="select-game-mode"
+                variant="standard"
+                label="Game Mode"
+                margin="dense"
+                size="small"
+                value={gameMode?.id}
+                onChange={(e) => {
+                  const gm = gameModes.find(gm => gm.id === e.target.value)
+                  if (gm) {
+                    setGameMode(gm)
+                  }
+                }}
+                sx={{ mx: 1, minWidth: 100 }}
+              >
+                {gameModes.map(gm => (
+                  <MenuItem key={`gm-${gm.id}`} value={gm.id}>
+                    {gm.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                id="select-n-player"
+                variant="standard"
+                label="# players"
+                margin="dense"
+                size="small"
+                value={nPlayer}
+                onChange={(e) => {
+                  setNPlayer(Number(e.target.value))
+                }}
+                sx={{ mx: 1, minWidth: 100 }}
+              >
+                {[2, 3, 4, 5].map((n) => (
+                  <MenuItem key={`nplayer-${n}`} value={n}>
+                    {n}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                id="select-dim"
+                variant="standard"
+                label="Map size"
+                margin="dense"
+                size="small"
+                value={dim}
+                onChange={(e) => {
+                  setDim(e.target.value as IGame.MapSize)
+                }}
+                sx={{ mx: 1, minWidth: 100 }}
+              >
+                {Object.keys(MAP_DIMS).map((name) => (
+                  <MenuItem key={`dim-${name}`} value={name}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Stack>
+          }
           <Button
             variant="contained"
             size="small"
             onClick={() => {
               if (!comm) return
               if (!gameMode) return
-              comm.sendActionCreateQueue({ gmid: gameMode.id })
+              comm.sendActionCreateQueue({
+                gmid: gameMode.id,
+                metadata: {
+                  dim: MAP_DIMS[dim],
+                  n_player: nPlayer,
+                }
+              })
             }}
           >
             Create
@@ -256,7 +280,7 @@ const Lobby: FC<LobbyProps> = (props) => {
                   marginRight: 5,
                 }}
               >
-                {`${queue.users.length} / ${getQueueGameMode(queue)?.config.n_player ?? "??"}`}
+                {`${queue.users.length} / ${queue.metadata.n_player}`}
               </Typography>
 
               {queue.users.map((user) => (

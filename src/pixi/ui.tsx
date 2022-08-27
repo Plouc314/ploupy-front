@@ -131,7 +131,7 @@ class UI implements IGame.Sprite {
         this,
         this.context,
         name,
-        { price: this.getActionPrice(name) + 200 }
+        { price: this.getActionPrice(name) }
       )
       btn.child().position.x = this.sizes.xButtons + x * (btn.sizes.dimX + this.sizes.marginButton)
       btn.child().position.y = this.sizes.yTechButtons - y * (btn.sizes.dimY + this.sizes.marginButton)

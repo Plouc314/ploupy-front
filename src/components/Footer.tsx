@@ -40,13 +40,15 @@ const Footer: FC<FooterProps> = (props) => {
     <Container
       maxWidth="xl"
       sx={{
-        position: "absolute",
-        bottom: 0,
+        position: "fixed",
+        bottom: "0%",
         pb: 1,
         pt: 1,
         borderTopWidth: 1,
         borderTopStyle: "solid",
-        borderTopColor: "text.disabled"
+        borderTopColor: "text.disabled",
+        zIndex: 2,
+        backgroundColor: "white"
       }}
     >
       <Grid

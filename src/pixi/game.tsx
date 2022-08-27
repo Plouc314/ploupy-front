@@ -47,7 +47,7 @@ class Game {
     this.comm = comm
     this.user = user
     this.keyboard = new Keyboard()
-    this.context = new Context(pixi, model.config)
+    this.context = new Context(pixi, model.config, model.metadata)
     this.map = new Map(this.context, model.map)
     this.animations = new Animations(this.context, this)
 
@@ -159,6 +159,7 @@ class Game {
 
   private assertCompleteModel(model: IGame.GameState): model is IGame.Game {
     if (!model.map?.tiles) return false
+    if (!model.config || !model.metadata) return false
     return true
   }
 

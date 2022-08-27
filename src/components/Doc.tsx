@@ -59,23 +59,30 @@ const Doc: FC<DocProps> = (props) => {
     {
       primary: "Factory",
       price: gc?.factory_price ?? 0,
-      secondary: ["Build robots at regular interval"],
+      secondary: [
+        "Can only be built on occupied tiles.",
+        "Expand occupation on nearby tiles when created.",
+        "Build robots at regular interval until reaching its maximum capacity or",
+        "running out of money. Does not have maintenance costs."
+      ],
     },
     {
       primary: "Turret",
       price: gc?.turret_price ?? 0,
       secondary: [
-        "Fire at one opponent robot at regular intervals",
-        "(if any in range)",
+        "Can only be built on occupied tiles.",
+        "Fire at opponent robots when they come within scope (with a reloading delay).",
+        "Has maintenance costs.",
       ],
     },
     {
       primary: "Robot",
       price: gc?.probe_price ?? 0,
       secondary: [
-        "Factory built, move to nearby tiles to increase their occupation",
-        "(makes the tile more colourful). Can be selected and receive",
-        "manual orders",
+        "Built by a factory.",
+        "Automatically move to nearby tiles to increase their occupation (farming).",
+        "Can be selected and receive manual orders.",
+        "Has maintenance costs.",
       ],
     },
   ]
@@ -124,7 +131,7 @@ const Doc: FC<DocProps> = (props) => {
         price: gc?.tech_probe_explosion_intensity_price ?? 0,
         type: "probe",
         secondary: [
-          "Increase the probe's explosion intensity. Reduce the occupation",
+          "Increases the probe's explosion intensity. Reduces the occupation",
           "of the affected tiles by a larger amount ",
           `(${gc?.probe_explosion_intensity} → `,
           `${(gc?.probe_explosion_intensity ?? 0) + (gc?.tech_probe_explosion_intensity_increase ?? 0)})`,
@@ -136,7 +143,7 @@ const Doc: FC<DocProps> = (props) => {
         price: gc?.tech_probe_claim_intensity_price ?? 0,
         type: "probe",
         secondary: [
-          "Increase the probe's farming efficiency. Increase the occupation",
+          "Increases the probe's farming efficiency. Increases the occupation",
           "of the farmed tile by a larger amount ",
           `(${gc?.probe_claim_intensity} → `,
           `${(gc?.probe_claim_intensity ?? 0) + (gc?.tech_probe_claim_intensity_increase ?? 0)})`,
@@ -148,19 +155,19 @@ const Doc: FC<DocProps> = (props) => {
         price: gc?.tech_probe_hp_price ?? 0,
         type: "probe",
         secondary: [
-          "Increase the probe's resistance. Increase the amount of turret shots",
+          "Increases the probe's resistance. Increases the amount of turret shots",
           "needed to take down the probe ",
           `(${gc?.probe_hp} → `,
           `${(gc?.probe_hp ?? 0) + (gc?.tech_probe_hp_increase ?? 0)})`,
         ],
       },
       {
-        primary: "SpaceX-like factory",
+        primary: "Rush",
         icon: "tech_factory_build_delay",
         price: gc?.tech_factory_build_delay_price ?? 0,
         type: "factory",
         secondary: [
-          "Increase the factory speed. Reduce the time needed to build a probe ",
+          "Rushes the production, skips testing. Reduces the time needed to build a probe ",
           `(${gc?.factory_build_probe_delay} → `,
           `${(gc?.factory_build_probe_delay ?? 0) - (gc?.tech_factory_build_delay_decrease ?? 0)}`,
           " sec)",
@@ -172,7 +179,7 @@ const Doc: FC<DocProps> = (props) => {
         price: gc?.tech_factory_max_probe_price ?? 0,
         type: "factory",
         secondary: [
-          "Scale up the factory. Increase the number of probes that a factory can handle ",
+          "Scales up the factory. Increases the number of probes that a factory can handle ",
           `(${gc?.factory_max_probe} → `,
           `${(gc?.factory_max_probe ?? 0) + (gc?.tech_factory_max_probe_increase ?? 0)})`,
         ],
@@ -183,10 +190,43 @@ const Doc: FC<DocProps> = (props) => {
         price: gc?.tech_factory_probe_price_price ?? 0,
         type: "factory",
         secondary: [
-          "Bring Henry Ford back from the dead to lead the factory.",
-          "Reduce the cost of producing a probe",
+          "Brings Henry Ford back from the dead to lead the factory.",
+          "Reduces the cost of producing a probe",
           `(${gc?.probe_price} → `,
-          `${(gc?.probe_price ?? 0) - (gc?.tech_factory_probe_price_decrease ?? 0)})`,
+          `${(gc?.probe_price ?? 0) - (gc?.tech_factory_probe_price_decrease ?? 0)} $)`,
+        ],
+      },
+      {
+        primary: "Power overload",
+        icon: "tech_turret_fire_delay",
+        price: gc?.tech_turret_fire_delay_price ?? 0,
+        type: "turret",
+        secondary: [
+          "Increases the turret power supply. Reduce the reloading time ",
+          `(${gc?.turret_fire_delay} → `,
+          `${(gc?.turret_fire_delay ?? 0) - (gc?.tech_turret_fire_delay_decrease ?? 0)} sec)`,
+        ],
+      },
+      {
+        primary: "Radar system",
+        icon: "tech_turret_scope",
+        price: gc?.tech_turret_scope_price ?? 0,
+        type: "turret",
+        secondary: [
+          "Provides the turret with a radar. Increases the turret scope ",
+          `(${gc?.turret_scope} → `,
+          `${(gc?.turret_scope ?? 0) + (gc?.tech_turret_scope_increase ?? 0)})`,
+        ],
+      },
+      {
+        primary: "Chinese supplier",
+        icon: "tech_turret_maintenance_costs",
+        price: gc?.tech_turret_maintenance_costs_price ?? 0,
+        type: "turret",
+        secondary: [
+          "Imports the spare parts from abroad. Reduce the maintenance costs ",
+          `(${gc?.turret_maintenance_costs} → `,
+          `${(gc?.turret_maintenance_costs ?? 0) - (gc?.tech_turret_maintenance_costs_decrease ?? 0)} $)`,
         ],
       }
     ]

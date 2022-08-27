@@ -71,6 +71,7 @@ const Page: FC<PageProps> = (props) => {
     <>
       <Head>
         <title>{props.title}</title>
+        <link rel="icon" href="/icon.png" />
       </Head>
       <Container maxWidth='xl'>
         {body}

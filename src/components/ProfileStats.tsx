@@ -7,6 +7,7 @@ import { FC, IComm, ICore } from '../../types'
 // mui
 import {
   Box,
+  capitalize,
   Card,
   CardContent,
   CardHeader,
@@ -43,9 +44,6 @@ import 'chartjs-adapter-date-fns'
 
 // hooks
 import useSingleEffect from '../hooks/useSingleEffect'
-
-// utils
-import { getModeName } from '../utils/prettyprint';
 
 // pixi
 import API from '../comm/api'
@@ -175,7 +173,7 @@ const GraphRanking: FC<GraphRankingProps> = (props) => {
     }
     return radius
   }
-
+  // @ts-ignore
   const colors = colorsSet[props.stats.mode.config.n_player]
 
   const totalGames = props.stats.scores.reduce((p, v) => p + v, 0)
@@ -253,7 +251,7 @@ const ProfileStats: FC<ProfileStatsProps> = (props) => {
       >
         <Tooltip title="Game mode">
           <Typography variant="h3">
-            {currentStats && getModeName(currentStats.mode)}
+            {capitalize(currentStats?.mode.name ?? "")}
           </Typography>
         </Tooltip>
         <IconButton
@@ -266,7 +264,10 @@ const ProfileStats: FC<ProfileStatsProps> = (props) => {
       {currentStats &&
         <>
           <GraphMMR user={props.user} stats={currentStats} />
-          <GraphRanking stats={currentStats} />
+          {/* Remove grahRanking until update of db
+            format to support metadata
+          */}
+          {/* <GraphRanking stats={currentStats} /> */}
         </>
       }
       <Menu
@@ -282,7 +283,7 @@ const ProfileStats: FC<ProfileStatsProps> = (props) => {
               setModeDialogAnchor(null)
             }}
           >
-            {getModeName(gstats.mode)}
+            {capitalize(gstats.mode.name)}
           </MenuItem>
         ))}
       </Menu>
