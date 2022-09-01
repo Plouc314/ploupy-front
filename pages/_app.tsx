@@ -1,5 +1,9 @@
 import type { AppProps } from 'next/app'
 
+// css
+import '../styles/main.css'
+
+// mui
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Fade } from '@mui/material';
 

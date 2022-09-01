@@ -36,7 +36,6 @@ class Turret extends Entity {
     this.alive = !model.death ?? this.alive
 
     if (model.shot_id !== null) {
-      console.log("shot id" + model.shot_id)
       this.player.animations.addTurretFire(this, model.shot_id)
     }
   }

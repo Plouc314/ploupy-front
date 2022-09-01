@@ -277,6 +277,8 @@ export namespace ICore {
     base_income: number
     building_occupation_min: number
     factory_price: number
+    factory_expansion_size: number
+    factory_maintenance_costs: number
     factory_max_probe: number
     factory_build_probe_delay: number
     max_occupation: number

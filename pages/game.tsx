@@ -128,18 +128,14 @@ const PageGame: FC<PageGameProps> = (props) => {
   return (
     <Page
       withComm
+      noMaxWidth
       title='Game'
     >
-      <MenuBar compact restricted />
-      <Paper
-        variant="outlined"
-        sx={{ p: 1 }}
-      >
-        <Stack
-          direction="row"
-          justifyContent="center"
-        >
-          {!isSpectator &&
+      <MenuBar
+        compact
+        restricted
+        actions={
+          !isSpectator ?
             <Button
               variant="contained"
               size="small"
@@ -155,15 +151,15 @@ const PageGame: FC<PageGameProps> = (props) => {
             >
               Resign
             </Button>
-          }
-        </Stack>
-      </Paper>
+            : undefined
+        }
+      />
       <div
         ref={refCanvasParent}
         style={{
           resize: "both",
           overflow: "hidden",
-          height: "75vh",
+          height: "calc(100vh - 51px)",
         }}
       >
         <canvas id="PixiCanvas" />
