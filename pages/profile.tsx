@@ -1,5 +1,8 @@
+// next
+import { useRouter } from 'next/router'
+
 // react
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // types
 import { FC, ICore } from '../types'
@@ -34,7 +37,6 @@ import ProfileBot from '../src/components/ProfileBot';
 
 
 type Tab = "stats" | "account" | "bot"
-
 
 interface ProfileSideBarProps {
   selected: Tab
@@ -91,8 +93,23 @@ export interface PageProfileProps { }
 
 const PageProfile: FC<PageProfileProps> = (props) => {
 
+  const router = useRouter()
   const { user } = useAuth()
   const [tab, setTab] = useState<Tab>("stats")
+
+  useEffect(() => {
+    const onHashChangeStart = (hash: string) => {
+      if (!hash.includes("#")) return
+      const tab = hash.split("#")[1]
+      setTab(tab as Tab)
+    };
+    onHashChangeStart(router.asPath)
+    router.events.on("hashChangeStart", onHashChangeStart);
+
+    return () => {
+      router.events.off("hashChangeStart", onHashChangeStart);
+    };
+  }, [router.events]);
 
   return (
     <Page
@@ -111,7 +128,9 @@ const PageProfile: FC<PageProfileProps> = (props) => {
         >
           <ProfileSideBar
             selected={tab}
-            onChange={(e) => setTab(e)}
+            onChange={(e) => {
+              router.push(`/profile/#${e}`)
+            }}
           />
         </Grid>
         <Grid

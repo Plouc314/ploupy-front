@@ -66,6 +66,8 @@ const BotRow: FC<BotRowProps> = (props) => {
   const router = useRouter()
 
   const [menuActions, setMenuActions] = useState<HTMLElement | null>(null)
+  const { enqueueSnackbar } = useSnackbar()
+
 
   const stats = () => {
     router.push(`/user?id=${props.bot.uid}`)
@@ -92,7 +94,11 @@ const BotRow: FC<BotRowProps> = (props) => {
         </TableCell>
         <TableCell align="center">
           <Tooltip title="Copy bot key">
-            <IconButton>
+            <IconButton
+              onClick={() => {
+                enqueueSnackbar("Not implemented.", { variant: "error" })
+              }}
+            >
               <KeyIcon color="secondary" />
             </IconButton>
           </Tooltip>
@@ -199,6 +205,11 @@ const BotCreation: FC<BotCreationProps> = (props) => {
           New
         </Typography>
 
+        {/*This is here to confuse the browser
+        (https://stackoverflow.com/questions/15738259/disabling-chrome-autofill)
+        */}
+        <input style={{ display: "none" }} type="text" name="fakeusernameremembered" />
+
         <TextField
           size="small"
           required
@@ -207,6 +218,7 @@ const BotCreation: FC<BotCreationProps> = (props) => {
           name="username"
           value={username}
           onChange={(e) => { setUsername(e.target.value) }}
+          inputProps={{ autocomplete: "off" }}
         />
 
         <Button

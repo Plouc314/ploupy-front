@@ -82,7 +82,7 @@ const MenuBar: FC<MenuBarProps> = (props) => {
       })
     setMenuAnchor(null)
   }
-  console.log(user)
+
   return (
     <AppBar position="static">
       <Toolbar

@@ -148,6 +148,7 @@ const PageGame: FC<PageGameProps> = (props) => {
                   gid: gid
                 })
               }}
+              sx={{ mr: 2 }}
             >
               Resign
             </Button>
