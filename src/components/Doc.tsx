@@ -317,7 +317,7 @@ const Doc: FC<DocProps> = (props) => {
         <IconButton
           onClick={() => { setShows({ ...shows, techs: !shows.techs }) }}
         >
-          {shows.controls ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+          {shows.techs ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
         </IconButton>
         Technologies
       </Typography>

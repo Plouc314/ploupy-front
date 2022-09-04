@@ -49,8 +49,11 @@ import useSio from '../src/comm/sio'
 
 const theme = createTheme()
 
-const getRandomAvatar = () => {
-  const idx = Math.floor(Math.random() * AVATARS.length)
+const getRandomAvatar = (): string => {
+  let idx = Math.floor(Math.random() * (AVATARS.length - 1))
+
+  // avoid the penguin
+  idx = (idx + 5) % AVATARS.length
   return AVATARS[idx]
 }
 

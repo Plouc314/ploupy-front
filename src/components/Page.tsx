@@ -30,6 +30,11 @@ export interface PageProps {
    * If the page need socket-io to be connected
    */
   withComm?: boolean
+  /**
+   * If the container wrapping the page shouldn't
+   * have a maximum width
+   */
+  noMaxWidth?: boolean
   /** The title set in the head tag */
   title: string
 }
@@ -73,7 +78,10 @@ const Page: FC<PageProps> = (props) => {
         <title>{props.title}</title>
         <link rel="icon" href="/icon.png" />
       </Head>
-      <Container maxWidth='xl'>
+      <Container
+        disableGutters
+        maxWidth={props.noMaxWidth ? false : 'xl'}
+      >
         {body}
       </Container>
     </>

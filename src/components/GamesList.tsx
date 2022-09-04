@@ -145,6 +145,15 @@ const GamesList: FC<GamesListProps> = (props) => {
         Online games
       </Typography>
       <List>
+        {games.length == 0 &&
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: "center", mb: 1 }}
+          >
+            There are currently no active games.
+          </Typography>
+        }
         {games.map(g => {
           const mode = gameModes?.find(gm => gm.id === g.gmid)
           if (!mode) return <></>

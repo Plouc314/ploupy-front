@@ -45,8 +45,6 @@ class Animations implements IGame.Sprite {
 
     let _probe: Probe = {} as Probe
     if (typeof probe === "string") {
-      console.log("players")
-      console.log(this.game.players)
       for (const player of this.game.players) {
         const p = player.probes.find(p => p.getId() === probe)
         if (p) {

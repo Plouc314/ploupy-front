@@ -299,14 +299,16 @@ const Lobby: FC<LobbyProps> = (props) => {
               variant="contained"
               size="small"
             >
-              <Button
-                color="primary"
-                onClick={() => {
-                  setCurrentQid(queue.qid)
-                }}
-              >
-                Add bot
-              </Button>
+              {queue.users[0].uid === user.uid &&
+                <Button
+                  color="primary"
+                  onClick={() => {
+                    setCurrentQid(queue.qid)
+                  }}
+                >
+                  Add bot
+                </Button>
+              }
               <Button
                 variant="contained"
                 size="small"

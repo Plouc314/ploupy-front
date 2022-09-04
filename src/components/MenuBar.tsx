@@ -66,6 +66,7 @@ export interface MenuBarProps {
   compact?: boolean
   /** Only option will be to logout */
   restricted?: boolean
+  actions?: JSX.Element
 }
 
 const MenuBar: FC<MenuBarProps> = (props) => {
@@ -81,7 +82,7 @@ const MenuBar: FC<MenuBarProps> = (props) => {
       })
     setMenuAnchor(null)
   }
-  console.log(user)
+
   return (
     <AppBar position="static">
       <Toolbar
@@ -96,6 +97,9 @@ const MenuBar: FC<MenuBarProps> = (props) => {
           </Typography>
         </a>
         <Box sx={{ flexGrow: 1 }} />
+        {props.actions &&
+          props.actions
+        }
         {user.connected &&
           <Tooltip title="Account">
             <IconButton

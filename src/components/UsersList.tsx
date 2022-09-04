@@ -93,7 +93,18 @@ const UsersList: FC<UsersListProps> = (props) => {
       <Typography sx={{ p: 1 }} fontWeight="bold">
         Online users
       </Typography>
-      <List>
+      <List
+        sx={{ maxHeight: 200, overflow: "auto" }}
+      >
+        {users.filter(user => !user.is_bot).length == 0 &&
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: "center", mb: 1 }}
+          >
+            There are currently no users connected.
+          </Typography>
+        }
         {users
           .filter(user => !user.is_bot)
           .map(user => (
@@ -105,10 +116,22 @@ const UsersList: FC<UsersListProps> = (props) => {
             />
           ))}
       </List>
+
       <Typography sx={{ p: 1 }} fontWeight="bold">
         Online bots
       </Typography>
-      <List>
+      <List
+        sx={{ maxHeight: 200, overflow: "auto" }}
+      >
+        {users.filter(user => user.is_bot).length == 0 &&
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: "center", mb: 1 }}
+          >
+            There are currently no bots connected.
+          </Typography>
+        }
         {users
           .filter(user => user.is_bot)
           .map(user => (

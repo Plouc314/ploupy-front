@@ -16,7 +16,8 @@ import PlayerBar from './ui/playerbar'
 interface UISizes {
   heightPlayerBar: number
   marginYPlayerBar: number
-  xButtons: number
+  xActionsButtons: number
+  xTechButtons: number
   yActionButtons: number
   yTechButtons: number
   marginButton: number
@@ -75,11 +76,12 @@ class UI implements IGame.Sprite {
 
   private build() {
     this.sizes = this.context.scaleUI({
-      heightPlayerBar: 60,
+      heightPlayerBar: 40,
       marginYPlayerBar: 5,
-      xButtons: 20,
+      xActionsButtons: 20,
+      xTechButtons: 140,
       yActionButtons: this.context.sizes.dimMap.y - 100,
-      yTechButtons: this.context.sizes.dimMap.y - 500,
+      yTechButtons: this.context.sizes.dimMap.y - 370,
       marginButton: 20,
     })
 
@@ -108,7 +110,7 @@ class UI implements IGame.Sprite {
         name,
         { key, price: this.getActionPrice(name) }
       )
-      btn.child().position.x = this.sizes.xButtons
+      btn.child().position.x = this.sizes.xActionsButtons
       btn.child().position.y = this.sizes.yActionButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
 
       // check if previous version of button exists
@@ -133,7 +135,7 @@ class UI implements IGame.Sprite {
         name,
         { price: this.getActionPrice(name) }
       )
-      btn.child().position.x = this.sizes.xButtons + x * (btn.sizes.dimX + this.sizes.marginButton)
+      btn.child().position.x = this.sizes.xTechButtons + x * (btn.sizes.dimX + this.sizes.marginButton)
       btn.child().position.y = this.sizes.yTechButtons - y * (btn.sizes.dimY + this.sizes.marginButton)
 
       // check if previous version of button exists

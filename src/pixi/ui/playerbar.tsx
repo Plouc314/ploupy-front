@@ -23,15 +23,14 @@ interface PlayerBarSizes {
   xIconMoney: number
   xValueMoney: number
   xValueIncome: number
-  xIconTechs: number
-  xIconsTech: number
   xIconFactories: number
   xValueFactories: number
   xIconTurrets: number
   xValueTurrets: number
   xIconProbes: number
   xValueProbes: number
-  yNdLine: number
+  xIconTechs: number
+  xIconsTech: number
 }
 
 class PlayerBar implements IGame.Sprite {
@@ -47,8 +46,7 @@ class PlayerBar implements IGame.Sprite {
   public sizes: PlayerBarSizes
 
   private container: Container
-  private stLine: Container
-  private ndLine: Container
+
   private color: UniformUI
   private username: TextUI
   private iconMoney: ImageUI
@@ -73,42 +71,34 @@ class PlayerBar implements IGame.Sprite {
     this.sizes = context.scaleUI({
       xColor: 10,
       color: 20,
-      icon: 18,
-      xUsername: 35,
-      xIconMoney: 185,
-      xValueMoney: 240,
-      xValueIncome: 245,
-      xIconTechs: 300,
-      xIconsTech: 328,
-      xIconFactories: 185,
-      xValueFactories: 225,
-      xIconTurrets: 255,
-      xValueTurrets: 295,
-      xIconProbes: 325,
-      xValueProbes: 365,
-      yNdLine: this.ui.sizes.heightPlayerBar / 2,
+      icon: 20,
+      xUsername: 40, // 35
+      xIconMoney: 195, // 185
+      xValueMoney: 250, // 240
+      xValueIncome: 255, // 245
+      xIconFactories: 315, // 185
+      xValueFactories: 360, // 225
+      xIconTurrets: 395, // 255
+      xValueTurrets: 440, // 295
+      xIconProbes: 475, // 325
+      xValueProbes: 520, // 365
+      xIconTechs: 555, // 300
+      xIconsTech: 588, // 328
     })
 
     this.container = new Container()
 
     const propsCenter = {
-      parent: { height: this.ui.sizes.heightPlayerBar / 2 },
+      parent: { height: this.ui.sizes.heightPlayerBar },
       centeredY: true,
     }
 
     const propsText = {
       color: Color.WHITE,
-      fontSize: 14,
+      fontSize: 16,
     }
 
     this.iconsTech = []
-
-    this.stLine = new Container()
-    this.ndLine = new Container()
-    this.ndLine.position.y = this.sizes.yNdLine
-
-    this.container.addChild(this.stLine)
-    this.container.addChild(this.ndLine)
 
     this.color = new UniformUI(context)
     this.color.dim.width = this.sizes.color
@@ -189,19 +179,18 @@ class PlayerBar implements IGame.Sprite {
     this.valueProbes.pos.x = this.sizes.xValueProbes
     this.valueProbes.compile()
 
-    this.stLine.addChild(this.color.child())
-    this.stLine.addChild(this.username.child())
-    this.stLine.addChild(this.iconMoney.child())
-    this.stLine.addChild(this.valueMoney.child())
-    this.stLine.addChild(this.valueIncome.child())
-    this.stLine.addChild(this.iconTechs.child())
-
-    this.ndLine.addChild(this.iconFactories.child())
-    this.ndLine.addChild(this.valueFactories.child())
-    this.ndLine.addChild(this.iconTurrets.child())
-    this.ndLine.addChild(this.valueTurrets.child())
-    this.ndLine.addChild(this.iconProbes.child())
-    this.ndLine.addChild(this.valueProbes.child())
+    this.container.addChild(this.color.child())
+    this.container.addChild(this.username.child())
+    this.container.addChild(this.iconMoney.child())
+    this.container.addChild(this.valueMoney.child())
+    this.container.addChild(this.valueIncome.child())
+    this.container.addChild(this.iconTechs.child())
+    this.container.addChild(this.iconFactories.child())
+    this.container.addChild(this.valueFactories.child())
+    this.container.addChild(this.iconTurrets.child())
+    this.container.addChild(this.valueTurrets.child())
+    this.container.addChild(this.iconProbes.child())
+    this.container.addChild(this.valueProbes.child())
   }
 
   public update(dt: number) {
@@ -234,7 +223,7 @@ class PlayerBar implements IGame.Sprite {
         icon.pos.x = this.sizes.xIconsTech + i * (this.sizes.icon + 4)
         icon.compile()
         this.iconsTech.push(icon)
-        this.stLine.addChild(icon.child())
+        this.container.addChild(icon.child())
       })
     }
 
@@ -259,7 +248,7 @@ class PlayerBar implements IGame.Sprite {
 
   private setIconProps(icon: ImageUI) {
     const propsCenter = {
-      parent: { height: this.ui.sizes.heightPlayerBar / 2 },
+      parent: { height: this.ui.sizes.heightPlayerBar },
       centeredY: true,
     }
 

@@ -124,7 +124,10 @@ class Player implements IGame.Sprite {
     // remove dead turrets
     this.turrets
       .filter(t => !t.alive)
-      .forEach(t => this.layoutTurrets.removeChild(t.child()))
+      .forEach(t => {
+        this.layoutTurrets.removeChild(t.child())
+      }
+      )
 
     this.turrets = this.turrets.filter(t => t.alive)
 
