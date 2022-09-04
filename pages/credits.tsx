@@ -50,9 +50,9 @@ const PageCredits: FC<PageCreditsProps> = (props) => {
       color: getIconColor(),
     },
     {
-      href: "https://www.flaticon.com/free-icons/adjustable-wrench",
-      title: "adjustable wrench icons",
-      text: "Adjustable wrench icons created by Freepik",
+      href: "https://www.flaticon.com/free-icons/blank",
+      title: "blank icons",
+      text: "Blank icons created by Google",
       icon: "probe",
       color: getIconColor(),
     },

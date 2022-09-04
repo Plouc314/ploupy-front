@@ -32,6 +32,7 @@ import {
   CategoryScale,
   LinearScale,
   TimeScale,
+  TimeSeriesScale,
   BarElement,
   PointElement,
   LineElement,
@@ -72,6 +73,8 @@ interface GraphMMRProps {
 const GraphMMR: FC<GraphMMRProps> = (props) => {
 
   const theme = useTheme()
+
+  console.log(props.stats)
 
   return (
     <Card sx={{ m: 2 }}>

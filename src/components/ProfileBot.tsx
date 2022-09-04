@@ -277,7 +277,7 @@ const BotDocs: FC<BotDocsProps> = (props) => {
 
   const [markdownSdk, setMarkdownSdk] = useState<string | null>(null)
 
-  const branch = FLAG_DEPLOY ? "master" : "dev"
+  const branch = true ? "master" : "dev"
   const url = `https://raw.githubusercontent.com/Plouc314/ploupy-python-sdk/${branch}/README.md`
 
   useEffect(() => {
@@ -396,6 +396,15 @@ const ProfileBot: FC<ProfileBotProps> = (props) => {
             ))}
           </TableBody>
         </Table>
+        {bots.length == 0 &&
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: "center", m: 1.5 }}
+          >
+            {"You haven't created any bot yet."}
+          </Typography>
+        }
       </Box>
       <Divider sx={{ mt: 4, mb: 2 }} />
       <Box sx={{ ml: 4, mr: 4 }}>
