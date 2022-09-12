@@ -146,15 +146,16 @@ const Lobby: FC<LobbyProps> = (props) => {
       })
   })
 
-  useSingleEffect(() => {
-    if (!comm) return
+  useEffect(() => {
+    if (!comm || !user) return
+    if (comm.sio.hasListeners("start_game")) return
 
     comm.setOnStartGame((data) => {
       router.push(`/game?id=${data.gid}`)
     })
     // check for active game AFTER having defined onStartGame
     comm.checkActiveGame()
-  })
+  }, [comm, user])
 
   return (
     <>

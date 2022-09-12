@@ -12,10 +12,12 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   GoogleAuthProvider,
+  signOut,
 } from 'firebase/auth'
 
 // hooks
 import useSingleEffect from '../hooks/useSingleEffect'
+import { useComm } from '../hooks/useComm'
 
 // comm
 import API from '../comm/api'
@@ -96,11 +98,14 @@ function useFirebaseAuth(): Firebase.Auth {
     last_online: "",
     mmrs: {},
   })
+  const comm = useComm()
   const [loading, setLoading] = useState(true)
-
   // listen for Firebase state change
-  useSingleEffect(() => {
-
+  useEffect(() => {
+    if (!comm) return
+    console.group("on auth changed")
+    console.log(comm)
+    console.groupEnd()
     onAuthStateChanged(auth, (_user) => {
 
       if (_user && !user.connected) { // signed in
@@ -127,10 +132,16 @@ function useFirebaseAuth(): Firebase.Auth {
               // set jwt token
               _user.getIdToken()
                 .then(jwt => {
-                  setUser({
-                    ...data,
-                    connected: true,
-                    jwt: jwt,
+                  // upgrade auth 
+                  comm?.sendActionUpgradeAuth({
+                    firebase_jwt: jwt
+                  }, (response) => {
+                    // the user is connected only if the upgrade succeed
+                    setUser({
+                      ...data,
+                      connected: response.success,
+                      jwt: jwt,
+                    })
                   })
                 })
 
@@ -142,10 +153,11 @@ function useFirebaseAuth(): Firebase.Auth {
       } else { // not signed in
         setUser({ ...user, connected: false })
         setLoading(false)
+        comm?.sendActionDowngradeAuth({})
       }
 
     })
-  })
+  }, [comm])
 
   /** Refresh user data */
   const refresh = () => {

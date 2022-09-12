@@ -88,4 +88,5 @@ export const MAP_DIMS: Record<IGame.MapSize, IGame.Dimension> = {
   small: { x: 17, y: 17 },
   medium: { x: 21, y: 21 },
   large: { x: 25, y: 25 },
+  xl: { x: 35, y: 35 },
 }

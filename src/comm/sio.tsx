@@ -15,32 +15,21 @@ function useSio() {
 
   const [sio, setSio] = useState<Socket | null>(null)
 
-  const { loading, user } = useAuth()
+  const { user } = useAuth()
 
-  const userConnectedRef = useRef(false)
   const [connected, setConnected] = useState(false)
-  const [isVisitor, setIsVisitor] = useState(true)
 
   useEffect(() => {
     // if loading or sio already setup -> break
-    if (loading || sio) return
-
-    userConnectedRef.current = user.connected
-
-    console.group("useEffect 1")
-    console.log("current: " + user.connected + " ref: " + userConnectedRef.current)
-
+    if (sio) return
 
     let headers: Record<string, string> = {}
     if (user.connected) {
-      setIsVisitor(false)
       headers = { "firebase-jwt": user.jwt }
     } else {
-      setIsVisitor(true)
       headers = {}
     }
-    console.log(headers)
-    console.groupEnd()
+
     const _sio = io(URL_SIO, {
       transportOptions: {
         polling: {
@@ -59,26 +48,9 @@ function useSio() {
     })
     setSio(_sio)
 
-  }, [loading, user, sio])
+  }, [user, sio])
 
-  useEffect(() => {
-    if (loading) return
-    if (user.connected == userConnectedRef.current) return
-
-    console.group("useEffect 2")
-    console.log("current: " + user.connected + " ref: " + userConnectedRef.current)
-    console.groupEnd()
-
-    userConnectedRef.current = user.connected
-    if (sio) {
-      sio.disconnect()
-      setSio(null)
-    }
-    setConnected(false)
-
-  }, [loading, user, sio])
-
-  return { connected, isVisitor, sio }
+  return { connected, sio }
 }
 
 

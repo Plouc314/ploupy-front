@@ -218,7 +218,7 @@ const BotCreation: FC<BotCreationProps> = (props) => {
           name="username"
           value={username}
           onChange={(e) => { setUsername(e.target.value) }}
-          inputProps={{ autocomplete: "off" }}
+          inputProps={{ autoComplete: "off" }}
         />
 
         <Button
@@ -277,7 +277,7 @@ const BotDocs: FC<BotDocsProps> = (props) => {
 
   const [markdownSdk, setMarkdownSdk] = useState<string | null>(null)
 
-  const branch = true ? "master" : "dev"
+  const branch = "master" //FLAG_DEPLOY ? "master" : "dev"
   const url = `https://raw.githubusercontent.com/Plouc314/ploupy-python-sdk/${branch}/README.md`
 
   useEffect(() => {

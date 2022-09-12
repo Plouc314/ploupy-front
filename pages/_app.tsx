@@ -51,15 +51,15 @@ const theme = createTheme({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={theme}>
-      <AuthProvider>
+      <SnackbarProvider TransitionComponent={Fade}>
         <CommProvider>
-          <SnackbarProvider TransitionComponent={Fade}>
+          <AuthProvider>
             <ToastProvider>
               <Component {...pageProps} />
             </ToastProvider>
-          </SnackbarProvider>
+          </AuthProvider>
         </CommProvider>
-      </AuthProvider>
+      </SnackbarProvider>
     </ThemeProvider>
   )
 }
