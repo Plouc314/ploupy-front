@@ -8,10 +8,12 @@ class Comm {
 
   public sio: Socket
   private onGameActionError: (msg: string) => void
+  private onGeneralActionError: (msg: string) => void
 
   constructor(sio: Socket) {
     this.sio = sio
     this.onGameActionError = () => { }
+    this.onGeneralActionError = () => { }
   }
 
   /**
@@ -19,6 +21,15 @@ class Comm {
    */
   public removeGameListeners() {
     this.sio.removeAllListeners("game_state")
+  }
+
+  /**
+   * The callback is called when an error occur on an action
+   * 
+   * Note: this is set in useComm
+   */
+  public setOnGeneralActionError(cb: (msg: string) => void) {
+    this.onGeneralActionError = cb
   }
 
   /**
@@ -34,7 +45,10 @@ class Comm {
   public refreshUserManager() {
     this.sio.emit("man_user_state", null, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "man_user_state", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
@@ -44,7 +58,10 @@ class Comm {
   public refreshQueueManager() {
     this.sio.emit("man_queue_state", null, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "man_queue_state", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
@@ -54,7 +71,10 @@ class Comm {
   public refreshGameManager() {
     this.sio.emit("man_game_state", null, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "man_game_state", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
@@ -66,7 +86,10 @@ class Comm {
   public checkActiveGame() {
     this.sio.emit("is_active_game", null, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "is_active_game", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
@@ -77,43 +100,82 @@ class Comm {
   public getGameState(data: IActions.GameState, cb?: (r: IComm.Response) => void) {
     this.sio.emit("game_state", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "game_state", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
       if (cb) cb(response)
+    })
+  }
+
+  public sendActionUpgradeAuth(data: IActions.UpgradeAuth, cb?: (r: IComm.Response) => void) {
+    this.sio.emit("upgrade_auth", data, (raw: string) => {
+      const response = JSON.parse(raw) as IComm.Response
+      console.log({ endpoint: "upgrade_auth", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
+      if (cb) cb(response)
+    })
+  }
+
+  public sendActionDowngradeAuth(data: IActions.DowngradeAuth) {
+    this.sio.emit("downgrade_auth", data, (raw: string) => {
+      const response = JSON.parse(raw) as IComm.Response
+      console.log({ endpoint: "downgrade_auth", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
   public sendActionCreateQueue(data: IActions.CreateQueue) {
     this.sio.emit("create_queue", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "create_queue", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
   public sendActionJoinQueue(data: IActions.JoinQueue) {
     this.sio.emit("join_queue", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "join_queue", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
   public sendActionLeaveQueue(data: IActions.LeaveQueue) {
     this.sio.emit("leave_queue", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "leave_queue", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
   public sendActionSendQueueInvitation(data: IActions.SendQueueInvitation) {
     this.sio.emit("send_queue_invitation", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "send_queue_invitation", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 
   public sendActionDisconnectBot(data: IActions.DisconnectBot) {
     this.sio.emit("disconnect_bot", data, (raw: string) => {
       const response = JSON.parse(raw) as IComm.Response
-      console.log(response)
+      console.log({ endpoint: "disconnect_bot", ...response })
+      if (!response.success) {
+        this.onGeneralActionError(response.msg)
+      }
     })
   }
 

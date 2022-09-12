@@ -9,11 +9,12 @@ import Comm from "../comm/comm";
 import useSio from "../comm/sio";
 
 // hooks
-import useSingleEffect from "./useSingleEffect";
+import { useSnackbar } from 'notistack';
 
 
 function useCommInternal(): Comm | null {
   const [comm, setComm] = useState<Comm | null>(null)
+  const { enqueueSnackbar } = useSnackbar()
   const { connected, sio } = useSio()
 
   useEffect(() => {
@@ -23,7 +24,11 @@ function useCommInternal(): Comm | null {
     }
 
     if (connected && sio && !comm) {
-      setComm(new Comm(sio))
+      const _comm = new Comm(sio)
+      _comm.setOnGeneralActionError((msg) => {
+        enqueueSnackbar(msg, { variant: "error" })
+      })
+      setComm(_comm)
     }
   }, [connected, sio, comm])
 

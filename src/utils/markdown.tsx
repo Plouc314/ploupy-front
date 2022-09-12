@@ -27,21 +27,21 @@ const Markdown: FC<MarkdownProps> = (props) => {
       if (line.startsWith("```")) {
         if (isBlock) {
           isBlock = false
-          lines[i + 1] = lines[i + 1] + "\n##### -"
+          lines[i + 1] = lines[i + 1] + "\n<br>"
         } else {
           isBlock = true
-          lines[i - 1] = lines[i - 1] + "\n##### -"
+          lines[i - 1] = lines[i - 1] + "\n<br>"
         }
       }
 
       // add brealine before blockquote
       if (line.startsWith(">") && !lines[i - 1].startsWith(">")) {
-        lines[i - 1] = lines[i - 1] + "\n##### -"
+        lines[i - 1] = lines[i - 1] + "\n<br>"
       }
 
       // add brealine after blockquote
       if (line.startsWith(">") && !lines[i + 1].startsWith(">")) {
-        lines[i + 1] = lines[i + 1] + "\n##### -"
+        lines[i + 1] = lines[i + 1] + "\n<br>"
       }
 
       // add emoji to link (as there is no text decoration)
@@ -111,7 +111,7 @@ const Markdown: FC<MarkdownProps> = (props) => {
               variant: "body1",
               component: "li",
             },
-          }
+          },
         },
         forceBlock: true
       }}

@@ -34,7 +34,7 @@ export namespace IGame {
 
   export type ID = string
 
-  export type MapSize = "small" | "medium" | "large"
+  export type MapSize = "small" | "medium" | "large" | "xl"
 
   export type TechType = "turret" | "factory" | "probe"
 
@@ -319,6 +319,14 @@ export namespace ICore {
 }
 
 export namespace IActions {
+
+  export type UpgradeAuth = {
+    firebase_jwt: string
+  }
+
+  export type DowngradeAuth = {
+
+  }
 
   export type CreateBot = {
     creator_uid: string

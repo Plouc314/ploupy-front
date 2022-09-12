@@ -36,7 +36,6 @@ import {
 import { auth, SessionPersistence, LocalPersistence, getErrorMessage, providerGoogle } from '../src/utils/Firebase'
 
 // hooks
-import useSingleEffect from '../src/hooks/useSingleEffect'
 import { useSnackbar } from 'notistack'
 
 // comm
@@ -45,7 +44,6 @@ import API from '../src/comm/api'
 // pixi
 import { AVATARS } from '../src/pixi/constants'
 import Textures from '../src/pixi/textures'
-import useSio from '../src/comm/sio'
 
 const theme = createTheme()
 
