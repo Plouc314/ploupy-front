@@ -64,10 +64,21 @@ interface BotRowProps {
 const BotRow: FC<BotRowProps> = (props) => {
 
   const router = useRouter()
-
+  const { user } = useAuth()
   const [menuActions, setMenuActions] = useState<HTMLElement | null>(null)
   const { enqueueSnackbar } = useSnackbar()
 
+  const getBotToken = () => {
+    API.getBotToken(props.bot.uid, user.jwt)
+      .then((token) => {
+        if (!token) {
+          enqueueSnackbar("Something went wrong...", { variant: "error" })
+          return
+        }
+        navigator.clipboard.writeText(token)
+          .then(() => enqueueSnackbar("Bot key copied.", { variant: "success" }))
+      })
+  }
 
   const stats = () => {
     router.push(`/user?id=${props.bot.uid}`)
@@ -95,9 +106,7 @@ const BotRow: FC<BotRowProps> = (props) => {
         <TableCell align="center">
           <Tooltip title="Copy bot key">
             <IconButton
-              onClick={() => {
-                enqueueSnackbar("Not implemented.", { variant: "error" })
-              }}
+              onClick={getBotToken}
             >
               <KeyIcon color="secondary" />
             </IconButton>

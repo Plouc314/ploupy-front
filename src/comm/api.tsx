@@ -58,6 +58,17 @@ class API {
     return { ...response.user, mmrs: response.mmrs.mmrs }
   }
 
+  public static async getBotToken(
+    botUid: string, jwt: string
+  ): Promise<string | null> {
+    const response = await this.get<IComm.BotTokenResponse>(
+      "bot-token",
+      { bot_uid: botUid, firebase_jwt: jwt }
+    )
+    if (!response.success) return null
+    return response.bot_jwt
+  }
+
   public static async getGameModes(): Promise<ICore.GameMode[] | null> {
     const response = await this.get<IComm.GameModeResponse>("game-mode", { all: true })
     if (!response.success) return null

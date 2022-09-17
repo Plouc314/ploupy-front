@@ -34,7 +34,7 @@ export namespace IGame {
 
   export type ID = string
 
-  export type MapSize = "small" | "medium" | "large" | "xl"
+  export type MapSize = "tiny" | "small" | "medium" | "large" | "xl"
 
   export type TechType = "turret" | "factory" | "probe"
 
@@ -407,6 +407,10 @@ export namespace IComm {
   export type UserResponse = {
     user: ICore.User
     mmrs: { mmrs: Record<IGame.ID, number> }
+  }
+
+  export type BotTokenResponse = {
+    bot_jwt: string
   }
 
   export type CreateBotResponse = {
