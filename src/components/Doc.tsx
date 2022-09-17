@@ -45,16 +45,22 @@ export interface DocItemProps {
   iconSrc?: string
   iconContent?: string
   trailing?: ReactNode
+  /** Display certain attributes of game config in a table */
   data?: {
-    /** Prefix of attributes to select in GameConfig */
-    node: string
+    /** Prefix of attributes to select in GameConfig (escaped)*/
+    prefix?: string
+    /** Select attributes that contains given string */
+    contains?: string
   }
 }
 
 const DocItem: FC<DocItemProps> = (props) => {
 
-  const getItemName = (key: string) => {
-    const [prefix, ...parts] = key.split("_")
+  const getItemName = (key: string, noPrefix?: boolean) => {
+    let [prefix, ...parts] = key.split("_")
+    if (!noPrefix) {
+      parts = [prefix, ...parts]
+    }
     return capitalize(parts.join(" "))
   }
 
@@ -71,11 +77,23 @@ const DocItem: FC<DocItemProps> = (props) => {
   const getDataItems = () => {
     if (!props.data) return []
     const items: [string, string][] = []
-    for (const [key, value] of Object.entries(props.gameConfig)) {
-      if (key.startsWith(props.data.node)) {
-        items.push([getItemName(key), getItemValue(key, value)])
+
+    if (props.data.prefix) {
+      for (const [key, value] of Object.entries(props.gameConfig)) {
+        if (key.startsWith(props.data.prefix)) {
+          items.push([getItemName(key, true), getItemValue(key, value)])
+        }
       }
     }
+
+    if (props.data.contains) {
+      for (const [key, value] of Object.entries(props.gameConfig)) {
+        if (key.includes(props.data.contains)) {
+          items.push([getItemName(key), getItemValue(key, value)])
+        }
+      }
+    }
+
     return items
   }
 
@@ -168,6 +186,7 @@ const Doc: FC<DocProps> = (props) => {
   const [gc, setGc] = useState<ICore.GameConfig | null>(null)
 
   const [shows, setShows] = useState({
+    concepts: false,
     entities: false,
     controls: false,
     techs: false,
@@ -183,20 +202,45 @@ const Doc: FC<DocProps> = (props) => {
       })
   })
 
+  const docConcepts = [
+    {
+      primary: "occupation",
+      contains: "occupation",
+      secondary: [
+        "The occupation describes how colourful a tile is.",
+        "When a player increases the occupation of a tile, it become part",
+        "of its territory. A minimum level of occupation is required to",
+        "build a building on a tile. To reduce the occupation of opponent",
+        "tiles, some probes must explode (see Controls) on them.",
+        "When a tile's occupation level is higher than half, it will deprecate",
+        "over time."
+      ],
+    },
+    {
+      primary: "income & maintenance",
+      contains: "income",
+      secondary: [
+        "There is only two sources of income: the base income and the tiles",
+        "occupation. The higher the occupation, the higher the income.",
+        "On the other hand, every entity has maintenance costs.",
+        "The income and maintenance costs are computed each second."
+      ],
+    },
+  ]
+
   const docEntities = [
     {
       primary: "factory",
-      price: gc?.factory_price ?? 0,
       secondary: [
         "Can only be built on occupied tiles.",
         "Expand occupation on nearby tiles when created.",
         "Build probes at regular interval until reaching its maximum capacity or",
-        "running out of money."
+        "running out of money.",
+        "When the factory is destroyed, all probes built by it are destroyed too."
       ],
     },
     {
       primary: "turret",
-      price: gc?.turret_price ?? 0,
       secondary: [
         "Can only be built on occupied tiles.",
         "Fire at opponent probes when they come within scope (with a reloading delay).",
@@ -204,7 +248,6 @@ const Doc: FC<DocProps> = (props) => {
     },
     {
       primary: "probe",
-      price: gc?.probe_price ?? 0,
       secondary: [
         "Built by a factory.",
         "Automatically move to nearby tiles to increase their occupation (farming).",
@@ -226,21 +269,21 @@ const Doc: FC<DocProps> = (props) => {
     },
     {
       control: "X",
-      primary: "Explode selected robots",
-      secondary: ["Press X with selected robots will instantly explode them"],
+      primary: "Explode selected probes",
+      secondary: ["Press X with selected probes will instantly explode them"],
     },
     {
       control: "A",
-      primary: "Make selected robots attack",
+      primary: "Make selected probes attack",
       secondary: [
-        "Press A with selected robots will make them target the closest opponent",
+        "Press A with selected probes will make them target the closest opponent",
         "territory and explode on arrival"
       ],
     },
     {
       control: "S",
       primary: "Select all",
-      secondary: ["Press S will select all robots"],
+      secondary: ["Press S will select all probes"],
     },
   ]
 
@@ -364,9 +407,33 @@ const Doc: FC<DocProps> = (props) => {
       </Typography>
       <Typography >
         {"Here is minimal documentation of the game's mechanisms. But the best way"}
-        {"to learn the game is to: play, lose, think for a bit, play again..."}
+        {" to learn the game is to: play, lose, think for a bit, play again..."}
       </Typography>
+
       <Typography variant="h4" sx={{ mt: 1, color: "text.secondary" }}>
+        <IconButton
+          onClick={() => { setShows({ ...shows, concepts: !shows.concepts }) }}
+        >
+          {shows.concepts ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+        </IconButton>
+        Concepts
+      </Typography>
+      <Collapse
+        in={shows.concepts}
+      >
+        {gc && docConcepts.map((doc, i) => (
+          <DocItem
+            key={doc.primary}
+            gameConfig={gc}
+            title={capitalize(doc.primary)}
+            body={doc.secondary.join(" ")}
+            data={{ contains: doc.contains }}
+          />
+        ))
+        }
+      </Collapse>
+
+      <Typography variant="h4" sx={{ color: "text.secondary" }}>
         <IconButton
           onClick={() => { setShows({ ...shows, entities: !shows.entities }) }}
         >
@@ -384,7 +451,7 @@ const Doc: FC<DocProps> = (props) => {
             title={capitalize(doc.primary)}
             body={doc.secondary.join(" ")}
             iconSrc={doc.primary}
-            data={{ node: doc.primary }}
+            data={{ prefix: doc.primary }}
           />
         ))
         }

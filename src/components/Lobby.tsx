@@ -17,7 +17,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  Grid,
+  Chip,
   List,
   ListItem,
   ListItemAvatar,
@@ -45,7 +45,7 @@ import { MAP_DIMS } from '../pixi/constants'
 import { UserItem } from './UsersList'
 
 interface DialogBotsProps {
-  qid: string
+  queue: ICore.ManQueue
   open: boolean
   onClose: () => void
 }
@@ -58,10 +58,16 @@ const DialogBots: FC<DialogBotsProps> = (props) => {
   const onInviteUser = (user: ICore.User) => {
     if (!comm) return
     comm.sendActionSendQueueInvitation({
-      qid: props.qid,
+      qid: props.queue.qid,
       uid: user.uid,
     })
   }
+
+
+  const bots = props.queue ? users
+    .filter(b => b.is_bot && !props.queue.users.find(u => u.uid === b.uid))
+    : []
+
 
   return (
     <Dialog
@@ -76,21 +82,21 @@ const DialogBots: FC<DialogBotsProps> = (props) => {
         Bots
       </DialogTitle>
       <DialogContent>
-        <List>
-          {users
-            .filter(u => u.is_bot)
-            .map(u => (
+        {bots.length > 0 &&
+          <List>
+            {bots.map(b => (
               <UserItem
-                key={u.uid}
-                user={u}
+                key={b.uid}
+                user={b}
                 userType="bot"
-                onInviteUser={() => onInviteUser(u)}
+                onInviteUser={() => onInviteUser(b)}
               />
             ))}
-        </List>
-        {users.filter(u => u.is_bot).length == 0 &&
+          </List>
+        }
+        {bots.length == 0 &&
           <Typography color="text.secondary">
-            There is currently no connected bots...
+            There is no bot available.
           </Typography>
         }
       </DialogContent>
@@ -157,6 +163,15 @@ const Lobby: FC<LobbyProps> = (props) => {
     comm.checkActiveGame()
   }, [comm, user])
 
+  const getMapDimName = (dim: IGame.Dimension) => {
+    for (const [key, { x, y }] of Object.entries(MAP_DIMS)) {
+      if (dim.x == x && dim.y == y) {
+        return key
+      }
+    }
+    return ""
+  }
+
   return (
     <>
       <Stack
@@ -214,7 +229,7 @@ const Lobby: FC<LobbyProps> = (props) => {
                 }}
                 sx={{ mx: 1, minWidth: 100 }}
               >
-                {[2, 3, 4, 5].map((n) => (
+                {[2, 3, 4, 5, 6].map((n) => (
                   <MenuItem key={`nplayer-${n}`} value={n}>
                     {n}
                   </MenuItem>
@@ -278,11 +293,31 @@ const Lobby: FC<LobbyProps> = (props) => {
                 sx={{
                   display: "inline",
                   fontWeight: "bold",
-                  marginRight: 5,
+                  mr: 2,
                 }}
               >
                 {`${queue.users.length} / ${queue.metadata.n_player}`}
               </Typography>
+
+              <Stack
+                direction="row"
+                alignItems="center"
+                sx={{ width: 140 }}
+              >
+                <Chip
+                  label={gameModes.find(gm => gm.id === queue.gmid)?.name}
+                  variant="outlined"
+                  size="small"
+                  color="default"
+                  sx={{ mr: 0.5, fontSize: 14 }}
+                />
+                <Chip
+                  label={getMapDimName(queue.metadata.dim)}
+                  size="small"
+                  color="primary"
+                  sx={{ mr: 0.5, fontSize: 14 }}
+                />
+              </Stack>
 
               {queue.users.map((user) => (
                 <Tooltip
@@ -332,7 +367,7 @@ const Lobby: FC<LobbyProps> = (props) => {
         <div /> {/* footer -> to display a divider at the bottom*/}
       </Stack>
       <DialogBots
-        qid={currentQid}
+        queue={queues.find(q => q.qid === currentQid) as ICore.ManQueue}
         open={!!currentQid}
         onClose={() => setCurrentQid("")}
       />

@@ -85,8 +85,9 @@ export const ICONS = [
 )
 
 export const MAP_DIMS: Record<IGame.MapSize, IGame.Dimension> = {
-  small: { x: 17, y: 17 },
-  medium: { x: 21, y: 21 },
-  large: { x: 25, y: 25 },
-  xl: { x: 35, y: 35 },
+  tiny: { x: 17, y: 17 },
+  small: { x: 21, y: 21 },
+  medium: { x: 25, y: 25 },
+  large: { x: 35, y: 35 },
+  xl: { x: 45, y: 45 },
 }
