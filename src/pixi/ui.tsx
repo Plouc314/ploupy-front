@@ -6,7 +6,7 @@ import { ICore, IGame } from '../../types'
 
 // pixi
 import Color from '../utils/color'
-import { getTechIconName, getTechType, TECHS } from './constants'
+import { getTechIconName, getTechType, TECHS, TECHS_NAME_MAP } from './constants'
 import Context from './context'
 import Game from './game'
 import ActionButton from './ui/actionbutton'
@@ -36,11 +36,22 @@ const actionButtonsData: { name: UIButtons, key: string }[] = [
   { name: "attack", key: "A" },
 ]
 
-const techButtonsData: { name: UIButtons, x: number, y: number }[] = TECHS
+const techButtonsData: { name: UIButtons, x: number, y: number }[] = [
+  TECHS[2],
+  TECHS[5],
+  TECHS[8],
+  TECHS[1],
+  TECHS[4],
+  TECHS[7],
+
+  TECHS[0],
+  TECHS[3],
+  TECHS[6],
+]
   .map((name, i) => ({
     name: getTechIconName(name),
-    x: i % 3,
-    y: (i - i % 3) / 3,
+    x: 2 - (i - i % 3) / 3,
+    y: i % 3,
   }))
 
 class UI implements IGame.Sprite {
@@ -86,6 +97,7 @@ class UI implements IGame.Sprite {
     })
 
     this.container.removeChildren()
+    this.container.sortableChildren = true
     this.container.position.x = this.context.sizes.ui.x
 
     this.background = new Graphics()
@@ -103,15 +115,20 @@ class UI implements IGame.Sprite {
       this.container.addChild(bar.child())
     }
 
-    actionButtonsData.forEach(({ name, key }, i) => {
+    techButtonsData.forEach(({ name, x, y }, i) => {
+      console.log(name)
       const btn = new ActionButton(
         this,
         this.context,
         name,
-        { key, price: this.getActionPrice(name) }
+        {
+          price: this.getActionPrice(name),
+          tooltip: this.getTechTooltip(name as IGame.TechIconName),
+        }
       )
-      btn.child().position.x = this.sizes.xActionsButtons
-      btn.child().position.y = this.sizes.yActionButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
+      btn.child().position.x = this.sizes.xTechButtons + x * (btn.sizes.dimX + this.sizes.marginButton)
+      btn.child().position.y = this.sizes.yTechButtons - y * (btn.sizes.dimY + this.sizes.marginButton)
+      btn.child().zIndex = i
 
       // check if previous version of button exists
       const oldButton = this.buttons[name]
@@ -128,15 +145,19 @@ class UI implements IGame.Sprite {
       }
     })
 
-    techButtonsData.forEach(({ name, x, y }) => {
+    actionButtonsData.forEach(({ name, key }, i) => {
       const btn = new ActionButton(
         this,
         this.context,
         name,
-        { price: this.getActionPrice(name) }
+        {
+          key,
+          price: this.getActionPrice(name),
+          tooltip: name,
+        }
       )
-      btn.child().position.x = this.sizes.xTechButtons + x * (btn.sizes.dimX + this.sizes.marginButton)
-      btn.child().position.y = this.sizes.yTechButtons - y * (btn.sizes.dimY + this.sizes.marginButton)
+      btn.child().position.x = this.sizes.xActionsButtons
+      btn.child().position.y = this.sizes.yActionButtons - i * (btn.sizes.dimY + this.sizes.marginButton)
 
       // check if previous version of button exists
       const oldButton = this.buttons[name]
@@ -210,6 +231,12 @@ class UI implements IGame.Sprite {
     }
     const key = action + "_price" as keyof ICore.GameConfig
     return this.context.config[key] as number + ""
+  }
+
+  private getTechTooltip(tech: IGame.TechIconName) {
+    const t = tech.split("_").slice(1).join("_").toUpperCase() as IGame.Tech
+    const desc = t.split("_").map(v => v.toLowerCase()).join(" ")
+    return TECHS_NAME_MAP[t] + " (" + desc + ")"
   }
 
   public setGameActionError(msg: string) {

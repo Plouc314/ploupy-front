@@ -39,6 +39,18 @@ export const TECHS: IGame.Tech[] = [
   "TURRET_MAINTENANCE_COSTS",
 ]
 
+export const TECHS_NAME_MAP: Record<IGame.Tech, string> = {
+  "PROBE_EXPLOSION_INTENSITY": "US bombs",
+  "PROBE_CLAIM_INTENSITY": "EU tools",
+  "PROBE_HP": "Windows defender",
+  "FACTORY_BUILD_DELAY": "Rush",
+  "FACTORY_PROBE_PRICE": "Cloud deployment",
+  "FACTORY_MAX_PROBE": "Ford invocation",
+  "TURRET_SCOPE": "Radar system",
+  "TURRET_FIRE_DELAY": "Power overload",
+  "TURRET_MAINTENANCE_COSTS": "Chinese supplier",
+}
+
 export const AVATARS = [
   "snake",
   "dog",
