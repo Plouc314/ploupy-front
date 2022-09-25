@@ -24,6 +24,7 @@ interface ActionButtonSizes {
   xPrice: number
   yPrice: number
   marginWidth: number
+  tooltipHeight: number
 }
 
 
@@ -42,12 +43,18 @@ class ActionButton implements IGame.Sprite {
   private icon: ImageUI
   private price?: TextUI
   private key?: TextUI
+  private tooltip?: Container
 
   public onClick: () => void
 
   private isHover: boolean
 
-  constructor(ui: UI, context: Context, icon: string, options?: { key?: string, price?: string }) {
+  constructor(
+    ui: UI,
+    context: Context,
+    icon: string,
+    options?: { key?: string, price?: string, tooltip?: string },
+  ) {
     this.ui = ui
     this.textures = ui.game.pixi.textures
     this.context = context
@@ -62,12 +69,14 @@ class ActionButton implements IGame.Sprite {
       xPrice: 5,
       yPrice: 68,
       marginWidth: 3,
+      tooltipHeight: 24,
     })
 
     this.onClick = () => { }
     this.isHover = false
 
     this.container = new Container()
+    this.container.sortableChildren = true
 
     this.setupInteractions()
 
@@ -115,6 +124,36 @@ class ActionButton implements IGame.Sprite {
       this.price.compile()
       this.container.addChild(this.price.child())
     }
+
+    if (options?.tooltip !== undefined) {
+      this.tooltip = new Container()
+      this.tooltip.visible = false
+
+      const text = new TextUI(context)
+      text.pos.x = this.sizes.dimX + 7
+      text.pos.y = this.sizes.dimY - 2
+      text.anchorY = "bottom"
+      text.color = Color.WHITE
+      text.fontSize = 14
+      text.text = options.tooltip
+      text.compile()
+
+      const bg = new UniformUI(context)
+      bg.pos.x = this.sizes.dimX
+      bg.pos.y = this.sizes.dimY + 3
+      bg.anchorY = "bottom"
+      bg.dim.height = this.sizes.tooltipHeight
+      bg.dim.width = text.child().width + 14
+      bg.color = ActionButton.BUTTON_COLOR
+      bg.marginWidth = 2
+      bg.marginColor = ActionButton.MARGIN_COLOR
+      bg.compile()
+
+      this.tooltip.addChild(bg.child())
+      this.tooltip.addChild(text.child())
+
+      this.container.addChild(this.tooltip)
+    }
   }
 
   private setupInteractions() {
@@ -123,12 +162,18 @@ class ActionButton implements IGame.Sprite {
 
     this.container.on("pointerover", () => {
       this.isHover = true
+      if (this.tooltip) {
+        this.tooltip.visible = true
+      }
       this.background.color = ActionButton.BUTTON_COLOR.withDiff(40)
       this.background.marginColor = ActionButton.MARGIN_COLOR.withDiff(-30)
       this.background.compile()
     })
     this.container.on("pointerout", () => {
       this.isHover = false
+      if (this.tooltip) {
+        this.tooltip.visible = false
+      }
       this.background.color = ActionButton.BUTTON_COLOR
       this.background.marginColor = ActionButton.MARGIN_COLOR
       this.background.compile()

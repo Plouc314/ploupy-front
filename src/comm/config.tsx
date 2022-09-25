@@ -1,4 +1,4 @@
-export const VERSION = "0.4.3"
+export const VERSION = "0.4.4"
 
 export const FLAG_DEPLOY: boolean = true
 
